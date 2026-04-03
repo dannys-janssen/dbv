@@ -10,14 +10,17 @@ import {
   aggregate,
   createDocument,
   updateDocument,
+  getSchema,
+  type CollectionSchema,
 } from "../api/mongo";
 import { useAuth } from "../context/AuthContext";
 import Editor from "@monaco-editor/react";
+import SchemaViewer from "../components/SchemaViewer";
 
-type View = "documents" | "aggregate";
+type View = "documents" | "aggregate" | "schema";
 
 export default function BrowserPage() {
-  const { logout } = useAuth();
+  const { logout, canWrite, roles } = useAuth();
   const navigate = useNavigate();
 
   const [databases, setDatabases] = useState<string[]>([]);
@@ -42,6 +45,10 @@ export default function BrowserPage() {
   const [pipeline, setPipeline] = useState("[]");
   const [aggResults, setAggResults] = useState<Record<string, unknown>[]>([]);
 
+  // Schema
+  const [schema, setSchema] = useState<CollectionSchema | null>(null);
+  const [schemaLoading, setSchemaLoading] = useState(false);
+
   useEffect(() => {
     getDatabases()
       .then((d) => setDatabases(d.databases))
@@ -54,8 +61,22 @@ export default function BrowserPage() {
       setCollections(c.collections);
       setSelectedCol("");
       setDocuments([]);
+      setSchema(null);
     });
   }, [selectedDb]);
+
+  const loadSchema = useCallback(() => {
+    if (!selectedDb || !selectedCol) return;
+    setSchemaLoading(true);
+    getSchema(selectedDb, selectedCol)
+      .then(setSchema)
+      .catch(() => setSchema(null))
+      .finally(() => setSchemaLoading(false));
+  }, [selectedDb, selectedCol]);
+
+  useEffect(() => {
+    if (view === "schema") loadSchema();
+  }, [view, loadSchema]);
 
   const loadDocuments = useCallback(() => {
     if (!selectedDb || !selectedCol) return;
@@ -169,16 +190,25 @@ export default function BrowserPage() {
         {selectedCol ? (
           <>
             <div style={styles.toolbar}>
-              <h2 style={{ margin: 0 }}>{selectedDb} / {selectedCol}</h2>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button style={styles.btn} onClick={() => setView("documents")}>Documents</button>
-                <button style={styles.btn} onClick={() => setView("aggregate")}>Aggregate</button>
-                <button style={styles.btn} onClick={openCreate}>+ New</button>
+              <div>
+                <h2 style={{ margin: 0 }}>{selectedDb} / {selectedCol}</h2>
+                <span style={styles.roleTag}>
+                  {canWrite ? "✏️ admin" : "👁 viewer"}
+                  {roles.length === 0 && " (no roles — check Keycloak config)"}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button style={activeBtn(view === "documents")} onClick={() => setView("documents")}>Documents</button>
+                <button style={activeBtn(view === "aggregate")} onClick={() => setView("aggregate")}>Aggregate</button>
+                <button style={activeBtn(view === "schema")} onClick={() => setView("schema")}>Schema</button>
+                {canWrite && <button style={styles.btn} onClick={openCreate}>+ New</button>}
                 <button style={styles.btn} onClick={() => exportCollection(selectedDb, selectedCol)}>Export</button>
-                <label style={styles.btn}>
-                  Import
-                  <input type="file" accept=".json" style={{ display: "none" }} onChange={handleImport} />
-                </label>
+                {canWrite && (
+                  <label style={styles.btn}>
+                    Import
+                    <input type="file" accept=".json" style={{ display: "none" }} onChange={handleImport} />
+                  </label>
+                )}
               </div>
             </div>
 
@@ -205,10 +235,12 @@ export default function BrowserPage() {
                         return (
                           <div key={id} style={styles.docCard}>
                             <pre style={styles.docPre}>{JSON.stringify(doc, null, 2)}</pre>
-                            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                              <button style={styles.smallBtn} onClick={() => openEdit(doc)}>Edit</button>
-                              <button style={{ ...styles.smallBtn, background: "#fee2e2" }} onClick={() => handleDelete(id)}>Delete</button>
-                            </div>
+                            {canWrite && (
+                              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                                <button style={styles.smallBtn} onClick={() => openEdit(doc)}>Edit</button>
+                                <button style={{ ...styles.smallBtn, background: "#fee2e2" }} onClick={() => handleDelete(id)}>Delete</button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -232,6 +264,12 @@ export default function BrowserPage() {
                   <pre style={styles.docPre}>{JSON.stringify(aggResults, null, 2)}</pre>
                 )}
               </div>
+            )}
+
+            {view === "schema" && (
+              schemaLoading ? <p>Inferring schema…</p> :
+              schema ? <SchemaViewer fields={schema.fields} sampledDocs={schema.sampled_documents} /> :
+              <p style={{ color: "#999" }}>No schema data available.</p>
             )}
           </>
         ) : (
@@ -263,6 +301,16 @@ export default function BrowserPage() {
   );
 }
 
+const activeBtn = (active: boolean): React.CSSProperties => ({
+  padding: "0.4rem 0.8rem",
+  borderRadius: "4px",
+  border: "1px solid #ddd",
+  background: active ? "#1a73e8" : "#f9fafb",
+  color: active ? "#fff" : "inherit",
+  cursor: "pointer",
+  fontWeight: active ? 600 : undefined,
+});
+
 const styles: Record<string, React.CSSProperties> = {
   layout: { display: "flex", height: "100vh", fontFamily: "sans-serif" },
   sidebar: { width: "240px", borderRight: "1px solid #e5e7eb", display: "flex", flexDirection: "column", overflowY: "auto" },
@@ -274,7 +322,8 @@ const styles: Record<string, React.CSSProperties> = {
   list: { listStyle: "none", padding: 0, margin: 0 },
   listItem: { padding: "0.4rem 0.5rem", borderRadius: "4px", cursor: "pointer" },
   main: { flex: 1, padding: "1.5rem", overflowY: "auto" },
-  toolbar: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" },
+  toolbar: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem", flexWrap: "wrap", gap: "0.75rem" },
+  roleTag: { fontSize: "0.75rem", color: "#6b7280", marginTop: "0.2rem", display: "block" },
   btn: { padding: "0.4rem 0.8rem", borderRadius: "4px", border: "1px solid #ddd", background: "#f9fafb", cursor: "pointer" },
   smallBtn: { padding: "0.25rem 0.6rem", borderRadius: "4px", border: "1px solid #ddd", background: "#f9fafb", cursor: "pointer", fontSize: "0.8rem" },
   input: { flex: 1, padding: "0.4rem 0.8rem", border: "1px solid #ddd", borderRadius: "4px", fontFamily: "monospace" },

@@ -1,3 +1,5 @@
+pub mod rbac;
+
 use axum::{
     extract::{FromRef, FromRequestParts, State},
     http::{request::Parts, HeaderMap},

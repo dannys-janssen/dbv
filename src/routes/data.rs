@@ -5,10 +5,10 @@ use axum::{
 use bson::{doc, Document};
 use futures::TryStreamExt;
 use mongodb::options::FindOptions;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::{json, Value};
 
-use crate::{auth::Claims, errors::AppError, state::AppState};
+use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppState};
 
 #[derive(Debug, Deserialize)]
 pub struct PaginationParams {
@@ -28,7 +28,7 @@ fn default_limit() -> i64 {
 }
 
 pub async fn list_databases(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
 ) -> Result<Json<Value>, AppError> {
     let dbs = state.db.list_databases().await?;
@@ -36,7 +36,7 @@ pub async fn list_databases(
 }
 
 pub async fn list_collections(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
     Path(db): Path<String>,
 ) -> Result<Json<Value>, AppError> {
@@ -45,7 +45,7 @@ pub async fn list_collections(
 }
 
 pub async fn list_documents(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
     Query(params): Query<PaginationParams>,
@@ -89,7 +89,7 @@ pub async fn list_documents(
 }
 
 pub async fn get_document(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
@@ -106,7 +106,7 @@ pub async fn get_document(
 }
 
 pub async fn create_document(
-    _claims: Claims,
+    _claims: WriteAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<Value>,
@@ -119,7 +119,7 @@ pub async fn create_document(
 }
 
 pub async fn update_document(
-    _claims: Claims,
+    _claims: WriteAccess,
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
     Json(body): Json<Value>,
@@ -140,7 +140,7 @@ pub async fn update_document(
 }
 
 pub async fn delete_document(
-    _claims: Claims,
+    _claims: WriteAccess,
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
@@ -162,7 +162,7 @@ pub struct AggregateBody {
 }
 
 pub async fn aggregate(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<AggregateBody>,

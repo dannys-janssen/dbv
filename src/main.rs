@@ -79,6 +79,10 @@ async fn main() -> anyhow::Result<()> {
             post(routes::data::aggregate),
         )
         .route(
+            "/databases/{db}/collections/{collection}/schema",
+            get(routes::schema::collection_schema),
+        )
+        .route(
             "/databases/{db}/collections/{collection}/export",
             get(routes::transfer::export_collection),
         )

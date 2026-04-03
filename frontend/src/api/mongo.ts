@@ -93,6 +93,26 @@ export const exportCollection = (db: string, collection: string) => {
   a.click();
 };
 
+export interface SchemaField {
+  path: string;
+  types: string[];
+  nullable: boolean;
+  occurrences: number;
+  coverage: number;
+}
+
+export interface CollectionSchema {
+  sampled_documents: number;
+  fields: SchemaField[];
+}
+
+export const getSchema = (db: string, collection: string) =>
+  api
+    .get<CollectionSchema>(
+      `/databases/${db}/collections/${collection}/schema`
+    )
+    .then((r) => r.data);
+
 export const importCollection = (
   db: string,
   collection: string,

@@ -10,11 +10,11 @@ use futures::TryStreamExt;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{auth::Claims, errors::AppError, state::AppState};
+use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppState};
 
 /// Export all documents in a collection as a JSON array (newline-delimited).
 pub async fn export_collection(
-    _claims: Claims,
+    _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Response, AppError> {
@@ -49,7 +49,7 @@ pub struct ImportBody {
 }
 
 pub async fn import_collection(
-    _claims: Claims,
+    _claims: WriteAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<ImportBody>,

@@ -1,8 +1,31 @@
 services:
+  traefik:
+    image: traefik:v3
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8888:8080"   # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/letsencrypt
+    restart: unless-stopped
+
   dbv:
     build: .
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       MONGODB_URI: mongodb://mongo:27017
       MONGODB_DB: ${MONGODB_DB:-dbv}
@@ -11,6 +34,13 @@ services:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-dbv}
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dbv.rule=Host(`${DBV_HOST:-dbv.localhost}`)
+      - traefik.http.routers.dbv.entrypoints=websecure
+      - traefik.http.routers.dbv.tls=true
+      - traefik.http.routers.dbv.tls.certresolver=${TLS_RESOLVER:-}
+      - traefik.http.services.dbv.loadbalancer.server.port=8080
     depends_on:
       mongo:
         condition: service_healthy
@@ -20,8 +50,8 @@ services:
 
   mongo:
     image: mongo:7
-    ports:
-      - "27017:27017"
+    expose:
+      - "27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -34,13 +64,20 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
     command: start-dev
-    ports:
-      - "8180:8080"
+    expose:
+      - "8080"
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_PUBLIC_HOST:-keycloak.localhost}`)
+      - traefik.http.routers.keycloak.entrypoints=websecure
+      - traefik.http.routers.keycloak.tls=true
+      - traefik.http.routers.keycloak.tls.certresolver=${TLS_RESOLVER:-}
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\n\r\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -49,3 +86,4 @@ services:
 
 volumes:
   mongo_data:
+  traefik_certs:
