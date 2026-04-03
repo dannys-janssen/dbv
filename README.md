@@ -120,15 +120,16 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 **Document view**
 
 - Browse documents with configurable **pagination** (10 / 20 / 50 / 100 per page)
-- **Filter** documents using a full MongoDB query expression:
+- **Filter** documents using a full MongoDB query expression — powered by Monaco with **schema-aware autocomplete** (field names, BSON types, and query operators such as `$gt`, `$in`, `$regex`, `$elemMatch` are suggested automatically based on the inferred schema):
   - Simple match: `{"status": "active"}`
   - Comparison: `{"price": {"$gt": 20.00}}`
   - Array operator: `{"tags": {"$in": ["sale", "new"]}}`
   - Combined: `{"age": {"$gte": 18}, "country": "DE"}`
-- **Sort** by any field: `{"price": -1}` (descending) or `{"name": 1}` (ascending)
+- **Sort** by any field — also Monaco-powered with schema autocomplete: `{"price": -1}` (descending) or `{"name": 1}` (ascending)
 - Filter and Sort fields validate JSON in real time — blue border when active, red on invalid; Apply is disabled when JSON is invalid
-- Press **Enter** or **Apply** to run; **Clear** resets both Filter and Sort
+- Press **Ctrl+Enter** or **Apply** to run; **Clear** resets both Filter and Sort
 - The Documents tab badge shows the total matching count
+- Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
 
 **Selecting and bulk-acting on documents** *(export available to all roles; delete requires dbv-admin)*
 
@@ -143,11 +144,12 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 
 - **+ New** — opens a JSON editor to create a new document
 - **Edit** — opens the document in a JSON editor with syntax highlighting
+- Both editors provide **schema-aware autocomplete**: field names from the inferred collection schema are suggested with their BSON type and coverage percentage
 - **Delete** — permanently removes the document after confirmation
 
 **Aggregate**
 
-Run an aggregation pipeline against the selected collection:
+Run an aggregation pipeline against the selected collection. The Monaco editor provides **schema-aware autocomplete** for pipeline stage names (`$match`, `$group`, `$lookup`, `$project`, …) with inline descriptions:
 
 ```json
 [
@@ -155,6 +157,8 @@ Run an aggregation pipeline against the selected collection:
   { "$group": { "_id": "$category", "count": { "$sum": 1 } } }
 ]
 ```
+
+Press **Ctrl+Enter** or **Run** to execute.
 
 **Schema**
 
@@ -172,8 +176,26 @@ Inspect the inferred schema of a collection — sampled from up to 100 documents
 View, create, and drop indexes on a collection from the **Indexes** tab:
 
 - The table shows name, key fields and directions, unique/sparse flags, and TTL
-- **+ New Index** opens the index builder: add key fields (ascending `1` or descending `-1`), set optional name, Unique, Sparse, and TTL (seconds)
+- **+ New Index** opens the index builder: add key fields (ascending `1` or descending `-1`), set optional name, Unique, Sparse, TTL (seconds), and **Create in background**
 - Click **Drop** to delete an index (`_id_` is protected and cannot be dropped)
+
+**Commands** *(dbv-admin only)*
+
+The **Commands** tab provides a split-panel MongoDB command runner:
+
+- **Left palette** — searchable list of 35 common commands grouped into five categories:
+
+  | Category | Examples |
+  |---|---|
+  | Server | `ping`, `serverStatus`, `buildInfo`, `currentOp`, `getLog` |
+  | Database | `dbStats`, `listCollections`, `createUser`, `dropUser` |
+  | Collection | `collStats`, `validate`, `compact`, `reIndex` |
+  | Replication | `replSetGetStatus`, `replSetGetConfig` |
+  | Administration | `renameCollection`, `fsync`, `profile` |
+
+- Click any palette entry to pre-fill the Monaco editor with a ready-to-run template (collection-name placeholders are replaced with the currently selected collection)
+- **Use admin database** toggle — when enabled the command runs against the `admin` database (required for server-wide and replication commands; indicated by a yellow `admin` badge in the palette)
+- Press **▶ Run** or **Ctrl+Enter** to execute — results appear in a read-only Monaco viewer; errors are highlighted in red
 
 **Export / Import** *(import requires dbv-admin)*
 
@@ -204,6 +226,7 @@ View, create, and drop indexes on a collection from the **Indexes** tab:
 | Import JSON into collection | ❌ | ✅ |
 | Create index | ❌ | ✅ |
 | Drop index | ❌ | ✅ |
+| Run MongoDB commands | ❌ | ✅ |
 
 ---
 
@@ -283,11 +306,11 @@ src/
 │   ├── mod.rs        # JwksCache, Claims extractor, RS256 JWT validation
 │   └── rbac.rs       # ReadAccess / WriteAccess extractors
 ├── db/
-│   └── mod.rs        # DbClient — wraps mongodb::Client, pings on startup
+│   └── mod.rs        # DbClient — wraps mongodb::Client, pings on startup, run_command helper
 └── routes/
     ├── auth_proxy.rs # POST /api/auth/login and /api/auth/refresh (Keycloak proxy)
     ├── health.rs     # GET /api/health  (no auth, pings MongoDB)
-    ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection
+    ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection, run_command
     ├── schema.rs     # Schema inference (samples 100 docs, infers BSON types)
     └── transfer.rs   # Export (GET) and Import (POST)
 
@@ -297,12 +320,17 @@ frontend/src/
 │   └── mongo.ts         # typed API functions for all endpoints
 ├── context/
 │   └── AuthContext.tsx  # token storage, auto-refresh timer, role parsing
+├── utils/
+│   └── mongoSchema.ts   # JSON Schema builders for Monaco autocomplete
+│                        # (buildDocumentSchema, buildFilterSchema, buildSortSchema, PIPELINE_SCHEMA)
 ├── components/
 │   ├── ProtectedRoute.tsx
-│   └── SchemaViewer.tsx
+│   ├── SchemaViewer.tsx
+│   ├── DocTreeView.tsx   # Recursive tree view for documents
+│   └── CommandsView.tsx  # Command palette + Monaco editor + results panel
 └── pages/
     ├── LoginPage.tsx    # Username/password login form
-    └── BrowserPage.tsx  # Main UI: sidebar, documents, aggregate, schema
+    └── BrowserPage.tsx  # Main UI: sidebar, documents, aggregate, schema, indexes, stats, commands
 ```
 
 ### Environment Variables
@@ -409,6 +437,12 @@ All endpoints are under `/api`.
 |---|---|---|---|
 | GET | `/api/databases/:db/collections/:col/export` | viewer+ | Download collection as JSON |
 | POST | `/api/databases/:db/collections/:col/import` | admin | Import `{ "documents": [...], "replace": false }` |
+
+#### Commands
+
+| Method | Path | Role | Body | Description |
+|---|---|---|---|---|
+| POST | `/api/databases/:db/run_command` | admin | `{ "command": {...}, "admin": false }` | Run any MongoDB command on `:db` (or the `admin` database when `admin: true`) |
 
 ### Adding a New Route
 

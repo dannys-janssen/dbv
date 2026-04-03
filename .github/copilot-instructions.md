@@ -35,18 +35,20 @@ browser (HTTPS)
 │   ├── auth/
 │   │   ├── mod.rs        # JwksCache, Claims extractor, JWT RS256 validation
 │   │   └── rbac.rs       # ReadAccess / WriteAccess extractors
-│   ├── db/mod.rs         # DbClient (MongoDB wrapper, ping on startup)
+│   ├── db/mod.rs         # DbClient (MongoDB wrapper, ping on startup, run_command helper)
 │   └── routes/
 │       ├── health.rs     # GET /api/health
-│       ├── data.rs       # CRUD + aggregate (paginated)
+│       ├── data.rs       # CRUD + aggregate + stats + run_command
 │       ├── schema.rs     # GET schema — samples docs, infers field types
 │       └── transfer.rs   # GET export, POST import
 ├── frontend/
 │   ├── src/
 │   │   ├── api/          # client.ts (axios + auth interceptor), mongo.ts
 │   │   ├── context/      # AuthContext (token + roles + canWrite)
-│   │   ├── components/   # ProtectedRoute, SchemaViewer
-│   │   └── pages/        # LoginPage, BrowserPage
+│   │   ├── utils/
+│   │   │   └── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
+│   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView, CommandsView
+│   │   └── pages/        # LoginPage, BrowserPage (all tabs)
 │   ├── vite.config.ts    # Proxy /api → http://localhost:8080 for dev
 │   └── dist/             # Production build (served by Axum)
 ├── Dockerfile            # Multi-stage: cargo-chef + Node builder + debian runtime
@@ -100,7 +102,7 @@ All runtime configuration is read from environment variables. No secrets in sour
 
 | Variable | Description |
 |---|---|
-| `MONGODB_URI` | MongoDB connection string, e.g. `mongodb://mongo:27017` |
+| `MONGODB_URI` | MongoDB connection string, e.g. `mongodb://mongo:27017` (supports auth, replica sets, Atlas SRV, TLS params) |
 | `MONGODB_DB` | Default database name |
 | `KEYCLOAK_URL` | Keycloak base URL, e.g. `http://keycloak:8080` |
 | `KEYCLOAK_REALM` | Keycloak realm name |
@@ -110,8 +112,11 @@ All runtime configuration is read from environment variables. No secrets in sour
 | `FRONTEND_DIST` | Path to React build output (default `./frontend/dist`) |
 | `DBV_HOST` | Public hostname for Traefik routing (default `dbv.localhost`) |
 | `KEYCLOAK_PUBLIC_HOST` | Public hostname for Keycloak via Traefik (default `keycloak.localhost`) |
-| `TLS_RESOLVER` | Traefik cert resolver name. Leave blank for self-signed; set to `letsencrypt` for production |
+| `TLS_RESOLVER` | Traefik cert resolver. Leave blank for self-signed; `letsencrypt` for production |
 | `ACME_EMAIL` | Email for Let's Encrypt (production only) |
+| `MONGODB_TLS_CA_FILE` | Path to PEM CA cert for custom/private CA |
+| `MONGODB_TLS_CERT_KEY_FILE` | Path to PEM client cert+key for mutual TLS |
+| `MONGODB_TLS_ALLOW_INVALID_CERTS` | `true` to skip cert validation (dev only) |
 
 `config.rs` parses backend vars at startup using `envy`, failing fast with a clear error if required variables are missing.
 
@@ -128,8 +133,8 @@ All runtime configuration is read from environment variables. No secrets in sour
 - Roles are read from the JWT's `realm_access.roles` claim (set in Keycloak).
 - `dbv-viewer` role → `ReadAccess` extractor passes.
 - `dbv-admin` role → both `ReadAccess` and `WriteAccess` extractors pass.
-- Read handlers (list, get, export, aggregate, schema) use `ReadAccess`.
-- Write handlers (create, update, delete, import) use `WriteAccess`.
+- Read handlers (list, get, export, aggregate, schema, stats) use `ReadAccess`.
+- Write handlers (create, update, delete, import, run_command) use `WriteAccess`.
 - The frontend reads roles from the JWT payload client-side to hide write controls for viewers.
 
 ### Authentication Middleware
@@ -145,6 +150,37 @@ All runtime configuration is read from environment variables. No secrets in sour
 - Never create per-request clients.
 - Collection names and DB names come from request path params, not hardcoded strings.
 - The schema endpoint samples up to 100 documents to infer field paths and BSON types.
+- `DbClient::run_command(db, doc, admin)` runs arbitrary commands; pass `admin: true` to target the `admin` database.
+
+### Monaco Editor and Autocomplete
+
+- The app uses `@monaco-editor/react ^4.7` for all JSON editors (filter, sort, document, aggregate, command).
+- Each editor is given a unique `path` prop that matches a JSON Schema registered via `loader.init().then(monaco => monaco.languages.json.jsonDefaults.setDiagnosticsOptions({...}))`.
+- Schemas are rebuilt and re-registered whenever the active collection's schema changes (keyed on the `schema` state via `useEffect`).
+- Schema builders live in `frontend/src/utils/mongoSchema.ts`:
+  - `buildDocumentSchema(schema)` → properties from sampled fields
+  - `buildFilterSchema(schema)` → fields + MongoDB query operators (`$eq`, `$gt`, `$in`, `$regex`, `$elemMatch`, …) + logical operators
+  - `buildSortSchema(schema)` → fields with `enum: [1, -1]`
+  - `PIPELINE_SCHEMA` → static schema for all aggregation stage names
+- Editor paths and their matching schema URIs:
+
+  | Editor | path | schema URI |
+  |---|---|---|
+  | Filter | `dbv://filter` | `http://dbv/filter-schema.json` |
+  | Sort | `dbv://sort` | `http://dbv/sort-schema.json` |
+  | Document create/edit | `dbv://document` | `http://dbv/document-schema.json` |
+  | Aggregate pipeline | `dbv://pipeline` | `http://dbv/pipeline-schema.json` |
+  | Command runner | `dbv://command` | *(no schema registered — free-form)* |
+
+- To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `BrowserPage.tsx`.
+
+### Command Runner
+
+- `POST /api/databases/:db/run_command` with body `{ "command": {...}, "admin": bool }` runs any MongoDB command.
+- Requires `WriteAccess` (dbv-admin only).
+- When `admin: true` the command is routed to the `admin` database regardless of `:db`.
+- Frontend: `CommandsView.tsx` — left palette selects a template; right side has Monaco editor, admin toggle, Run button, and read-only result viewer.
+- `loadDocumentsRef` pattern: use `useRef` to keep `onMount` callbacks stable when calling parent state-modifying functions from Monaco event handlers.
 
 ### Static File Serving
 
