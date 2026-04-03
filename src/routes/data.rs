@@ -162,17 +162,26 @@ pub async fn list_documents(
     })))
 }
 
+/// Parse a document `_id` from a URL path segment.
+/// Tries ObjectId first (24 hex chars); falls back to a BSON string so that
+/// collections with string, integer-encoded-as-string, or other non-ObjectId
+/// `_id` fields are handled correctly.
+fn parse_id_bson(id: &str) -> bson::Bson {
+    bson::oid::ObjectId::parse_str(id)
+        .map(bson::Bson::ObjectId)
+        .unwrap_or_else(|_| bson::Bson::String(id.to_string()))
+}
+
 pub async fn get_document(
     _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
-    let oid = bson::oid::ObjectId::parse_str(&id)
-        .map_err(|_| AppError::BadRequest(format!("Invalid ObjectId: {id}")))?;
+    let doc_id = parse_id_bson(&id);
 
     let doc = coll
-        .find_one(doc! { "_id": oid }, None)
+        .find_one(doc! { "_id": doc_id }, None)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("Document {id} not found")))?;
 
@@ -199,12 +208,11 @@ pub async fn update_document(
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
-    let oid = bson::oid::ObjectId::parse_str(&id)
-        .map_err(|_| AppError::BadRequest(format!("Invalid ObjectId: {id}")))?;
+    let doc_id = parse_id_bson(&id);
 
     let replacement = json_to_doc(body)?;
     let result = coll
-        .replace_one(doc! { "_id": oid }, replacement, None)
+        .replace_one(doc! { "_id": doc_id }, replacement, None)
         .await?;
 
     Ok(Json(json!({
@@ -219,10 +227,9 @@ pub async fn delete_document(
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
-    let oid = bson::oid::ObjectId::parse_str(&id)
-        .map_err(|_| AppError::BadRequest(format!("Invalid ObjectId: {id}")))?;
+    let doc_id = parse_id_bson(&id);
 
-    let result = coll.delete_one(doc! { "_id": oid }, None).await?;
+    let result = coll.delete_one(doc! { "_id": doc_id }, None).await?;
     if result.deleted_count == 0 {
         return Err(AppError::NotFound(format!("Document {id} not found")));
     }
@@ -244,13 +251,9 @@ pub async fn bulk_delete_documents(
     if body.ids.is_empty() {
         return Err(AppError::BadRequest("No IDs provided".into()));
     }
-    let oids: Vec<bson::Bson> = body.ids
-        .iter()
-        .filter_map(|id| bson::oid::ObjectId::parse_str(id).ok())
-        .map(bson::Bson::ObjectId)
-        .collect();
+    let ids: Vec<bson::Bson> = body.ids.iter().map(|id| parse_id_bson(id)).collect();
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
-    let result = coll.delete_many(doc! { "_id": { "$in": &oids } }, None).await?;
+    let result = coll.delete_many(doc! { "_id": { "$in": &ids } }, None).await?;
     Ok(Json(json!({ "deleted": result.deleted_count })))
 }
 
