@@ -1,72 +1,7 @@
 import { useState } from "react";
+import { formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel } from "../utils/bsonFormat";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-
-// ── type colours ─────────────────────────────────────────────────────────────
-function typeColor(value: unknown): string {
-  if (value === null) return "#94a3b8";
-  if (typeof value === "boolean") return "#7c3aed";
-  if (typeof value === "number") return "#0369a1";
-  if (typeof value === "string") return "#15803d";
-  if (Array.isArray(value)) return "#b45309";
-  if (typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    if ("$oid" in obj) return "#6366f1";
-    if ("$date" in obj) return "#0891b2";
-    if ("$numberInt" in obj || "$numberLong" in obj || "$numberDouble" in obj)
-      return "#0369a1";
-  }
-  return "#374151";
-}
-
-function formatPrimitive(value: unknown): string {
-  if (value === null) return "null";
-  if (typeof value === "string") return `"${value}"`;
-  if (typeof value === "boolean") return String(value);
-  if (typeof value === "number") return String(value);
-  if (typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    if ("$oid" in obj) return String(obj["$oid"]);
-    if ("$date" in obj) {
-      const d = obj["$date"];
-      if (typeof d === "string" || typeof d === "number") {
-        return new Date(d).toISOString();
-      }
-    }
-    if ("$numberInt" in obj) return String(obj["$numberInt"]);
-    if ("$numberLong" in obj) return String(obj["$numberLong"]);
-    if ("$numberDouble" in obj) return String(obj["$numberDouble"]);
-  }
-  return JSON.stringify(value);
-}
-
-function isPrimitive(value: unknown): boolean {
-  if (value === null) return true;
-  if (typeof value !== "object") return true;
-  const obj = value as Record<string, unknown>;
-  return (
-    "$oid" in obj ||
-    "$date" in obj ||
-    "$numberInt" in obj ||
-    "$numberLong" in obj ||
-    "$numberDouble" in obj
-  );
-}
-
-function typeLabel(value: unknown): string {
-  if (value === null) return "null";
-  if (Array.isArray(value)) return `Array(${(value as unknown[]).length})`;
-  if (typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    if ("$oid" in obj) return "ObjectId";
-    if ("$date" in obj) return "Date";
-    if ("$numberInt" in obj) return "Int32";
-    if ("$numberLong" in obj) return "Int64";
-    if ("$numberDouble" in obj) return "Double";
-    return `Object(${Object.keys(obj).length})`;
-  }
-  return typeof value;
-}
 
 // ── recursive tree node ───────────────────────────────────────────────────────
 // Each TreeNode manages its OWN isExpanded state.
@@ -83,7 +18,7 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const indent = depth * 18;
 
-  if (isPrimitive(value)) {
+  if (isBsonPrimitive(value)) {
     return (
       <div
         style={{
@@ -97,8 +32,8 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
         <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace", minWidth: 0 }}>
           {String(nodeKey)}:
         </span>
-        <span style={{ color: typeColor(value), fontSize: "12px", fontFamily: "monospace", wordBreak: "break-all" }}>
-          {formatPrimitive(value)}
+        <span style={{ color: bsonTypeColor(value), fontSize: "12px", fontFamily: "monospace", wordBreak: "break-all" }}>
+          {formatBsonValue(value)}
         </span>
       </div>
     );
@@ -129,8 +64,8 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
         <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>
           {String(nodeKey)}:
         </span>
-        <span style={{ color: typeColor(value), fontSize: "11px", fontFamily: "monospace", opacity: 0.8 }}>
-          {typeLabel(value)}
+        <span style={{ color: bsonTypeColor(value), fontSize: "11px", fontFamily: "monospace", opacity: 0.8 }}>
+          {bsonTypeLabel(value)}
         </span>
       </div>
       {isExpanded && (
@@ -210,7 +145,7 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
         </span>
 
         <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {formatPrimitive(idValue)}
+          {formatBsonValue(idValue)}
         </span>
 
         <span style={{ fontSize: "11px", color: "#94a3b8", background: "#f1f5f9", borderRadius: "10px", padding: "1px 7px", whiteSpace: "nowrap" }}>
@@ -257,8 +192,8 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           {/* _id row (always first, always shown as primitive) */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px", padding: "2px 0", paddingLeft: 18 }}>
             <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>_id:</span>
-            <span style={{ color: typeColor(idValue), fontSize: "12px", fontFamily: "monospace" }}>
-              {formatPrimitive(idValue)}
+            <span style={{ color: bsonTypeColor(idValue), fontSize: "12px", fontFamily: "monospace" }}>
+              {formatBsonValue(idValue)}
             </span>
           </div>
 

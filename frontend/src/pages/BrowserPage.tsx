@@ -36,6 +36,7 @@ import {
   buildSortSchema,
   PIPELINE_SCHEMA,
 } from "../utils/mongoSchema";
+import { formatBsonValue } from "../utils/bsonFormat";
 
 type View = "documents" | "aggregate" | "schema" | "indexes" | "stats" | "commands";
 
@@ -60,7 +61,9 @@ function previewDoc(doc: Record<string, unknown>): string {
   const entries = Object.entries(doc)
     .filter(([k]) => k !== "_id")
     .map(([k, v]) => {
-      const val = typeof v === "object" && v !== null ? "{…}" : String(v);
+      const val = typeof v === "object" && v !== null
+        ? formatBsonValue(v)   // formats dates, OIDs, etc. as human-readable
+        : String(v);
       return `${k}: ${val}`;
     });
   const preview = entries.join("  ·  ");
