@@ -79,6 +79,8 @@ pub struct Claims {
     pub preferred_username: Option<String>,
     pub email: Option<String>,
     pub realm_access: Option<RealmAccess>,
+    /// Authorized party — Keycloak sets this to the client_id that requested the token.
+    pub azp: Option<String>,
     pub exp: usize,
     pub iat: usize,
 }
@@ -149,10 +151,22 @@ async fn validate_token(
     let decoding_key = build_decoding_key(&jwk_owned)?;
 
     let mut validation = Validation::new(Algorithm::RS256);
-    validation.set_audience(&[&config.keycloak_client_id]);
+    // Keycloak tokens carry aud=["account"] by default, not the client_id.
+    // We instead verify the azp (authorized party) claim after decoding.
+    validation.validate_aud = false;
 
     let data = decode::<Claims>(token, &decoding_key, &validation)
         .map_err(|e| AppError::Unauthorized(format!("Token validation failed: {e}")))?;
+
+    // Verify the token was actually issued for our client.
+    if let Some(azp) = &data.claims.azp {
+        if azp != &config.keycloak_client_id {
+            return Err(AppError::Unauthorized(format!(
+                "Token azp '{azp}' does not match expected client '{}'",
+                config.keycloak_client_id
+            )));
+        }
+    }
 
     Ok(data.claims)
 }
