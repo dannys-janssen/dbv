@@ -103,6 +103,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "monospace",
     fontSize: "0.82rem",
     background: "#f3f4f6",
+    color: "#1e293b",
     padding: "0.1rem 0.35rem",
     borderRadius: "3px",
   },
