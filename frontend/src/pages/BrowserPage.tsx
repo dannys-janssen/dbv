@@ -57,12 +57,14 @@ export default function BrowserPage() {
 
   useEffect(() => {
     if (!selectedDb) return;
-    getCollections(selectedDb).then((c) => {
-      setCollections(c.collections);
-      setSelectedCol("");
-      setDocuments([]);
-      setSchema(null);
-    });
+    getCollections(selectedDb)
+      .then((c) => {
+        setCollections(c.collections);
+        setSelectedCol("");
+        setDocuments([]);
+        setSchema(null);
+      })
+      .catch((e) => setError(`Failed to load collections: ${e.message}`));
   }, [selectedDb]);
 
   const loadSchema = useCallback(() => {
@@ -170,17 +172,26 @@ export default function BrowserPage() {
         {selectedDb && (
           <div style={styles.section}>
             <label style={styles.label}>Collection</label>
-            <ul style={styles.list}>
-              {collections.map((c) => (
-                <li
-                  key={c}
-                  style={{ ...styles.listItem, background: c === selectedCol ? "#dbeafe" : undefined }}
-                  onClick={() => { setSelectedCol(c); setPage(1); }}
-                >
-                  {c}
-                </li>
-              ))}
-            </ul>
+            {collections.length === 0 ? (
+              <p style={{ fontSize: "0.8rem", color: "#9ca3af", margin: 0 }}>
+                No collections found.{"\n"}
+                {canWrite
+                  ? 'Use "+ New" after selecting a collection name to create one, or import data.'
+                  : "Ask an admin to create collections."}
+              </p>
+            ) : (
+              <ul style={styles.list}>
+                {collections.map((c) => (
+                  <li
+                    key={c}
+                    style={{ ...styles.listItem, background: c === selectedCol ? "#dbeafe" : undefined }}
+                    onClick={() => { setSelectedCol(c); setPage(1); }}
+                  >
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </aside>
@@ -273,8 +284,19 @@ export default function BrowserPage() {
             )}
           </>
         ) : (
-          <div style={{ color: "#999", marginTop: "4rem", textAlign: "center" }}>
-            Select a database and collection to get started.
+          <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
+            <p style={{ color: "#6b7280", fontSize: "1rem", marginBottom: "0.5rem" }}>
+              {selectedDb
+                ? "Select a collection from the sidebar to browse data."
+                : "Select a database from the sidebar to get started."}
+            </p>
+            {selectedDb && collections.length === 0 && (
+              <p style={{ color: "#9ca3af", fontSize: "0.85rem" }}>
+                <strong>{selectedDb}</strong> has no collections yet.{" "}
+                {["admin", "config", "local"].includes(selectedDb) &&
+                  "This is a MongoDB system database — consider creating your own database instead."}
+              </p>
+            )}
           </div>
         )}
       </main>
