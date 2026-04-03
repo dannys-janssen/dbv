@@ -167,6 +167,8 @@ export default function BrowserPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filterText, setFilterText] = useState("");
+  const [sortText, setSortText] = useState("");
+  const [limitVal, setLimitVal] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -289,6 +291,9 @@ export default function BrowserPage() {
         setSelectedCol("");
         setDocuments([]);
         setSchema(null);
+        setFilterText("");
+        setSortText("");
+        setPage(1);
       })
       .catch((e) => setError(`Failed to load collections: ${e.message}`));
   }, [selectedDb]);
@@ -323,14 +328,14 @@ export default function BrowserPage() {
     if (!selectedDb || !selectedCol) return;
     setLoading(true);
     setError("");
-    getDocuments(selectedDb, selectedCol, page, 20, filterText || undefined)
+    getDocuments(selectedDb, selectedCol, page, limitVal, filterText || undefined, sortText || undefined)
       .then((r) => {
         setDocuments(r.documents);
         setTotal(r.total);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [selectedDb, selectedCol, page, filterText]);
+  }, [selectedDb, selectedCol, page, limitVal, filterText, sortText]);
 
   useEffect(() => {
     loadDocuments();
@@ -904,112 +909,115 @@ export default function BrowserPage() {
             {/* ── Documents tab ── */}
             {view === "documents" && (
               <>
-                {/* Action bar */}
-                <div
-                  style={{
-                    padding: "10px 20px",
-                    background: "#f8fafc",
-                    borderBottom: "1px solid #e2e8f0",
-                    display: "flex",
-                    gap: "8px",
-                    alignItems: "center",
-                  }}
-                >
-                  <input
-                    style={{
-                      flex: 1,
-                      padding: "8px 12px",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "6px",
-                      fontSize: "13px",
-                      fontFamily: "monospace",
-                      outline: "none",
-                      background: "#ffffff",
-                    }}
-                    placeholder='Filter…  e.g. {"status":"active"}'
-                    value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && loadDocuments()}
-                  />
-                  <button
-                    onClick={loadDocuments}
-                    style={{
-                      background: "#2563eb",
-                      color: "#ffffff",
-                      padding: "8px 14px",
-                      borderRadius: "6px",
-                      fontSize: "13px",
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: FONT,
-                      fontWeight: 500,
-                    }}
-                  >
-                    Apply
-                  </button>
-                  <div
-                    style={{
-                      width: "1px",
-                      height: "20px",
-                      background: "#e2e8f0",
-                    }}
-                  />
-                  <button
-                    onClick={() => exportCollection(selectedDb, selectedCol).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                    style={{
-                      background: "transparent",
-                      color: "#374151",
-                      padding: "8px 14px",
-                      borderRadius: "6px",
-                      fontSize: "13px",
-                      border: "1px solid #e2e8f0",
-                      cursor: "pointer",
-                      fontFamily: FONT,
-                    }}
-                  >
-                    Export
-                  </button>
-                  {canWrite && (
-                    <>
-                      <label
-                        style={{
-                          background: "transparent",
-                          color: "#374151",
-                          padding: "8px 14px",
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          border: "1px solid #e2e8f0",
-                          cursor: "pointer",
-                          fontFamily: FONT,
-                        }}
-                      >
-                        Import
-                        <input
-                          type="file"
-                          accept=".json"
-                          style={{ display: "none" }}
-                          onChange={(e) => void handleImport(e)}
-                        />
-                      </label>
-                      <button
-                        onClick={openCreate}
-                        style={{
-                          background: "#2563eb",
-                          color: "#ffffff",
-                          padding: "8px 14px",
-                          borderRadius: "6px",
-                          fontSize: "13px",
-                          border: "none",
-                          cursor: "pointer",
-                          fontFamily: FONT,
-                          fontWeight: 500,
-                        }}
-                      >
-                        + New Document
-                      </button>
-                    </>
-                  )}
-                </div>
+                {/* Query bar */}
+                {(() => {
+                  const filterValid = !filterText.trim() || (() => { try { JSON.parse(filterText); return true; } catch { return false; } })();
+                  const sortValid   = !sortText.trim()   || (() => { try { JSON.parse(sortText);   return true; } catch { return false; } })();
+                  const hasFilter   = !!filterText.trim();
+                  const hasSort     = !!sortText.trim();
+                  return (
+                    <div style={{ padding: "10px 20px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                      {/* Row 1: filter + sort inputs */}
+                      <div style={{ display: "flex", gap: "8px", alignItems: "flex-end", marginBottom: "8px" }}>
+                        {/* Filter */}
+                        <div style={{ flex: 2 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Filter</span>
+                            {hasFilter && filterValid && (
+                              <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>active</span>
+                            )}
+                            {hasFilter && !filterValid && (
+                              <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                            )}
+                          </div>
+                          <input
+                            style={{
+                              width: "100%", boxSizing: "border-box",
+                              padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
+                              fontFamily: "monospace", outline: "none", background: "#ffffff",
+                              border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                            }}
+                            placeholder='e.g. {"status":"active"}  or  {"price":{"$gt":20}}'
+                            value={filterText}
+                            onChange={(e) => { setFilterText(e.target.value); setPage(1); }}
+                            onKeyDown={(e) => e.key === "Enter" && filterValid && sortValid && loadDocuments()}
+                          />
+                        </div>
+
+                        {/* Sort */}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Sort</span>
+                            {hasSort && !sortValid && (
+                              <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                            )}
+                          </div>
+                          <input
+                            style={{
+                              width: "100%", boxSizing: "border-box",
+                              padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
+                              fontFamily: "monospace", outline: "none", background: "#ffffff",
+                              border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                            }}
+                            placeholder='e.g. {"price":-1}'
+                            value={sortText}
+                            onChange={(e) => { setSortText(e.target.value); setPage(1); }}
+                            onKeyDown={(e) => e.key === "Enter" && filterValid && sortValid && loadDocuments()}
+                          />
+                        </div>
+
+                        {/* Limit */}
+                        <div style={{ flexShrink: 0 }}>
+                          <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>Limit</div>
+                          <select
+                            value={limitVal}
+                            onChange={(e) => { setLimitVal(Number(e.target.value)); setPage(1); }}
+                            style={{ padding: "8px 10px", border: "1px solid #e2e8f0", borderRadius: "6px", fontSize: "13px", fontFamily: FONT, background: "#fff", color: "#374151" }}
+                          >
+                            {[10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Row 2: action buttons */}
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <button
+                          onClick={loadDocuments}
+                          disabled={!filterValid || !sortValid}
+                          style={{ background: filterValid && sortValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}
+                        >
+                          Apply
+                        </button>
+                        {(hasFilter || hasSort) && (
+                          <button
+                            onClick={() => { setFilterText(""); setSortText(""); setPage(1); }}
+                            style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                        <div style={{ flex: 1 }} />
+                        <button
+                          onClick={() => exportCollection(selectedDb, selectedCol).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                        >
+                          Export
+                        </button>
+                        {canWrite && (
+                          <>
+                            <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
+                              Import
+                              <input type="file" accept=".json" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
+                            </label>
+                            <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
+                              + New Document
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Document table */}
                 <div style={{ padding: "0 20px 20px" }}>
