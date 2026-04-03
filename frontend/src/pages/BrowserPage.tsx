@@ -29,6 +29,7 @@ import { useAuth } from "../context/AuthContext";
 import Editor, { loader } from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 import DocTreeView from "../components/DocTreeView";
+import CommandsView from "../components/CommandsView";
 import {
   buildDocumentSchema,
   buildFilterSchema,
@@ -36,7 +37,7 @@ import {
   PIPELINE_SCHEMA,
 } from "../utils/mongoSchema";
 
-type View = "documents" | "aggregate" | "schema" | "indexes" | "stats";
+type View = "documents" | "aggregate" | "schema" | "indexes" | "stats" | "commands";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -965,7 +966,7 @@ export default function BrowserPage() {
                 flexDirection: "row",
               }}
             >
-              {(["documents", "aggregate", "schema", "indexes", "stats"] as View[]).map((tab) => {
+              {(["documents", "aggregate", "schema", "indexes", "stats", "commands"] as View[]).map((tab) => {
                 const isActive = view === tab;
                 const label =
                   tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -1788,6 +1789,11 @@ export default function BrowserPage() {
                     )}
                   </>
                 )}
+              </div>
+            )}
+            {view === "commands" && (
+              <div style={{ height: "calc(100vh - 97px)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                <CommandsView db={selectedDb} collection={selectedCol} />
               </div>
             )}
           </>

@@ -337,3 +337,24 @@ pub async fn collection_stats(
         .await?;
     Ok(Json(serde_json::to_value(doc)?))
 }
+
+// ── Run command ───────────────────────────────────────────────────────────────
+
+#[derive(Debug, Deserialize)]
+pub struct RunCommandBody {
+    pub command: Value,
+    #[serde(default)]
+    pub admin: bool,
+}
+
+pub async fn run_command(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+    Json(body): Json<RunCommandBody>,
+) -> Result<Json<Value>, AppError> {
+    let cmd_doc: bson::Document = serde_json::from_value(body.command)
+        .map_err(|e| AppError::BadRequest(format!("Invalid command document: {e}")))?;
+    let result = state.db.run_command(&db, cmd_doc, body.admin).await?;
+    Ok(Json(json!({ "result": result })))
+}

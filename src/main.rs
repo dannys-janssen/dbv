@@ -123,6 +123,10 @@ async fn main() -> anyhow::Result<()> {
         .route(
             "/databases/:db/collections/:collection/import",
             post(routes::transfer::import_collection),
+        )
+        .route(
+            "/databases/:db/run_command",
+            post(routes::data::run_command),
         );
 
     let frontend_dist = config.frontend_dist.clone();

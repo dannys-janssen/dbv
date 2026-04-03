@@ -199,3 +199,14 @@ export const getCollectionStats = (db: string, collection: string) =>
   api
     .get<Record<string, unknown>>(`/databases/${db}/collections/${collection}/stats`)
     .then((r) => r.data);
+
+// ── Run command ────────────────────────────────────────────────────────────────
+
+export const runDbCommand = (
+  db: string,
+  command: Record<string, unknown>,
+  admin = false
+) =>
+  api
+    .post<{ result: Record<string, unknown> }>(`/databases/${db}/run_command`, { command, admin })
+    .then((r) => r.data.result);

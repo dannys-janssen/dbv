@@ -147,4 +147,11 @@ impl DbClient {
         coll.drop_index(name, None).await?;
         Ok(())
     }
+
+    /// Run an arbitrary MongoDB command on `db_name` (or "admin" when `admin` is true).
+    pub async fn run_command(&self, db_name: &str, command: bson::Document, admin: bool) -> Result<Value, AppError> {
+        let db = if admin { self.client.database("admin") } else { self.client.database(db_name) };
+        let result = db.run_command(command, None).await?;
+        Ok(serde_json::to_value(result)?)
+    }
 }
