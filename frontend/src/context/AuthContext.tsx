@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useCallback,
   type ReactNode,
 } from "react";
 import api from "../api/client";
@@ -61,15 +62,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     setToken(null);
     setRoles([]);
-  };
+  }, []);
 
-  const scheduleRefresh = (accessToken: string) => {
+  const scheduleRefresh = useCallback((accessToken: string) => {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
     const delay = msUntilRefresh(accessToken);
     refreshTimer.current = setTimeout(async () => {
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout();
       }
     }, delay);
-  };
+  }, [logout]); // logout is stable (useCallback []), so scheduleRefresh is too
 
   const login = (accessToken: string, refreshToken: string) => {
     localStorage.setItem("access_token", accessToken);
@@ -104,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (token) scheduleRefresh(token);
     return () => { if (refreshTimer.current) clearTimeout(refreshTimer.current); };
+  // scheduleRefresh is stable (useCallback), token is only read once on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
