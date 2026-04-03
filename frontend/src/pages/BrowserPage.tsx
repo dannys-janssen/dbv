@@ -327,9 +327,9 @@ export default function BrowserPage() {
     setEditorOpen(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
-      const parsed = JSON.parse(editorValue);
+      const parsed = JSON.parse(editorValue) as Record<string, unknown>;
       if (editingId) {
         await updateDocument(selectedDb, selectedCol, editingId, parsed);
       } else {
@@ -340,7 +340,7 @@ export default function BrowserPage() {
     } catch (e: unknown) {
       alert("Invalid JSON or save failed: " + (e as Error).message);
     }
-  };
+  }, [editorValue, editingId, selectedDb, selectedCol, loadDocuments]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -352,7 +352,7 @@ export default function BrowserPage() {
     loadDocuments();
   };
 
-  const runAggregate = async () => {
+  const runAggregate = useCallback(async () => {
     try {
       const p = JSON.parse(pipeline) as unknown[];
       const r = await aggregate(selectedDb, selectedCol, p);
@@ -360,7 +360,31 @@ export default function BrowserPage() {
     } catch (e: unknown) {
       alert("Error: " + (e as Error).message);
     }
-  };
+  }, [pipeline, selectedDb, selectedCol]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // ESC — close any open modal
+      if (e.key === "Escape") {
+        if (editorOpen) { setEditorOpen(false); return; }
+        if (newDbOpen)  { setNewDbOpen(false);  return; }
+        if (newColOpen) { setNewColOpen(false);  return; }
+      }
+      // Ctrl+S / Cmd+S — save document editor
+      if ((e.ctrlKey || e.metaKey) && e.key === "s" && editorOpen) {
+        e.preventDefault();
+        void handleSave();
+      }
+      // Ctrl+Enter / Cmd+Enter — run aggregate pipeline
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && view === "aggregate") {
+        e.preventDefault();
+        void runAggregate();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [editorOpen, newDbOpen, newColOpen, view, handleSave, runAggregate]);
 
   const getDocId = (doc: Record<string, unknown>): string => {
     const id = doc["_id"] as Record<string, unknown> | string | undefined;
@@ -902,7 +926,7 @@ export default function BrowserPage() {
                     }}
                   />
                   <button
-                    onClick={() => exportCollection(selectedDb, selectedCol)}
+                    onClick={() => exportCollection(selectedDb, selectedCol).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
                     style={{
                       background: "transparent",
                       color: "#374151",

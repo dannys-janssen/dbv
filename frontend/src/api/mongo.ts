@@ -94,15 +94,23 @@ export const aggregate = (
     )
     .then((r) => r.data);
 
-export const exportCollection = (db: string, collection: string) => {
+export const exportCollection = async (db: string, collection: string): Promise<void> => {
   const token = localStorage.getItem("access_token");
   const url = `/api/databases/${db}/collections/${collection}/export`;
+  const resp = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: "Export failed" }));
+    throw new Error((err as { error?: string }).error ?? "Export failed");
+  }
+  const blob = await resp.blob();
+  const objectUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = token
-    ? `${url}?token=${encodeURIComponent(token)}`
-    : url;
+  a.href = objectUrl;
   a.download = `${collection}.json`;
   a.click();
+  URL.revokeObjectURL(objectUrl);
 };
 
 export interface SchemaField {
