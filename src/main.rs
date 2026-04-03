@@ -82,7 +82,9 @@ async fn main() -> anyhow::Result<()> {
         )
         .route(
             "/databases/:db/collections/:collection/documents",
-            get(routes::data::list_documents).post(routes::data::create_document),
+            get(routes::data::list_documents)
+                .post(routes::data::create_document)
+                .delete(routes::data::bulk_delete_documents),
         )
         .route(
             "/databases/:db/collections/:collection/documents/:id",

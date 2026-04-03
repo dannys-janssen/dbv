@@ -5,6 +5,7 @@ import {
   getCollections,
   getDocuments,
   deleteDocument,
+  bulkDeleteDocuments,
   exportCollection,
   importCollection,
   aggregate,
@@ -189,6 +190,9 @@ export default function BrowserPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Multi-select
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // Editor modal
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorValue, setEditorValue] = useState("{}");
@@ -321,6 +325,7 @@ export default function BrowserPage() {
         setFilterText("");
         setSortText("");
         setPage(1);
+        setSelectedIds(new Set());
       })
       .catch((e) => setError(`Failed to load collections: ${e.message}`));
   }, [selectedDb]);
@@ -368,6 +373,7 @@ export default function BrowserPage() {
     if (!selectedDb || !selectedCol) return;
     setLoading(true);
     setError("");
+    setSelectedIds(new Set());
     getDocuments(selectedDb, selectedCol, page, limitVal, filterText || undefined, sortText || undefined)
       .then((r) => {
         setDocuments(r.documents);
@@ -1086,6 +1092,59 @@ export default function BrowserPage() {
                   );
                 })()}
 
+                {/* Bulk action bar */}
+                {selectedIds.size > 0 && (
+                  <div style={{
+                    padding: "8px 20px",
+                    background: "#eff6ff",
+                    borderBottom: "1px solid #bfdbfe",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8", flex: 1 }}>
+                      {selectedIds.size} document{selectedIds.size !== 1 ? "s" : ""} selected
+                    </span>
+                    <button
+                      onClick={() => {
+                        const selected = documents.filter((d) => selectedIds.has(getDocId(d)));
+                        const blob = new Blob([JSON.stringify(selected, null, 2)], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${selectedCol}_selection.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      style={{ padding: "5px 14px", background: "#fff", border: "1px solid #bfdbfe", color: "#1d4ed8", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                    >
+                      Export Selected
+                    </button>
+                    {canWrite && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Delete \${selectedIds.size} selected document\${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+                          try {
+                            await bulkDeleteDocuments(selectedDb, selectedCol, [...selectedIds]);
+                            loadDocuments();
+                          } catch (e: unknown) {
+                            alert("Delete failed: " + (e as Error).message);
+                          }
+                        }}
+                        style={{ padding: "5px 14px", background: "#fee2e2", border: "none", color: "#dc2626", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                      >
+                        Delete Selected
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedIds(new Set())}
+                      style={{ padding: "5px 10px", background: "transparent", border: "none", color: "#64748b", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT }}
+                    >
+                      ✕ Clear
+                    </button>
+                  </div>
+                )}
+
                 {/* Document table */}
                 <div style={{ padding: "0 20px 20px" }}>
                   {error && (
@@ -1127,6 +1186,22 @@ export default function BrowserPage() {
                             borderBottom: "2px solid #e2e8f0",
                           }}
                         >
+                          <th style={{ width: "40px", padding: "10px 12px", textAlign: "center" }}>
+                            <input
+                              type="checkbox"
+                              checked={documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)))}
+                              ref={(el) => {
+                                if (el) el.indeterminate = selectedIds.size > 0 && !documents.every((d) => selectedIds.has(getDocId(d)));
+                              }}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedIds(new Set(documents.map((d) => getDocId(d))));
+                                } else {
+                                  setSelectedIds(new Set());
+                                }
+                              }}
+                            />
+                          </th>
                           <th
                             style={{
                               width: "180px",
@@ -1174,7 +1249,7 @@ export default function BrowserPage() {
                         {documents.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={3}
+                              colSpan={4}
                               style={{
                                 textAlign: "center",
                                 padding: "40px 20px",
@@ -1215,17 +1290,28 @@ export default function BrowserPage() {
                         ) : (
                           documents.map((doc) => {
                             const id = getDocId(doc);
+                            const isSelected = selectedIds.has(id);
                             return (
                               <tr
                                 key={id}
-                                style={{ borderBottom: "1px solid #f1f5f9" }}
-                                onMouseEnter={(e) =>
-                                  (e.currentTarget.style.background = "#f8fafc")
-                                }
-                                onMouseLeave={(e) =>
-                                  (e.currentTarget.style.background = "")
-                                }
+                                style={{ borderBottom: "1px solid #f1f5f9", background: isSelected ? "#eff6ff" : undefined }}
+                                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
+                                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = ""; }}
                               >
+                                <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      setSelectedIds((prev) => {
+                                        const next = new Set(prev);
+                                        if (e.target.checked) next.add(id);
+                                        else next.delete(id);
+                                        return next;
+                                      });
+                                    }}
+                                  />
+                                </td>
                                 <td
                                   style={{
                                     padding: "10px 12px",

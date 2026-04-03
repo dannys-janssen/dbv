@@ -214,6 +214,30 @@ pub async fn delete_document(
 }
 
 #[derive(Deserialize)]
+pub struct BulkDeleteBody {
+    pub ids: Vec<String>,
+}
+
+pub async fn bulk_delete_documents(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path((db, collection)): Path<(String, String)>,
+    Json(body): Json<BulkDeleteBody>,
+) -> Result<Json<Value>, AppError> {
+    if body.ids.is_empty() {
+        return Err(AppError::BadRequest("No IDs provided".into()));
+    }
+    let oids: Vec<bson::Bson> = body.ids
+        .iter()
+        .filter_map(|id| bson::oid::ObjectId::parse_str(id).ok())
+        .map(bson::Bson::ObjectId)
+        .collect();
+    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let result = coll.delete_many(doc! { "_id": { "$in": &oids } }, None).await?;
+    Ok(Json(json!({ "deleted": result.deleted_count })))
+}
+
+#[derive(Deserialize)]
 pub struct AggregateBody {
     pub pipeline: Vec<Value>,
 }
