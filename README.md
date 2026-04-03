@@ -130,6 +130,15 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 - Press **Enter** or **Apply** to run; **Clear** resets both Filter and Sort
 - The Documents tab badge shows the total matching count
 
+**Selecting and bulk-acting on documents** *(export available to all roles; delete requires dbv-admin)*
+
+- Use the **checkbox** at the start of each row to select individual documents, or the **header checkbox** to select / deselect all documents on the current page (indeterminate state when partially selected)
+- A **blue action bar** appears above the table showing the selection count and offering:
+  - **Export Selected** — downloads the selected documents as a JSON file (client-side, no extra request)
+  - **Delete Selected** *(dbv-admin only)* — deletes all selected documents after confirmation
+  - **✕ Clear** — deselects all
+- Selection is cleared automatically when changing pages, switching collections, or after a bulk delete
+
 **Editing documents** *(dbv-admin only)*
 
 - **+ New** — opens a JSON editor to create a new document
@@ -183,6 +192,7 @@ View, create, and drop indexes on a collection from the **Indexes** tab:
 | View collection schema | ✅ | ✅ |
 | View indexes | ✅ | ✅ |
 | Export collection to JSON | ✅ | ✅ |
+| Export selected documents to JSON | ✅ | ✅ |
 | Create database | ❌ | ✅ |
 | Drop database | ❌ | ✅ |
 | Create collection | ❌ | ✅ |
@@ -190,6 +200,7 @@ View, create, and drop indexes on a collection from the **Indexes** tab:
 | Create document | ❌ | ✅ |
 | Edit document | ❌ | ✅ |
 | Delete document | ❌ | ✅ |
+| Bulk delete selected documents | ❌ | ✅ |
 | Import JSON into collection | ❌ | ✅ |
 | Create index | ❌ | ✅ |
 | Drop index | ❌ | ✅ |
@@ -347,6 +358,7 @@ All endpoints are under `/api`.
 |---|---|---|---|
 | GET | `/api/databases/:db/collections/:col/documents` | viewer+ | List documents. Query params: `page`, `limit`, `filter` (JSON), `sort` (JSON) |
 | POST | `/api/databases/:db/collections/:col/documents` | admin | Insert a document |
+| DELETE | `/api/databases/:db/collections/:col/documents` | admin | Bulk delete documents. Body: `{ "ids": ["<objectId>", ...] }` |
 | GET | `/api/databases/:db/collections/:col/documents/:id` | viewer+ | Get document by ObjectId |
 | PUT | `/api/databases/:db/collections/:col/documents/:id` | admin | Replace document by ObjectId |
 | DELETE | `/api/databases/:db/collections/:col/documents/:id` | admin | Delete document by ObjectId |
