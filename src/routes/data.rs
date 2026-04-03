@@ -13,6 +13,23 @@ use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppS
 
 const SYSTEM_DATABASES: &[&str] = &["admin", "config", "local"];
 
+/// Convert a `serde_json::Value` to a BSON `Document` while correctly
+/// interpreting MongoDB Extended JSON types such as `{"$date": "..."}`,
+/// `{"$oid": "..."}`, `{"$binary": {...}}`, etc.
+/// Unlike `bson::to_document`, this goes through `bson::Bson::try_from` which
+/// calls the Extended JSON deserialiser on every JSON object.
+fn json_to_doc(val: Value) -> Result<Document, AppError> {
+    use std::convert::TryFrom;
+    match bson::Bson::try_from(val)
+        .map_err(|e| AppError::BadRequest(format!("Extended JSON error: {e}")))?
+    {
+        bson::Bson::Document(d) => Ok(d),
+        _ => Err(AppError::BadRequest(
+            "Request body must be a JSON object".to_string(),
+        )),
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct PaginationParams {
     #[serde(default = "default_page")]
@@ -110,7 +127,7 @@ pub async fn list_documents(
     let filter: Document = match &params.filter {
         Some(f) => serde_json::from_str(f)
             .ok()
-            .and_then(|v: Value| bson::to_document(&v).ok())
+            .and_then(|v: Value| json_to_doc(v).ok())
             .unwrap_or_default(),
         None => doc! {},
     };
@@ -119,7 +136,7 @@ pub async fn list_documents(
         .sort
         .as_deref()
         .and_then(|s| serde_json::from_str(s).ok())
-        .and_then(|v: Value| bson::to_document(&v).ok());
+        .and_then(|v: Value| json_to_doc(v).ok());
 
     let skip = (params.page.saturating_sub(1)) * (params.limit as u64);
 
@@ -169,7 +186,7 @@ pub async fn create_document(
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
-    let document = bson::to_document(&body)?;
+    let document = json_to_doc(body)?;
     let result = coll.insert_one(document, None).await?;
     let inserted_id = serde_json::to_value(result.inserted_id)?;
     Ok(Json(json!({ "inserted_id": inserted_id })))
@@ -185,7 +202,7 @@ pub async fn update_document(
     let oid = bson::oid::ObjectId::parse_str(&id)
         .map_err(|_| AppError::BadRequest(format!("Invalid ObjectId: {id}")))?;
 
-    let replacement = bson::to_document(&body)?;
+    let replacement = json_to_doc(body)?;
     let result = coll
         .replace_one(doc! { "_id": oid }, replacement, None)
         .await?;
@@ -252,7 +269,8 @@ pub async fn aggregate(
     let pipeline: Vec<Document> = body
         .pipeline
         .iter()
-        .map(|s| bson::to_document(s).map_err(AppError::BsonSer))
+        .cloned()
+        .map(json_to_doc)
         .collect::<Result<_, _>>()?;
 
     let mut cursor = coll.aggregate(pipeline, None).await?;
@@ -291,7 +309,7 @@ pub async fn create_index(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<CreateIndexBody>,
 ) -> Result<(StatusCode, Json<Value>), AppError> {
-    let keys = bson::to_document(&body.keys)
+    let keys = json_to_doc(body.keys)
         .map_err(|_| AppError::BadRequest("Invalid keys document".into()))?;
     if keys.is_empty() {
         return Err(AppError::BadRequest("Index keys cannot be empty".into()));

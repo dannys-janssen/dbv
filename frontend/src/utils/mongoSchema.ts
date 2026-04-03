@@ -1,26 +1,122 @@
 import type { CollectionSchema } from "../api/mongo";
 
-// Map BSON types to JSON Schema types
-function bsonToJsonType(types: string[]): object {
-  const map: Record<string, string> = {
-    String: "string",
-    Int32: "number",
-    Int64: "number",
-    Double: "number",
-    Decimal128: "number",
-    Boolean: "boolean",
-    Array: "array",
-    Document: "object",
-    Object: "object",
-    ObjectId: "string",
-    Date: "string",
-    Null: "null",
-  };
-  const jsonTypes = [...new Set(types.flatMap((t) => (map[t] ? [map[t]] : [])))];
-  if (jsonTypes.length === 0) return {};
-  if (jsonTypes.length === 1) return { type: jsonTypes[0] };
-  return { type: jsonTypes };
+// ── Extended JSON type schemas ────────────────────────────────────────────────
+
+/** JSON Schema for a BSON Date expressed as MongoDB Extended JSON. */
+const DATE_SCHEMA = {
+  oneOf: [
+    {
+      type: "object",
+      description: 'BSON Date — {"$date": "2024-01-01T00:00:00.000Z"}',
+      properties: { $date: { type: "string", description: "ISO 8601 datetime string" } },
+      required: ["$date"],
+      additionalProperties: false,
+    },
+    {
+      type: "object",
+      description: 'BSON Date (canonical) — {"$date": {"$numberLong": "…"}}',
+      properties: {
+        $date: {
+          type: "object",
+          properties: { $numberLong: { type: "string", description: "Milliseconds since epoch" } },
+          required: ["$numberLong"],
+        },
+      },
+      required: ["$date"],
+      additionalProperties: false,
+    },
+  ],
+};
+
+/** JSON Schema for a BSON ObjectId expressed as MongoDB Extended JSON. */
+const OBJECT_ID_SCHEMA = {
+  type: "object",
+  description: 'BSON ObjectId — {"$oid": "507f1f77bcf86cd799439011"}',
+  properties: {
+    $oid: { type: "string", pattern: "^[0-9a-fA-F]{24}$", description: "24 hex characters" },
+  },
+  required: ["$oid"],
+  additionalProperties: false,
+};
+
+/** JSON Schema for a BSON Binary (UUID subtype 04) expressed as Extended JSON. */
+const UUID_SCHEMA = {
+  type: "object",
+  description: 'BSON UUID — {"$binary": {"base64": "…", "subType": "04"}}',
+  properties: {
+    $binary: {
+      type: "object",
+      properties: {
+        base64: { type: "string", description: "Base64-encoded bytes" },
+        subType: { type: "string", enum: ["04", "03", "00", "05"], description: "BSON binary subtype" },
+      },
+      required: ["base64", "subType"],
+    },
+  },
+  required: ["$binary"],
+  additionalProperties: false,
+};
+
+/** JSON Schema for a BSON Int64 / NumberLong expressed as Extended JSON. */
+const LONG_SCHEMA = {
+  oneOf: [
+    { type: "number", description: "64-bit integer (safe range)" },
+    {
+      type: "object",
+      description: 'BSON NumberLong — {"$numberLong": "123456789012345"}',
+      properties: { $numberLong: { type: "string", description: "64-bit integer as string" } },
+      required: ["$numberLong"],
+      additionalProperties: false,
+    },
+  ],
+};
+
+/** JSON Schema for a BSON Decimal128 expressed as Extended JSON. */
+const DECIMAL_SCHEMA = {
+  oneOf: [
+    { type: "number" },
+    {
+      type: "object",
+      description: 'BSON Decimal128 — {"$numberDecimal": "3.14159"}',
+      properties: { $numberDecimal: { type: "string" } },
+      required: ["$numberDecimal"],
+      additionalProperties: false,
+    },
+  ],
+};
+
+// ── Type mapping ──────────────────────────────────────────────────────────────
+
+/** Map BSON type names to JSON Schema fragments (including Extended JSON shapes). */
+function bsonTypeToSchema(type: string): object {
+  switch (type) {
+    case "Date":       return DATE_SCHEMA;
+    case "ObjectId":   return OBJECT_ID_SCHEMA;
+    case "UUID":       return UUID_SCHEMA;
+    case "BinData":    return UUID_SCHEMA;
+    case "Int64":      return LONG_SCHEMA;
+    case "Decimal128": return DECIMAL_SCHEMA;
+    case "String":     return { type: "string" };
+    case "Int32":      return { type: "integer" };
+    case "Double":     return { type: "number" };
+    case "Boolean":    return { type: "boolean" };
+    case "Array":      return { type: "array" };
+    case "Document":
+    case "Object":     return { type: "object" };
+    case "Null":       return { type: "null" };
+    default:           return {};
+  }
 }
+
+/** Combine multiple BSON types into a single JSON Schema. */
+function bsonTypesToSchema(types: string[]): object {
+  const schemas = types.map(bsonTypeToSchema).filter((s) => Object.keys(s).length > 0);
+  if (schemas.length === 0) return {};
+  if (schemas.length === 1) return schemas[0];
+  return { oneOf: schemas };
+}
+
+// ── Schema builders ───────────────────────────────────────────────────────────
 
 // Build a JSON Schema for the document create/edit editor
 export function buildDocumentSchema(schema: CollectionSchema): object {
@@ -28,8 +124,9 @@ export function buildDocumentSchema(schema: CollectionSchema): object {
   for (const field of schema.fields) {
     if (field.path.includes(".")) continue; // skip nested (Monaco resolves by dotted path)
     const pct = Math.round(field.coverage * 100);
+    const typeSchema = bsonTypesToSchema(field.types);
     properties[field.path] = {
-      ...bsonToJsonType(field.types),
+      ...typeSchema,
       description: `${field.types.join(" | ")} · ${pct}% coverage${field.nullable ? " · nullable" : ""}`,
     };
   }
@@ -62,9 +159,10 @@ export function buildFilterSchema(schema: CollectionSchema): object {
   const properties: Record<string, object> = {};
   for (const field of schema.fields) {
     if (field.path.includes(".")) continue;
+    const typeSchema = bsonTypesToSchema(field.types);
     properties[field.path] = {
       oneOf: [
-        { ...bsonToJsonType(field.types), description: `Direct match on ${field.path}` },
+        { ...typeSchema, description: `Direct match on ${field.path}` },
         { type: "object", properties: QUERY_OPS, description: "Query operators" },
       ],
     };
