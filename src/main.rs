@@ -62,10 +62,21 @@ async fn main() -> anyhow::Result<()> {
 
     let api = Router::new()
         .route("/health", get(routes::health::health))
-        .route("/databases", get(routes::data::list_databases))
+        .route(
+            "/databases",
+            get(routes::data::list_databases),
+        )
+        .route(
+            "/databases/{db}",
+            post(routes::data::create_database).delete(routes::data::drop_database),
+        )
         .route(
             "/databases/{db}/collections",
-            get(routes::data::list_collections),
+            get(routes::data::list_collections).post(routes::data::create_collection),
+        )
+        .route(
+            "/databases/{db}/collections/{collection}",
+            delete(routes::data::drop_collection),
         )
         .route(
             "/databases/{db}/collections/{collection}/documents",

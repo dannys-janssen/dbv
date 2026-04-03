@@ -19,6 +19,18 @@ export interface AggregateResult {
   results: Record<string, unknown>[];
 }
 
+export const createDatabase = (db: string, collection: string) =>
+  api.post(`/databases/${db}`, { collection }).then((r) => r.data);
+
+export const dropDatabase = (db: string) =>
+  api.delete(`/databases/${db}`).then((r) => r.data);
+
+export const createCollection = (db: string, name: string) =>
+  api.post(`/databases/${db}/collections`, { name }).then((r) => r.data);
+
+export const dropCollection = (db: string, collection: string) =>
+  api.delete(`/databases/${db}/collections/${collection}`).then((r) => r.data);
+
 export const getDatabases = () =>
   api.get<DatabaseList>("/databases").then((r) => r.data);
 

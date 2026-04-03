@@ -11,6 +11,10 @@ import {
   createDocument,
   updateDocument,
   getSchema,
+  createDatabase,
+  dropDatabase,
+  createCollection,
+  dropCollection,
   type CollectionSchema,
 } from "../api/mongo";
 import { useAuth } from "../context/AuthContext";
@@ -49,11 +53,71 @@ export default function BrowserPage() {
   const [schema, setSchema] = useState<CollectionSchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
 
-  useEffect(() => {
+  // Create/Drop dialogs
+  const [newDbName, setNewDbName] = useState("");
+  const [newDbCollection, setNewDbCollection] = useState("");
+  const [newDbOpen, setNewDbOpen] = useState(false);
+  const [newColName, setNewColName] = useState("");
+  const [newColOpen, setNewColOpen] = useState(false);
+
+  const reloadDatabases = useCallback(() => {
     getDatabases()
       .then((d) => setDatabases(d.databases))
       .catch(() => { logout(); navigate("/login"); });
-  }, []);
+  }, [logout, navigate]);
+
+  const reloadCollections = useCallback(() => {
+    if (!selectedDb) return;
+    getCollections(selectedDb)
+      .then((c) => setCollections(c.collections))
+      .catch((e) => setError(`Failed to load collections: ${e.message}`));
+  }, [selectedDb]);
+
+  const handleCreateDb = async () => {
+    if (!newDbName.trim() || !newDbCollection.trim()) return;
+    try {
+      await createDatabase(newDbName.trim(), newDbCollection.trim());
+      setNewDbOpen(false);
+      setNewDbName("");
+      setNewDbCollection("");
+      reloadDatabases();
+      setSelectedDb(newDbName.trim());
+    } catch (e: unknown) { alert("Error: " + (e as Error).message); }
+  };
+
+  const handleDropDb = async () => {
+    if (!selectedDb) return;
+    if (!confirm(`Drop entire database "${selectedDb}"? This cannot be undone.`)) return;
+    try {
+      await dropDatabase(selectedDb);
+      setSelectedDb("");
+      setCollections([]);
+      reloadDatabases();
+    } catch (e: unknown) { alert("Error: " + (e as Error).message); }
+  };
+
+  const handleCreateCollection = async () => {
+    if (!newColName.trim()) return;
+    try {
+      await createCollection(selectedDb, newColName.trim());
+      setNewColOpen(false);
+      setNewColName("");
+      reloadCollections();
+    } catch (e: unknown) { alert("Error: " + (e as Error).message); }
+  };
+
+  const handleDropCollection = async (col: string) => {
+    if (!confirm(`Drop collection "${col}"? All documents will be deleted.`)) return;
+    try {
+      await dropCollection(selectedDb, col);
+      if (col === selectedCol) { setSelectedCol(""); setDocuments([]); }
+      reloadCollections();
+    } catch (e: unknown) { alert("Error: " + (e as Error).message); }
+  };
+
+  useEffect(() => {
+    reloadDatabases();
+  }, [reloadDatabases]);
 
   useEffect(() => {
     if (!selectedDb) return;
@@ -163,20 +227,35 @@ export default function BrowserPage() {
           </button>
         </div>
         <div style={styles.section}>
-          <label style={styles.label}>Database</label>
-          <select style={styles.select} value={selectedDb} onChange={(e) => setSelectedDb(e.target.value)}>
-            <option value="">— select —</option>
-            {databases.map((db) => <option key={db}>{db}</option>)}
-          </select>
+          <div style={styles.sectionHeader}>
+            <label style={styles.label}>Database</label>
+            {canWrite && (
+              <button style={styles.iconBtn} title="Create database" onClick={() => setNewDbOpen(true)}>＋</button>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: "0.25rem" }}>
+            <select style={{ ...styles.select, flex: 1 }} value={selectedDb} onChange={(e) => setSelectedDb(e.target.value)}>
+              <option value="">— select —</option>
+              {databases.map((db) => <option key={db}>{db}</option>)}
+            </select>
+            {canWrite && selectedDb && !["admin","config","local"].includes(selectedDb) && (
+              <button style={styles.dangerIconBtn} title={`Drop database "${selectedDb}"`} onClick={handleDropDb}>🗑</button>
+            )}
+          </div>
         </div>
         {selectedDb && (
           <div style={styles.section}>
-            <label style={styles.label}>Collection</label>
+            <div style={styles.sectionHeader}>
+              <label style={styles.label}>Collection</label>
+              {canWrite && (
+                <button style={styles.iconBtn} title="Create collection" onClick={() => setNewColOpen(true)}>＋</button>
+              )}
+            </div>
             {collections.length === 0 ? (
               <p style={{ fontSize: "0.8rem", color: "#9ca3af", margin: 0 }}>
                 No collections found.{"\n"}
                 {canWrite
-                  ? 'Use "+ New" after selecting a collection name to create one, or import data.'
+                  ? 'Click ＋ to create one, or import data.'
                   : "Ask an admin to create collections."}
               </p>
             ) : (
@@ -184,10 +263,17 @@ export default function BrowserPage() {
                 {collections.map((c) => (
                   <li
                     key={c}
-                    style={{ ...styles.listItem, background: c === selectedCol ? "#dbeafe" : undefined }}
+                    style={{ ...styles.listItem, background: c === selectedCol ? "#dbeafe" : undefined, display: "flex", justifyContent: "space-between", alignItems: "center" }}
                     onClick={() => { setSelectedCol(c); setPage(1); }}
                   >
-                    {c}
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c}</span>
+                    {canWrite && (
+                      <button
+                        style={styles.inlineDeleteBtn}
+                        title={`Drop collection "${c}"`}
+                        onClick={(e) => { e.stopPropagation(); handleDropCollection(c); }}
+                      >✕</button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -319,6 +405,46 @@ export default function BrowserPage() {
           </div>
         </div>
       )}
+      {/* Create Database modal */}
+      {newDbOpen && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <h3>Create Database</h3>
+            <p style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+              MongoDB creates a database when its first collection is created.
+            </p>
+            <label style={styles.label}>Database name</label>
+            <input style={{ ...styles.input, width: "100%", marginBottom: "0.75rem", boxSizing: "border-box" }}
+              placeholder="e.g. myapp" value={newDbName} onChange={(e) => setNewDbName(e.target.value)} />
+            <label style={styles.label}>Initial collection name</label>
+            <input style={{ ...styles.input, width: "100%", boxSizing: "border-box" }}
+              placeholder="e.g. users" value={newDbCollection} onChange={(e) => setNewDbCollection(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleCreateDb()} />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", justifyContent: "flex-end" }}>
+              <button style={styles.btn} onClick={() => setNewDbOpen(false)}>Cancel</button>
+              <button style={{ ...styles.btn, background: "#1a73e8", color: "#fff" }} onClick={handleCreateDb}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Collection modal */}
+      {newColOpen && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <h3>Create Collection in <em>{selectedDb}</em></h3>
+            <label style={styles.label}>Collection name</label>
+            <input style={{ ...styles.input, width: "100%", boxSizing: "border-box" }}
+              placeholder="e.g. products" value={newColName} onChange={(e) => setNewColName(e.target.value)}
+              autoFocus
+              onKeyDown={(e) => e.key === "Enter" && handleCreateCollection()} />
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", justifyContent: "flex-end" }}>
+              <button style={styles.btn} onClick={() => setNewColOpen(false)}>Cancel</button>
+              <button style={{ ...styles.btn, background: "#1a73e8", color: "#fff" }} onClick={handleCreateCollection}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -339,10 +465,14 @@ const styles: Record<string, React.CSSProperties> = {
   sidebarHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", borderBottom: "1px solid #e5e7eb" },
   logoutBtn: { background: "none", border: "none", cursor: "pointer", color: "#888", fontSize: "0.8rem" },
   section: { padding: "1rem" },
-  label: { display: "block", fontSize: "0.75rem", color: "#666", marginBottom: "0.4rem", textTransform: "uppercase" },
+  sectionHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" },
+  label: { display: "block", fontSize: "0.75rem", color: "#666", textTransform: "uppercase" },
   select: { width: "100%", padding: "0.4rem", borderRadius: "4px", border: "1px solid #ddd" },
   list: { listStyle: "none", padding: 0, margin: 0 },
   listItem: { padding: "0.4rem 0.5rem", borderRadius: "4px", cursor: "pointer" },
+  iconBtn: { background: "none", border: "none", cursor: "pointer", color: "#1a73e8", fontSize: "1rem", lineHeight: 1, padding: "0 2px" },
+  dangerIconBtn: { background: "none", border: "1px solid #fca5a5", borderRadius: "4px", cursor: "pointer", color: "#ef4444", fontSize: "0.85rem", padding: "0.2rem 0.4rem" },
+  inlineDeleteBtn: { background: "none", border: "none", cursor: "pointer", color: "#9ca3af", fontSize: "0.7rem", padding: "0 2px", flexShrink: 0 },
   main: { flex: 1, padding: "1.5rem", overflowY: "auto" },
   toolbar: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem", flexWrap: "wrap", gap: "0.75rem" },
   roleTag: { fontSize: "0.75rem", color: "#6b7280", marginTop: "0.2rem", display: "block" },
@@ -353,5 +483,5 @@ const styles: Record<string, React.CSSProperties> = {
   docCard: { border: "1px solid #e5e7eb", borderRadius: "6px", padding: "0.75rem", background: "#fafafa" },
   docPre: { fontSize: "0.75rem", overflow: "auto", maxHeight: "200px", margin: 0, whiteSpace: "pre-wrap" },
   overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 },
-  modal: { background: "#fff", borderRadius: "8px", padding: "1.5rem", width: "600px", boxShadow: "0 8px 30px rgba(0,0,0,0.2)" },
+  modal: { background: "#fff", borderRadius: "8px", padding: "1.5rem", width: "600px", maxWidth: "90vw", boxShadow: "0 8px 30px rgba(0,0,0,0.2)" },
 };

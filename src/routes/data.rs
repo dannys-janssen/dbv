@@ -1,5 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
+    http::StatusCode,
     Json,
 };
 use bson::{doc, Document};
@@ -9,6 +10,8 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppState};
+
+const SYSTEM_DATABASES: &[&str] = &["admin", "config", "local"];
 
 #[derive(Debug, Deserialize)]
 pub struct PaginationParams {
@@ -35,6 +38,36 @@ pub async fn list_databases(
     Ok(Json(json!({ "databases": dbs })))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct CreateDatabaseBody {
+    pub collection: String,
+}
+
+pub async fn create_database(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+    Json(body): Json<CreateDatabaseBody>,
+) -> Result<(StatusCode, Json<Value>), AppError> {
+    if SYSTEM_DATABASES.contains(&db.as_str()) {
+        return Err(AppError::BadRequest(format!("Cannot create system database '{db}'")));
+    }
+    state.db.create_collection(&db, &body.collection).await?;
+    Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.collection }))))
+}
+
+pub async fn drop_database(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+) -> Result<Json<Value>, AppError> {
+    if SYSTEM_DATABASES.contains(&db.as_str()) {
+        return Err(AppError::BadRequest(format!("Cannot drop system database '{db}'")));
+    }
+    state.db.drop_database(&db).await?;
+    Ok(Json(json!({ "dropped": db })))
+}
+
 pub async fn list_collections(
     _claims: ReadAccess,
     State(state): State<AppState>,
@@ -42,6 +75,30 @@ pub async fn list_collections(
 ) -> Result<Json<Value>, AppError> {
     let collections = state.db.list_collections(&db).await?;
     Ok(Json(json!({ "collections": collections })))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateCollectionBody {
+    pub name: String,
+}
+
+pub async fn create_collection(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+    Json(body): Json<CreateCollectionBody>,
+) -> Result<(StatusCode, Json<Value>), AppError> {
+    state.db.create_collection(&db, &body.name).await?;
+    Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.name }))))
+}
+
+pub async fn drop_collection(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path((db, collection)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    state.db.drop_collection(&db, &collection).await?;
+    Ok(Json(json!({ "dropped": collection })))
 }
 
 pub async fn list_documents(

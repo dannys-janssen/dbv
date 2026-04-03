@@ -46,4 +46,19 @@ impl DbClient {
         let names = self.client.database(db).list_collection_names(None).await?;
         Ok(names)
     }
+
+    pub async fn create_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
+        self.client.database(db).create_collection(collection, None).await?;
+        Ok(())
+    }
+
+    pub async fn drop_database(&self, db: &str) -> Result<(), AppError> {
+        self.client.database(db).drop(None).await?;
+        Ok(())
+    }
+
+    pub async fn drop_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
+        self.client.database(db).collection::<bson::Document>(collection).drop(None).await?;
+        Ok(())
+    }
 }
