@@ -28,6 +28,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import Editor from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
+import DocTreeView from "../components/DocTreeView";
 
 type View = "documents" | "aggregate" | "schema" | "indexes" | "stats";
 
@@ -192,6 +193,8 @@ export default function BrowserPage() {
 
   // Multi-select
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // Document layout: table or tree
+  const [docLayout, setDocLayout] = useState<"table" | "tree">("table");
 
   // Editor modal
   const [editorOpen, setEditorOpen] = useState(false);
@@ -1070,6 +1073,23 @@ export default function BrowserPage() {
                           </button>
                         )}
                         <div style={{ flex: 1 }} />
+                        {/* Layout toggle */}
+                        <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                          <button
+                            title="Table view"
+                            onClick={() => setDocLayout("table")}
+                            style={{ background: docLayout === "table" ? "#2563eb" : "transparent", color: docLayout === "table" ? "#fff" : "#64748b", border: "none", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          >
+                            ☰
+                          </button>
+                          <button
+                            title="Tree view"
+                            onClick={() => setDocLayout("tree")}
+                            style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          >
+                            🌲
+                          </button>
+                        </div>
                         <button
                           onClick={() => exportCollection(selectedDb, selectedCol).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
                           style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
@@ -1170,6 +1190,29 @@ export default function BrowserPage() {
                     >
                       Loading…
                     </p>
+                  ) : docLayout === "tree" ? (
+                    <DocTreeView
+                      documents={documents}
+                      selectedIds={selectedIds}
+                      onSelectOne={(id, checked) =>
+                        setSelectedIds((prev) => {
+                          const next = new Set(prev);
+                          if (checked) next.add(id);
+                          else next.delete(id);
+                          return next;
+                        })
+                      }
+                      onSelectAll={(checked) => {
+                        if (checked) setSelectedIds(new Set(documents.map((d) => getDocId(d))));
+                        else setSelectedIds(new Set());
+                      }}
+                      canWrite={canWrite}
+                      onEdit={openEdit}
+                      onDelete={(id) => void handleDelete(id)}
+                      getDocId={getDocId}
+                      loading={false}
+                      filterText={filterText}
+                    />
                   ) : (
                     <table
                       style={{
