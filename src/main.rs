@@ -1,11 +1,14 @@
 use axum::{
+    http::{StatusCode, Uri},
+    response::{Html, IntoResponse, Response},
     routing::{delete, get, post, put},
     Router,
 };
 use std::net::SocketAddr;
+use tokio::fs;
 use tower_http::{
     cors::{Any, CorsLayer},
-    services::{ServeDir, ServeFile},
+    services::ServeDir,
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -95,11 +98,21 @@ async fn main() -> anyhow::Result<()> {
     let index_html = format!("{}/index.html", frontend_dist);
     let app = Router::new()
         .nest("/api", api)
-        .fallback_service(
-            ServeDir::new(&frontend_dist)
-                .append_index_html_on_directories(true)
-                .fallback(ServeFile::new(index_html)),
-        )
+        // Serve static assets (JS, CSS, images, etc.) from the dist folder.
+        .nest_service("/assets", ServeDir::new(format!("{}/assets", frontend_dist)))
+        // Catch-all: API paths that didn't match get 404; everything else gets index.html.
+        .fallback(move |uri: Uri| {
+            let index_html = index_html.clone();
+            async move {
+                if uri.path().starts_with("/api") {
+                    return (StatusCode::NOT_FOUND, "Not found").into_response();
+                }
+                match fs::read_to_string(&index_html).await {
+                    Ok(html) => Html(html).into_response(),
+                    Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "index.html not found").into_response(),
+                }
+            }
+        })
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);
