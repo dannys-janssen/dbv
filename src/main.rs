@@ -62,6 +62,8 @@ async fn main() -> anyhow::Result<()> {
 
     let api = Router::new()
         .route("/health", get(routes::health::health))
+        .route("/auth/login", post(routes::auth_proxy::login))
+        .route("/auth/refresh", post(routes::auth_proxy::refresh))
         .route(
             "/databases",
             get(routes::data::list_databases),
