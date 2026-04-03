@@ -18,6 +18,8 @@ import {
   listIndexes,
   createIndex,
   dropIndex,
+  getDatabaseStats,
+  getCollectionStats,
   type CollectionSchema,
   type IndexInfo,
   type IndexKey,
@@ -26,9 +28,24 @@ import { useAuth } from "../context/AuthContext";
 import Editor from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 
-type View = "documents" | "aggregate" | "schema" | "indexes";
+type View = "documents" | "aggregate" | "schema" | "indexes" | "stats";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(2)} MB`;
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
+}
+
+function numVal(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (v && typeof v === "object" && "$numberInt" in v) return Number((v as Record<string, unknown>)["$numberInt"]);
+  if (v && typeof v === "object" && "$numberLong" in v) return Number((v as Record<string, unknown>)["$numberLong"]);
+  if (v && typeof v === "object" && "$numberDouble" in v) return Number((v as Record<string, unknown>)["$numberDouble"]);
+  return 0;
+}
 
 function previewDoc(doc: Record<string, unknown>): string {
   const entries = Object.entries(doc)
@@ -196,6 +213,15 @@ export default function BrowserPage() {
   const [indexBackground, setIndexBackground] = useState(true);
   const [indexTtl, setIndexTtl] = useState("");
 
+  // Collection stats tab
+  const [colStats, setColStats] = useState<Record<string, unknown> | null>(null);
+  const [colStatsLoading, setColStatsLoading] = useState(false);
+
+  // Database stats modal
+  const [dbStatsOpen, setDbStatsOpen] = useState(false);
+  const [dbStats, setDbStats] = useState<Record<string, unknown> | null>(null);
+  const [dbStatsLoading, setDbStatsLoading] = useState(false);
+
   // Create/Drop dialogs
   const [newDbName, setNewDbName] = useState("");
   const [newDbCollection, setNewDbCollection] = useState("");
@@ -325,6 +351,19 @@ export default function BrowserPage() {
     if (view === "indexes") loadIndexes();
   }, [view, loadIndexes]);
 
+  const loadColStats = useCallback(() => {
+    if (!selectedDb || !selectedCol) return;
+    setColStatsLoading(true);
+    getCollectionStats(selectedDb, selectedCol)
+      .then(setColStats)
+      .catch(() => setColStats(null))
+      .finally(() => setColStatsLoading(false));
+  }, [selectedDb, selectedCol]);
+
+  useEffect(() => {
+    if (view === "stats") loadColStats();
+  }, [view, loadColStats]);
+
   const loadDocuments = useCallback(() => {
     if (!selectedDb || !selectedCol) return;
     setLoading(true);
@@ -405,6 +444,7 @@ export default function BrowserPage() {
         if (newDbOpen)    { setNewDbOpen(false);     return; }
         if (newColOpen)   { setNewColOpen(false);    return; }
         if (newIndexOpen) { setNewIndexOpen(false);  return; }
+        if (dbStatsOpen)  { setDbStatsOpen(false);   return; }
       }
       // Ctrl+S / Cmd+S — save document editor
       if ((e.ctrlKey || e.metaKey) && e.key === "s" && editorOpen) {
@@ -419,7 +459,7 @@ export default function BrowserPage() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [editorOpen, newDbOpen, newColOpen, newIndexOpen, view, handleSave, runAggregate]);
+  }, [editorOpen, newDbOpen, newColOpen, newIndexOpen, dbStatsOpen, view, handleSave, runAggregate]);
 
   const getDocId = (doc: Record<string, unknown>): string => {
     const id = doc["_id"] as Record<string, unknown> | string | undefined;
@@ -588,6 +628,32 @@ export default function BrowserPage() {
                     >
                       {db}
                     </span>
+                    {isSelected && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDbStats(null);
+                          setDbStatsOpen(true);
+                          setDbStatsLoading(true);
+                          getDatabaseStats(db)
+                            .then(setDbStats)
+                            .catch(() => setDbStats(null))
+                            .finally(() => setDbStatsLoading(false));
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#94a3b8",
+                          fontSize: "14px",
+                          padding: "0 2px",
+                          lineHeight: 1,
+                        }}
+                        title={`Database stats for "${db}"`}
+                      >
+                        ℹ
+                      </button>
+                    )}
                     {canWrite && isSelected && (
                       <button
                         onClick={(e) => {
@@ -861,7 +927,7 @@ export default function BrowserPage() {
                 flexDirection: "row",
               }}
             >
-              {(["documents", "aggregate", "schema", "indexes"] as View[]).map((tab) => {
+              {(["documents", "aggregate", "schema", "indexes", "stats"] as View[]).map((tab) => {
                 const isActive = view === tab;
                 const label =
                   tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -1470,6 +1536,71 @@ export default function BrowserPage() {
                 )}
               </div>
             )}
+
+            {/* ── Stats tab ── */}
+            {view === "stats" && (
+              <div style={{ padding: "20px", fontFamily: FONT }}>
+                {colStatsLoading ? (
+                  <p style={{ color: "#64748b", fontSize: "13px" }}>Loading stats…</p>
+                ) : !colStats ? (
+                  <p style={{ color: "#94a3b8", fontSize: "13px" }}>No stats available.</p>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                      <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>Collection statistics</span>
+                      <button onClick={loadColStats} style={{ padding: "5px 12px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", fontSize: "12px", color: "#374151", fontFamily: FONT }}>↻ Refresh</button>
+                    </div>
+                    {(() => {
+                      const s = colStats;
+                      const cards: { label: string; value: string; sub?: string }[] = [
+                        { label: "Documents",        value: numVal(s["count"]).toLocaleString() },
+                        { label: "Avg document size", value: formatBytes(numVal(s["avgObjSize"])) },
+                        { label: "Data size",         value: formatBytes(numVal(s["size"])) },
+                        { label: "Storage size",      value: formatBytes(numVal(s["storageSize"])) },
+                        { label: "Indexes",           value: numVal(s["nindexes"]).toLocaleString() },
+                        { label: "Index size",        value: formatBytes(numVal(s["totalIndexSize"])) },
+                      ];
+                      return (
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px", marginBottom: "24px" }}>
+                          {cards.map((c) => (
+                            <div key={c.label} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "14px 16px" }}>
+                              <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{c.label}</div>
+                              <div style={{ fontSize: "22px", fontWeight: 700, color: "#1e293b" }}>{c.value}</div>
+                              {c.sub && <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>{c.sub}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Index sizes breakdown */}
+                    {colStats["indexSizes"] && typeof colStats["indexSizes"] === "object" && (
+                      <>
+                        <h4 style={{ fontSize: "13px", fontWeight: 600, color: "#374151", margin: "0 0 10px 0" }}>Index sizes</h4>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                          <thead>
+                            <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                              <th style={{ padding: "6px 12px", textAlign: "left", color: "#475569", fontWeight: 600 }}>Index</th>
+                              <th style={{ padding: "6px 12px", textAlign: "right", color: "#475569", fontWeight: 600 }}>Size</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(colStats["indexSizes"] as Record<string, unknown>).map(([name, size]) => (
+                              <tr key={name} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                                <td style={{ padding: "6px 12px", color: "#1e293b" }}>
+                                  <code style={{ background: "#f1f5f9", color: "#334155", padding: "1px 5px", borderRadius: "3px", fontSize: "12px" }}>{name}</code>
+                                </td>
+                                <td style={{ padding: "6px 12px", textAlign: "right", color: "#64748b" }}>{formatBytes(numVal(size))}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
@@ -1692,6 +1823,44 @@ export default function BrowserPage() {
               >
                 Create Index
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Database stats modal ── */}
+      {dbStatsOpen && (
+        <div style={overlayStyle}>
+          <div style={{ ...modalBaseStyle, width: "520px" }}>
+            <h3 style={modalTitleStyle}>Database: {selectedDb}</h3>
+            <p style={modalSubtitleStyle}>Storage and document statistics</p>
+
+            {dbStatsLoading ? (
+              <p style={{ color: "#64748b", fontSize: "13px", margin: "8px 0 20px" }}>Loading…</p>
+            ) : !dbStats ? (
+              <p style={{ color: "#94a3b8", fontSize: "13px", margin: "8px 0 20px" }}>Stats unavailable.</p>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
+                {([
+                  { label: "Collections",   value: numVal(dbStats["collections"]).toLocaleString() },
+                  { label: "Documents",     value: numVal(dbStats["objects"]).toLocaleString() },
+                  { label: "Avg doc size",  value: formatBytes(numVal(dbStats["avgObjSize"])) },
+                  { label: "Data size",     value: formatBytes(numVal(dbStats["dataSize"])) },
+                  { label: "Storage size",  value: formatBytes(numVal(dbStats["storageSize"])) },
+                  { label: "Indexes",       value: numVal(dbStats["indexes"]).toLocaleString() },
+                  { label: "Index size",    value: formatBytes(numVal(dbStats["indexSize"])) },
+                  { label: "Total size",    value: formatBytes(numVal(dbStats["totalSize"])) },
+                ] as { label: string; value: string }[]).map((c) => (
+                  <div key={c.label} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "12px 14px" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>{c.label}</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "#1e293b" }}>{c.value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={modalFooterStyle}>
+              <button onClick={() => setDbStatsOpen(false)} style={primaryBtnStyle}>Close</button>
             </div>
           </div>
         </div>

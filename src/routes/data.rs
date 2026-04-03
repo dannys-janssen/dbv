@@ -289,3 +289,27 @@ pub async fn drop_index(
     state.db.drop_index(&db, &collection, &name).await?;
     Ok(Json(json!({ "dropped": name })))
 }
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+pub async fn database_stats(
+    _claims: ReadAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+) -> Result<Json<Value>, AppError> {
+    let doc = state.db.database(&db)
+        .run_command(bson::doc! { "dbStats": 1, "scale": 1 }, None)
+        .await?;
+    Ok(Json(serde_json::to_value(doc)?))
+}
+
+pub async fn collection_stats(
+    _claims: ReadAccess,
+    State(state): State<AppState>,
+    Path((db, collection)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    let doc = state.db.database(&db)
+        .run_command(bson::doc! { "collStats": &collection, "scale": 1 }, None)
+        .await?;
+    Ok(Json(serde_json::to_value(doc)?))
+}

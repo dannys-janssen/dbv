@@ -184,3 +184,13 @@ export const dropIndex = (db: string, collection: string, name: string) =>
   api
     .delete(`/databases/${db}/collections/${collection}/indexes/${name}`)
     .then((r) => r.data);
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+
+export const getDatabaseStats = (db: string) =>
+  api.get<Record<string, unknown>>(`/databases/${db}/stats`).then((r) => r.data);
+
+export const getCollectionStats = (db: string, collection: string) =>
+  api
+    .get<Record<string, unknown>>(`/databases/${db}/collections/${collection}/stats`)
+    .then((r) => r.data);

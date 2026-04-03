@@ -95,6 +95,14 @@ async fn main() -> anyhow::Result<()> {
             post(routes::data::aggregate),
         )
         .route(
+            "/databases/:db/stats",
+            get(routes::data::database_stats),
+        )
+        .route(
+            "/databases/:db/collections/:collection/stats",
+            get(routes::data::collection_stats),
+        )
+        .route(
             "/databases/:db/collections/:collection/indexes",
             get(routes::data::list_indexes).post(routes::data::create_index),
         )
