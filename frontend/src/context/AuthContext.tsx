@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import api from "../api/client";
@@ -14,9 +15,15 @@ interface JwtPayload {
   exp?: number;
 }
 
+/** Decode a base64url-encoded JWT segment (handles padding and url-safe chars). */
+function base64urlDecode(s: string): string {
+  const padded = s + "=".repeat((4 - (s.length % 4)) % 4);
+  return atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+}
+
 function parsePayload(token: string): JwtPayload {
   try {
-    return JSON.parse(atob(token.split(".")[1])) as JwtPayload;
+    return JSON.parse(base64urlDecode(token.split(".")[1])) as JwtPayload;
   } catch {
     return {};
   }
@@ -26,12 +33,16 @@ function parseRoles(token: string): string[] {
   return parsePayload(token).realm_access?.roles ?? [];
 }
 
-/** Returns milliseconds until the token expires, minus a 60-second buffer. */
+/**
+ * Returns milliseconds until the token should be proactively refreshed
+ * (60 s before expiry). Returns at least 10 s to prevent tight loops from
+ * clock skew or tokens with very short lifetimes.
+ */
 function msUntilRefresh(token: string): number {
   const exp = parsePayload(token).exp;
-  if (!exp) return 0;
+  if (!exp) return 60_000; // Unknown expiry: retry in 1 minute
   const msLeft = exp * 1000 - Date.now();
-  return Math.max(msLeft - 60_000, 0);
+  return Math.max(msLeft - 60_000, 10_000);
 }
 
 interface AuthContextValue {
@@ -93,13 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, delay);
   }, [logout]); // logout is stable (useCallback []), so scheduleRefresh is too
 
-  const login = (accessToken: string, refreshToken: string) => {
+  const login = useCallback((accessToken: string, refreshToken: string) => {
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
     setToken(accessToken);
     setRoles(parseRoles(accessToken));
     scheduleRefresh(accessToken);
-  };
+  }, [scheduleRefresh]);
 
   // On mount, schedule refresh if we already have a stored token.
   useEffect(() => {
@@ -111,10 +122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const canWrite = roles.includes("dbv-admin");
 
+  const contextValue = useMemo(
+    () => ({ token, roles, login, logout, isAuthenticated: !!token, canWrite }),
+    [token, roles, login, logout, canWrite]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{ token, roles, login, logout, isAuthenticated: !!token, canWrite }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
