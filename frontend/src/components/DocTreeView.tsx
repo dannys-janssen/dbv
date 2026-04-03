@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-// ── type colours ────────────────────────────────────────────────────────────
+// ── type colours ─────────────────────────────────────────────────────────────
 function typeColor(value: unknown): string {
   if (value === null) return "#94a3b8";
   if (typeof value === "boolean") return "#7c3aed";
@@ -68,19 +68,20 @@ function typeLabel(value: unknown): string {
   return typeof value;
 }
 
-// ── recursive tree node ──────────────────────────────────────────────────────
+// ── recursive tree node ───────────────────────────────────────────────────────
+// Each TreeNode manages its OWN isExpanded state.
+// defaultExpanded comes from the parent's "expand all / collapse all" action.
+// Changing the `key` on the tree container remounts nodes with the new default.
 interface TreeNodeProps {
   nodeKey: string | number;
   value: unknown;
-  path: string;
   depth: number;
-  expanded: Set<string>;
-  onToggle: (path: string) => void;
+  defaultExpanded: boolean;
 }
 
-function TreeNode({ nodeKey, value, path, depth, expanded, onToggle }: TreeNodeProps) {
+function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const indent = depth * 18;
-  const isExp = expanded.has(path);
 
   if (isPrimitive(value)) {
     return (
@@ -96,14 +97,7 @@ function TreeNode({ nodeKey, value, path, depth, expanded, onToggle }: TreeNodeP
         <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace", minWidth: 0 }}>
           {String(nodeKey)}:
         </span>
-        <span
-          style={{
-            color: typeColor(value),
-            fontSize: "12px",
-            fontFamily: "monospace",
-            wordBreak: "break-all",
-          }}
-        >
+        <span style={{ color: typeColor(value), fontSize: "12px", fontFamily: "monospace", wordBreak: "break-all" }}>
           {formatPrimitive(value)}
         </span>
       </div>
@@ -127,44 +121,27 @@ function TreeNode({ nodeKey, value, path, depth, expanded, onToggle }: TreeNodeP
           cursor: "pointer",
           userSelect: "none",
         }}
-        onClick={() => onToggle(path)}
+        onClick={() => setIsExpanded((e) => !e)}
       >
-        <span
-          style={{
-            width: "16px",
-            textAlign: "center",
-            fontSize: "10px",
-            color: "#94a3b8",
-            flexShrink: 0,
-          }}
-        >
-          {isExp ? "▼" : "▶"}
+        <span style={{ width: "16px", textAlign: "center", fontSize: "10px", color: "#94a3b8", flexShrink: 0 }}>
+          {isExpanded ? "▼" : "▶"}
         </span>
         <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>
           {String(nodeKey)}:
         </span>
-        <span
-          style={{
-            color: typeColor(value),
-            fontSize: "11px",
-            fontFamily: "monospace",
-            opacity: 0.8,
-          }}
-        >
+        <span style={{ color: typeColor(value), fontSize: "11px", fontFamily: "monospace", opacity: 0.8 }}>
           {typeLabel(value)}
         </span>
       </div>
-      {isExp && (
+      {isExpanded && (
         <div style={{ borderLeft: "1px dashed #e2e8f0", marginLeft: indent + 8 }}>
           {children.map(({ k, v }) => (
             <TreeNode
               key={String(k)}
               nodeKey={k}
               value={v}
-              path={`${path}.${String(k)}`}
               depth={depth + 1}
-              expanded={expanded}
-              onToggle={onToggle}
+              defaultExpanded={defaultExpanded}
             />
           ))}
         </div>
@@ -173,10 +150,9 @@ function TreeNode({ nodeKey, value, path, depth, expanded, onToggle }: TreeNodeP
   );
 }
 
-// ── single document card ─────────────────────────────────────────────────────
+// ── single document card ──────────────────────────────────────────────────────
 interface DocCardProps {
   doc: Record<string, unknown>;
-  docId: string;
   isSelected: boolean;
   canWrite: boolean;
   onSelect: (checked: boolean) => void;
@@ -186,35 +162,12 @@ interface DocCardProps {
 
 function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocCardProps) {
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  const onToggle = useCallback((path: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
-  }, []);
-
-  const expandAll = useCallback(() => {
-    const paths = new Set<string>();
-    function collectPaths(value: unknown, path: string) {
-      if (isPrimitive(value)) return;
-      paths.add(path);
-      if (Array.isArray(value)) {
-        (value as unknown[]).forEach((v, i) => collectPaths(v, `${path}.${i}`));
-      } else {
-        Object.entries(value as Record<string, unknown>).forEach(([k, v]) =>
-          collectPaths(v, `${path}.${k}`)
-        );
-      }
-    }
-    Object.entries(doc).forEach(([k, v]) => collectPaths(v, k));
-    setExpanded(paths);
-  }, [doc]);
-
-  const collapseAll = useCallback(() => setExpanded(new Set()), []);
+  // treeKey changes whenever expand-all / collapse-all is clicked, forcing
+  // TreeNode remount so they reinitialise with the correct defaultExpanded.
+  const [treeState, setTreeState] = useState<{ expanded: boolean; key: number }>({
+    expanded: false,
+    key: 0,
+  });
 
   const fields = Object.entries(doc).filter(([k]) => k !== "_id");
   const idValue = doc["_id"];
@@ -243,7 +196,6 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
         }}
         onClick={() => setOpen((o) => !o)}
       >
-        {/* checkbox — stop propagation so clicking it doesn't toggle doc open */}
         <div onClick={(e) => e.stopPropagation()}>
           <input
             type="checkbox"
@@ -253,80 +205,29 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           />
         </div>
 
-        <span
-          style={{
-            fontSize: "10px",
-            color: "#94a3b8",
-            width: "14px",
-            textAlign: "center",
-            flexShrink: 0,
-          }}
-        >
+        <span style={{ fontSize: "10px", color: "#94a3b8", width: "14px", textAlign: "center", flexShrink: 0 }}>
           {open ? "▼" : "▶"}
         </span>
 
-        {/* _id */}
-        <span
-          style={{
-            fontFamily: "monospace",
-            fontSize: "12px",
-            color: "#6366f1",
-            flex: 1,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {formatPrimitive(idValue)}
         </span>
 
-        {/* field count badge */}
-        <span
-          style={{
-            fontSize: "11px",
-            color: "#94a3b8",
-            background: "#f1f5f9",
-            borderRadius: "10px",
-            padding: "1px 7px",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span style={{ fontSize: "11px", color: "#94a3b8", background: "#f1f5f9", borderRadius: "10px", padding: "1px 7px", whiteSpace: "nowrap" }}>
           {fields.length + 1} fields
         </span>
 
-        {/* actions — stop propagation */}
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{ display: "flex", gap: "6px", flexShrink: 0 }}
-        >
+        <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
           <button
             onClick={onEdit}
-            style={{
-              background: "transparent",
-              color: "#374151",
-              border: "1px solid #e2e8f0",
-              padding: "3px 10px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              cursor: "pointer",
-              fontFamily: FONT,
-            }}
+            style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
           >
             Edit
           </button>
           {canWrite && (
             <button
               onClick={onDelete}
-              style={{
-                background: "#fee2e2",
-                color: "#dc2626",
-                border: "none",
-                padding: "3px 10px",
-                borderRadius: "4px",
-                fontSize: "12px",
-                cursor: "pointer",
-                fontFamily: FONT,
-              }}
+              style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
             >
               Delete
             </button>
@@ -337,65 +238,49 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
       {/* Body */}
       {open && (
         <div style={{ padding: "6px 12px 10px" }}>
-          {/* expand / collapse all toolbar */}
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              marginBottom: "6px",
-              paddingBottom: "6px",
-              borderBottom: "1px solid #f1f5f9",
-            }}
-          >
+          {/* Expand / collapse all bar */}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "6px", paddingBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
             <button
-              onClick={expandAll}
+              onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: true, key: s.key + 1 })); }}
               style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
               Expand all
             </button>
             <button
-              onClick={collapseAll}
+              onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: false, key: s.key + 1 })); }}
               style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
               Collapse all
             </button>
           </div>
 
-          {/* _id row always first */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: "6px",
-              padding: "2px 0",
-              paddingLeft: 18,
-            }}
-          >
+          {/* _id row (always first, always shown as primitive) */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", padding: "2px 0", paddingLeft: 18 }}>
             <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>_id:</span>
             <span style={{ color: typeColor(idValue), fontSize: "12px", fontFamily: "monospace" }}>
               {formatPrimitive(idValue)}
             </span>
           </div>
 
-          {/* remaining fields */}
-          {fields.map(([k, v]) => (
-            <TreeNode
-              key={k}
-              nodeKey={k}
-              value={v}
-              path={k}
-              depth={0}
-              expanded={expanded}
-              onToggle={onToggle}
-            />
-          ))}
+          {/* Remaining fields — key forces remount when treeState changes */}
+          <div key={treeState.key}>
+            {fields.map(([k, v]) => (
+              <TreeNode
+                key={k}
+                nodeKey={k}
+                value={v}
+                depth={0}
+                defaultExpanded={treeState.expanded}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// ── public component ─────────────────────────────────────────────────────────
+// ── public component ──────────────────────────────────────────────────────────
 export interface DocTreeViewProps {
   documents: Record<string, unknown>[];
   selectedIds: Set<string>;
@@ -448,17 +333,8 @@ export default function DocTreeView({
 
   return (
     <div>
-      {/* select-all bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "6px 2px",
-          marginBottom: "6px",
-          borderBottom: "1px solid #f1f5f9",
-        }}
-      >
+      {/* Select-all bar */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
         <input
           type="checkbox"
           checked={allSelected}
@@ -477,7 +353,6 @@ export default function DocTreeView({
           <DocCard
             key={id}
             doc={doc}
-            docId={id}
             isSelected={selectedIds.has(id)}
             canWrite={canWrite}
             onSelect={(checked) => onSelectOne(id, checked)}
