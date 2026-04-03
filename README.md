@@ -1,0 +1,369 @@
+# dbv — MongoDB Browser
+
+A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authentication. Runs entirely in Docker.
+
+## Table of Contents
+
+- [User Guide](#user-guide)
+  - [Getting Started](#getting-started)
+  - [First-Time Keycloak Setup](#first-time-keycloak-setup)
+  - [Using the App](#using-the-app)
+  - [Roles and Permissions](#roles-and-permissions)
+- [Developer Guide](#developer-guide)
+  - [Architecture](#architecture)
+  - [Prerequisites](#prerequisites)
+  - [Local Development](#local-development)
+  - [Project Structure](#project-structure)
+  - [Environment Variables](#environment-variables)
+  - [API Reference](#api-reference)
+
+---
+
+## User Guide
+
+### Getting Started
+
+**Requirements:** Docker and Docker Compose.
+
+**1. Clone and configure**
+
+```bash
+git clone <repo-url>
+cd dbv
+cp .env.example .env
+# Edit .env and set a secure KEYCLOAK_ADMIN_PASSWORD
+```
+
+**2. Add local hostnames** *(local development only)*
+
+```bash
+echo '127.0.0.1  dbv.localhost keycloak.localhost' | sudo tee -a /etc/hosts
+```
+
+**3. Start all services**
+
+```bash
+docker compose up -d
+```
+
+This starts four containers:
+
+| Service | Purpose |
+|---|---|
+| **traefik** | HTTPS reverse proxy, routes traffic |
+| **dbv** | The application (Rust + React) |
+| **mongo** | MongoDB database |
+| **keycloak** | Authentication server |
+
+**4. Open the app**
+
+| URL | Description |
+|---|---|
+| `https://dbv.localhost` | dbv application |
+| `https://keycloak.localhost` | Keycloak admin console |
+| `http://localhost:8888` | Traefik dashboard (internal) |
+
+> **Note:** Your browser will show a security warning for the self-signed certificate in local development. Accept it to proceed. In production, configure Let's Encrypt (see [Environment Variables](#environment-variables)).
+
+---
+
+### First-Time Keycloak Setup
+
+Before you can log in to dbv, you need to create a user in Keycloak and assign them a role.
+
+**1. Open the Keycloak admin console**
+
+Go to `https://keycloak.localhost` and sign in with the credentials from your `.env` file (default: `admin` / `admin`).
+
+**2. Create a role**
+
+1. In the left menu, go to **Realm roles**
+2. Click **Create role**
+3. Enter `dbv-admin` (full access) or `dbv-viewer` (read-only)
+4. Click **Save**
+
+**3. Create a user**
+
+1. Go to **Users** → **Add user**
+2. Fill in **Username** and click **Create**
+3. Go to the **Credentials** tab → **Set password** → disable **Temporary**
+4. Go to the **Role mapping** tab → **Assign role** → select `dbv-admin` or `dbv-viewer`
+
+**4. Create a client** *(for token issuance)*
+
+1. Go to **Clients** → **Create client**
+2. Set **Client ID** to the value of `KEYCLOAK_CLIENT_ID` in your `.env` (default: `dbv`)
+3. Enable **Direct access grants** (for token testing via curl)
+4. Set **Valid redirect URIs** to `https://dbv.localhost/*`
+5. Click **Save**
+
+**5. Get a token**
+
+You can test token retrieval with curl:
+
+```bash
+curl -s -X POST \
+  https://keycloak.localhost/realms/master/protocol/openid-connect/token \
+  --insecure \
+  -d "client_id=dbv" \
+  -d "username=<your-user>" \
+  -d "password=<your-password>" \
+  -d "grant_type=password" \
+  | python3 -m json.tool
+```
+
+Copy the `access_token` value.
+
+---
+
+### Using the App
+
+**Signing in**
+
+Open `https://dbv.localhost`. You will see the login screen — paste your JWT access token and click **Sign In**.
+
+**Browsing data**
+
+- The left sidebar lists your **databases**. Select one to see its collections.
+- Click a **collection** to open it in the main panel.
+
+**Document view**
+
+- Browse documents with **pagination** (20 per page)
+- **Filter** documents using a MongoDB query JSON object, e.g. `{"status": "active"}`
+- Click **Apply** or press Enter to run the filter
+
+**Editing documents** *(dbv-admin only)*
+
+- **+ New** — opens a JSON editor to create a new document
+- **Edit** — opens the document in a JSON editor with syntax highlighting
+- **Delete** — permanently removes the document after confirmation
+
+**Aggregate**
+
+Run an aggregation pipeline against the selected collection:
+
+```json
+[
+  { "$match": { "status": "active" } },
+  { "$group": { "_id": "$category", "count": { "$sum": 1 } } }
+]
+```
+
+**Schema**
+
+Inspect the inferred schema of a collection — sampled from up to 100 documents. Shows:
+
+| Column | Description |
+|---|---|
+| **Field path** | Dotted path, including nested fields (e.g. `address.city`) |
+| **Types** | All BSON types observed for that field |
+| **Coverage** | Percentage of sampled documents that contain this field |
+| **Nullable** | Whether any document had `null` for this field |
+
+**Export / Import** *(import requires dbv-admin)*
+
+- **Export** — downloads the entire collection as a pretty-printed JSON file
+- **Import** — uploads a JSON file (array of documents); you will be asked whether to replace the existing data
+
+---
+
+### Roles and Permissions
+
+| Action | `dbv-viewer` | `dbv-admin` |
+|---|:---:|:---:|
+| Browse databases and collections | ✅ | ✅ |
+| Read documents (with filter/pagination) | ✅ | ✅ |
+| Run aggregation pipelines | ✅ | ✅ |
+| View collection schema | ✅ | ✅ |
+| Export collection to JSON | ✅ | ✅ |
+| Create document | ❌ | ✅ |
+| Edit document | ❌ | ✅ |
+| Delete document | ❌ | ✅ |
+| Import JSON into collection | ❌ | ✅ |
+
+---
+
+## Developer Guide
+
+### Architecture
+
+```
+Browser (HTTPS)
+  └── Traefik v3  (TLS termination, HTTP→HTTPS redirect)
+        ├── https://dbv.localhost        → dbv:8080
+        └── https://keycloak.localhost   → keycloak:8080
+
+dbv container
+  ├── Axum (Rust)  serves /api/* and static files
+  │     ├── auth/     JWT RS256 validation via Keycloak JWKS
+  │     ├── rbac/     ReadAccess / WriteAccess Axum extractors
+  │     ├── routes/   CRUD, aggregate, schema, export/import
+  │     └── db/       MongoDB 2.8 async client
+  └── React SPA     served from frontend/dist/ via tower-http ServeDir
+```
+
+### Prerequisites
+
+| Tool | Version |
+|---|---|
+| Rust | stable (1.75+) |
+| Node.js | 18+ |
+| Docker + Docker Compose | v2 |
+
+### Local Development
+
+**1. Start infrastructure only**
+
+```bash
+docker compose up -d traefik mongo keycloak
+```
+
+**2. Run the Rust backend**
+
+```bash
+# Copy and fill in required vars
+cp .env.example .env
+
+export $(grep -v '^#' .env | xargs)
+export MONGODB_URI=mongodb://localhost:27017   # mongo not exposed by default
+export KEYCLOAK_URL=http://localhost:8180      # if you expose keycloak locally
+
+cargo run
+# Server on http://localhost:8080
+```
+
+> For local dev it is simpler to use `docker compose up -d` for all services and iterate only on the frontend with `npm run dev`.
+
+**3. Run the React frontend dev server**
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Opens http://localhost:5173
+# /api requests are proxied to http://localhost:8080 automatically
+```
+
+**4. Build for production**
+
+```bash
+# Build frontend first (output goes to frontend/dist/)
+cd frontend && npm run build && cd ..
+
+# Then build the Rust binary (it embeds the dist path at runtime via env var)
+cargo build --release
+```
+
+### Project Structure
+
+```
+src/
+├── main.rs           # Axum router, server startup
+├── config.rs         # Env-var config (envy crate) — fails fast on missing vars
+├── state.rs          # AppState + FromRef impls for sub-extractors
+├── errors.rs         # AppError enum implementing IntoResponse
+├── auth/
+│   ├── mod.rs        # JwksCache, Claims extractor, RS256 JWT validation
+│   └── rbac.rs       # ReadAccess / WriteAccess extractors
+├── db/
+│   └── mod.rs        # DbClient — wraps mongodb::Client, pings on startup
+└── routes/
+    ├── health.rs     # GET /api/health  (no auth, pings MongoDB)
+    ├── data.rs       # CRUD + aggregate + pagination
+    ├── schema.rs     # Schema inference (samples 100 docs, infers BSON types)
+    └── transfer.rs   # Export (GET) and Import (POST)
+
+frontend/src/
+├── api/
+│   ├── client.ts     # axios instance with Bearer token interceptor
+│   └── mongo.ts      # typed API functions for all endpoints
+├── context/
+│   └── AuthContext.tsx  # token storage, role parsing, canWrite flag
+├── components/
+│   ├── ProtectedRoute.tsx
+│   └── SchemaViewer.tsx
+└── pages/
+    ├── LoginPage.tsx    # JWT paste login
+    └── BrowserPage.tsx  # Main UI: sidebar, documents, aggregate, schema
+```
+
+### Environment Variables
+
+All backend configuration is read from environment variables at startup. Missing required variables cause an immediate exit with a clear error message.
+
+| Variable | Required | Default | Description |
+|---|:---:|---|---|
+| `MONGODB_URI` | ✅ | — | MongoDB connection string |
+| `MONGODB_DB` | ✅ | — | Default database name |
+| `KEYCLOAK_URL` | ✅ | — | Keycloak base URL (internal, e.g. `http://keycloak:8080`) |
+| `KEYCLOAK_REALM` | ✅ | — | Keycloak realm |
+| `KEYCLOAK_CLIENT_ID` | ✅ | — | OAuth2 client ID for audience validation |
+| `SERVER_HOST` | | `0.0.0.0` | Bind address |
+| `SERVER_PORT` | | `8080` | Bind port |
+| `FRONTEND_DIST` | | `./frontend/dist` | Path to built React assets |
+| `DBV_HOST` | | `dbv.localhost` | Public hostname (Traefik routing) |
+| `KEYCLOAK_PUBLIC_HOST` | | `keycloak.localhost` | Keycloak public hostname (Traefik routing) |
+| `TLS_RESOLVER` | | *(blank)* | Traefik cert resolver. Leave blank for self-signed; set `letsencrypt` for production |
+| `ACME_EMAIL` | | `admin@example.com` | Email for Let's Encrypt (production only) |
+
+### API Reference
+
+All endpoints are under `/api`. All except `/api/health` require `Authorization: Bearer <token>`.
+
+#### Health
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/api/health` | None | Liveness check, pings MongoDB |
+
+#### Databases & Collections
+
+| Method | Path | Role | Description |
+|---|---|---|---|
+| GET | `/api/databases` | viewer+ | List all databases |
+| GET | `/api/databases/:db/collections` | viewer+ | List collections in a database |
+
+#### Documents
+
+| Method | Path | Role | Description |
+|---|---|---|---|
+| GET | `/api/databases/:db/collections/:col/documents` | viewer+ | List documents. Query params: `page`, `limit`, `filter` (JSON), `sort` (JSON) |
+| POST | `/api/databases/:db/collections/:col/documents` | admin | Insert a document |
+| GET | `/api/databases/:db/collections/:col/documents/:id` | viewer+ | Get document by ObjectId |
+| PUT | `/api/databases/:db/collections/:col/documents/:id` | admin | Replace document by ObjectId |
+| DELETE | `/api/databases/:db/collections/:col/documents/:id` | admin | Delete document by ObjectId |
+
+#### Aggregation & Schema
+
+| Method | Path | Role | Body | Description |
+|---|---|---|---|---|
+| POST | `/api/databases/:db/collections/:col/aggregate` | viewer+ | `{ "pipeline": [...] }` | Run aggregation pipeline |
+| GET | `/api/databases/:db/collections/:col/schema` | viewer+ | — | Infer schema from up to 100 sampled documents |
+
+#### Export / Import
+
+| Method | Path | Role | Description |
+|---|---|---|---|
+| GET | `/api/databases/:db/collections/:col/export` | viewer+ | Download collection as JSON |
+| POST | `/api/databases/:db/collections/:col/import` | admin | Import `{ "documents": [...], "replace": false }` |
+
+### Adding a New Route
+
+1. Add handler function in `src/routes/<feature>.rs` — use `ReadAccess` or `WriteAccess` extractor as appropriate
+2. Register the route in `src/main.rs` inside the `api` router
+3. Add the corresponding typed function in `frontend/src/api/mongo.ts`
+4. Add `pub mod <feature>;` to `src/routes/mod.rs`
+
+### Production Deployment
+
+1. Point real DNS records for `DBV_HOST` and `KEYCLOAK_PUBLIC_HOST` to your server
+2. In `.env`, set:
+   ```
+   TLS_RESOLVER=letsencrypt
+   ACME_EMAIL=you@yourdomain.com
+   DBV_HOST=dbv.yourdomain.com
+   KEYCLOAK_PUBLIC_HOST=auth.yourdomain.com
+   KEYCLOAK_ADMIN_PASSWORD=<strong-password>
+   ```
+3. `docker compose up -d` — Traefik will obtain certificates automatically on first request
