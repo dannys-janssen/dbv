@@ -15,13 +15,18 @@ import {
   dropDatabase,
   createCollection,
   dropCollection,
+  listIndexes,
+  createIndex,
+  dropIndex,
   type CollectionSchema,
+  type IndexInfo,
+  type IndexKey,
 } from "../api/mongo";
 import { useAuth } from "../context/AuthContext";
 import Editor from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 
-type View = "documents" | "aggregate" | "schema";
+type View = "documents" | "aggregate" | "schema" | "indexes";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -178,6 +183,16 @@ export default function BrowserPage() {
   const [schema, setSchema] = useState<CollectionSchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
 
+  // Indexes
+  const [indexes, setIndexes] = useState<IndexInfo[]>([]);
+  const [indexesLoading, setIndexesLoading] = useState(false);
+  const [newIndexOpen, setNewIndexOpen] = useState(false);
+  const [indexKeys, setIndexKeys] = useState<IndexKey[]>([{ field: "", direction: 1 }]);
+  const [indexName, setIndexName] = useState("");
+  const [indexUnique, setIndexUnique] = useState(false);
+  const [indexSparse, setIndexSparse] = useState(false);
+  const [indexTtl, setIndexTtl] = useState("");
+
   // Create/Drop dialogs
   const [newDbName, setNewDbName] = useState("");
   const [newDbCollection, setNewDbCollection] = useState("");
@@ -291,6 +306,19 @@ export default function BrowserPage() {
     if (view === "schema") loadSchema();
   }, [view, loadSchema]);
 
+  const loadIndexes = useCallback(() => {
+    if (!selectedDb || !selectedCol) return;
+    setIndexesLoading(true);
+    listIndexes(selectedDb, selectedCol)
+      .then((r) => setIndexes(r.indexes))
+      .catch(() => setIndexes([]))
+      .finally(() => setIndexesLoading(false));
+  }, [selectedDb, selectedCol]);
+
+  useEffect(() => {
+    if (view === "indexes") loadIndexes();
+  }, [view, loadIndexes]);
+
   const loadDocuments = useCallback(() => {
     if (!selectedDb || !selectedCol) return;
     setLoading(true);
@@ -367,9 +395,10 @@ export default function BrowserPage() {
     const handler = (e: KeyboardEvent) => {
       // ESC — close any open modal
       if (e.key === "Escape") {
-        if (editorOpen) { setEditorOpen(false); return; }
-        if (newDbOpen)  { setNewDbOpen(false);  return; }
-        if (newColOpen) { setNewColOpen(false);  return; }
+        if (editorOpen)   { setEditorOpen(false);   return; }
+        if (newDbOpen)    { setNewDbOpen(false);     return; }
+        if (newColOpen)   { setNewColOpen(false);    return; }
+        if (newIndexOpen) { setNewIndexOpen(false);  return; }
       }
       // Ctrl+S / Cmd+S — save document editor
       if ((e.ctrlKey || e.metaKey) && e.key === "s" && editorOpen) {
@@ -384,7 +413,7 @@ export default function BrowserPage() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [editorOpen, newDbOpen, newColOpen, view, handleSave, runAggregate]);
+  }, [editorOpen, newDbOpen, newColOpen, newIndexOpen, view, handleSave, runAggregate]);
 
   const getDocId = (doc: Record<string, unknown>): string => {
     const id = doc["_id"] as Record<string, unknown> | string | undefined;
@@ -826,7 +855,7 @@ export default function BrowserPage() {
                 flexDirection: "row",
               }}
             >
-              {(["documents", "aggregate", "schema"] as View[]).map((tab) => {
+              {(["documents", "aggregate", "schema", "indexes"] as View[]).map((tab) => {
                 const isActive = view === tab;
                 const label =
                   tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -1361,6 +1390,77 @@ export default function BrowserPage() {
                 )}
               </div>
             )}
+
+            {/* ── Indexes tab ── */}
+            {view === "indexes" && (
+              <div style={{ padding: "20px", fontFamily: FONT }}>
+                {/* Toolbar */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                  <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>
+                    {indexesLoading ? "Loading…" : `${indexes.length} index${indexes.length !== 1 ? "es" : ""}`}
+                  </span>
+                  <button
+                    onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexTtl(""); setNewIndexOpen(true); }}
+                    style={{ padding: "6px 14px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
+                  >
+                    + New Index
+                  </button>
+                </div>
+
+                {/* Index table */}
+                {indexes.length === 0 && !indexesLoading ? (
+                  <p style={{ color: "#94a3b8", fontSize: "13px" }}>No indexes found.</p>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                      <thead>
+                        <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                          {["Name", "Keys", "Unique", "Sparse", "TTL (s)", ""].map((h) => (
+                            <th key={h} style={{ padding: "8px 12px", textAlign: "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {indexes.map((idx) => (
+                          <tr key={idx.name} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                            <td style={{ padding: "8px 12px", color: "#1e293b", fontWeight: 500 }}>{idx.name}</td>
+                            <td style={{ padding: "8px 12px" }}>
+                              <code style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", fontSize: "12px", color: "#334155" }}>
+                                {Object.entries(idx.keys).map(([f, d]) => `${f}: ${d}`).join(", ")}
+                              </code>
+                            </td>
+                            <td style={{ padding: "8px 12px", color: idx.unique ? "#16a34a" : "#94a3b8" }}>
+                              {idx.unique ? "✓" : "—"}
+                            </td>
+                            <td style={{ padding: "8px 12px", color: idx.sparse ? "#16a34a" : "#94a3b8" }}>
+                              {idx.sparse ? "✓" : "—"}
+                            </td>
+                            <td style={{ padding: "8px 12px", color: "#64748b" }}>
+                              {idx.ttl !== undefined ? idx.ttl : "—"}
+                            </td>
+                            <td style={{ padding: "8px 12px" }}>
+                              {idx.name !== "_id_" && (
+                                <button
+                                  onClick={() => {
+                                    if (!confirm(`Drop index "${idx.name}"?`)) return;
+                                    dropIndex(selectedDb, selectedCol, idx.name)
+                                      .then(loadIndexes)
+                                      .catch((e: unknown) => alert("Error: " + (e as Error).message));
+                                  }}
+                                  style={{ padding: "3px 10px", background: "#fff", border: "1px solid #fca5a5", color: "#dc2626", borderRadius: "5px", cursor: "pointer", fontSize: "12px", fontWeight: 500 }}
+                                >
+                                  Drop
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
@@ -1470,6 +1570,110 @@ export default function BrowserPage() {
                 style={primaryBtnStyle}
               >
                 Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Create Index modal ── */}
+      {newIndexOpen && (
+        <div style={overlayStyle}>
+          <div style={{ ...modalBaseStyle, width: "560px" }}>
+            <h3 style={modalTitleStyle}>Create Index</h3>
+            <p style={modalSubtitleStyle}>
+              Define the fields and options for the new index.
+            </p>
+
+            {/* Key builder */}
+            <label style={modalLabelStyle}>Index Keys</label>
+            {indexKeys.map((k, i) => (
+              <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                <input
+                  style={{ ...modalInputStyle, flex: 2, marginBottom: 0 }}
+                  placeholder="field name"
+                  value={k.field}
+                  onChange={(e) => {
+                    const updated = [...indexKeys];
+                    updated[i] = { ...updated[i], field: e.target.value };
+                    setIndexKeys(updated);
+                  }}
+                />
+                <select
+                  value={k.direction}
+                  onChange={(e) => {
+                    const updated = [...indexKeys];
+                    updated[i] = { ...updated[i], direction: Number(e.target.value) as 1 | -1 };
+                    setIndexKeys(updated);
+                  }}
+                  style={{ padding: "9px 8px", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "13px", fontFamily: FONT, background: "#fff", color: "#374151" }}
+                >
+                  <option value={1}>1 (asc)</option>
+                  <option value={-1}>-1 (desc)</option>
+                </select>
+                {indexKeys.length > 1 && (
+                  <button
+                    onClick={() => setIndexKeys(indexKeys.filter((_, j) => j !== i))}
+                    style={{ padding: "6px 10px", background: "#fff", border: "1px solid #fca5a5", color: "#dc2626", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}
+                  >✕</button>
+                )}
+              </div>
+            ))}
+            <button
+              onClick={() => setIndexKeys([...indexKeys, { field: "", direction: 1 }])}
+              style={{ fontSize: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", marginBottom: "16px", padding: 0 }}
+            >
+              + Add field
+            </button>
+
+            {/* Options */}
+            <label style={modalLabelStyle}>Index Name <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional)</span></label>
+            <input
+              style={modalInputStyle}
+              placeholder="auto-generated if empty"
+              value={indexName}
+              onChange={(e) => setIndexName(e.target.value)}
+            />
+
+            <div style={{ display: "flex", gap: "24px", marginBottom: "16px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
+                <input type="checkbox" checked={indexUnique} onChange={(e) => setIndexUnique(e.target.checked)} />
+                Unique
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
+                <input type="checkbox" checked={indexSparse} onChange={(e) => setIndexSparse(e.target.checked)} />
+                Sparse
+              </label>
+            </div>
+
+            <label style={modalLabelStyle}>TTL <span style={{ fontWeight: 400, color: "#94a3b8" }}>(seconds, optional)</span></label>
+            <input
+              style={modalInputStyle}
+              placeholder="e.g. 3600"
+              type="number"
+              value={indexTtl}
+              onChange={(e) => setIndexTtl(e.target.value)}
+            />
+
+            <div style={modalFooterStyle}>
+              <button onClick={() => setNewIndexOpen(false)} style={cancelBtnStyle}>Cancel</button>
+              <button
+                onClick={() => {
+                  const keys = Object.fromEntries(
+                    indexKeys.filter((k) => k.field.trim()).map((k) => [k.field.trim(), k.direction])
+                  ) as Record<string, 1 | -1>;
+                  if (Object.keys(keys).length === 0) { alert("At least one field is required."); return; }
+                  createIndex(selectedDb, selectedCol, keys, {
+                    name: indexName.trim() || undefined,
+                    unique: indexUnique || undefined,
+                    sparse: indexSparse || undefined,
+                    ttl: indexTtl ? Number(indexTtl) : undefined,
+                  })
+                    .then(() => { setNewIndexOpen(false); loadIndexes(); })
+                    .catch((e: unknown) => alert("Error: " + (e as Error).message));
+                }}
+                style={primaryBtnStyle}
+              >
+                Create Index
               </button>
             </div>
           </div>

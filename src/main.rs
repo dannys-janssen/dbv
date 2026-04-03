@@ -95,6 +95,14 @@ async fn main() -> anyhow::Result<()> {
             post(routes::data::aggregate),
         )
         .route(
+            "/databases/:db/collections/:collection/indexes",
+            get(routes::data::list_indexes).post(routes::data::create_index),
+        )
+        .route(
+            "/databases/:db/collections/:collection/indexes/:name",
+            delete(routes::data::drop_index),
+        )
+        .route(
             "/databases/:db/collections/:collection/schema",
             get(routes::schema::collection_schema),
         )

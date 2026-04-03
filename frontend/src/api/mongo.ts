@@ -145,3 +145,42 @@ export const importCollection = (
       replace,
     })
     .then((r) => r.data);
+
+// ── Index management ──────────────────────────────────────────────────────────
+
+export interface IndexInfo {
+  name: string;
+  keys: Record<string, number>;
+  unique: boolean;
+  sparse: boolean;
+  ttl?: number;
+}
+
+export interface IndexList {
+  indexes: IndexInfo[];
+}
+
+export interface IndexKey {
+  field: string;
+  direction: 1 | -1;
+}
+
+export const listIndexes = (db: string, collection: string) =>
+  api
+    .get<IndexList>(`/databases/${db}/collections/${collection}/indexes`)
+    .then((r) => r.data);
+
+export const createIndex = (
+  db: string,
+  collection: string,
+  keys: Record<string, 1 | -1>,
+  options?: { name?: string; unique?: boolean; sparse?: boolean; ttl?: number }
+) =>
+  api
+    .post(`/databases/${db}/collections/${collection}/indexes`, { keys, ...options })
+    .then((r) => r.data);
+
+export const dropIndex = (db: string, collection: string, name: string) =>
+  api
+    .delete(`/databases/${db}/collections/${collection}/indexes/${name}`)
+    .then((r) => r.data);

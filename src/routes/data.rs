@@ -239,3 +239,52 @@ pub async fn aggregate(
 
     Ok(Json(json!({ "results": results })))
 }
+
+// ── Index management ─────────────────────────────────────────────────────────
+
+pub async fn list_indexes(
+    _claims: ReadAccess,
+    State(state): State<AppState>,
+    Path((db, collection)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    let indexes = state.db.list_indexes(&db, &collection).await?;
+    Ok(Json(json!({ "indexes": indexes })))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateIndexBody {
+    pub keys: Value,
+    pub name: Option<String>,
+    pub unique: Option<bool>,
+    pub sparse: Option<bool>,
+    pub ttl: Option<u64>,
+}
+
+pub async fn create_index(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path((db, collection)): Path<(String, String)>,
+    Json(body): Json<CreateIndexBody>,
+) -> Result<(StatusCode, Json<Value>), AppError> {
+    let keys = bson::to_document(&body.keys)
+        .map_err(|_| AppError::BadRequest("Invalid keys document".into()))?;
+    if keys.is_empty() {
+        return Err(AppError::BadRequest("Index keys cannot be empty".into()));
+    }
+    let index_name = state.db
+        .create_index(&db, &collection, keys, body.name, body.unique, body.sparse, body.ttl)
+        .await?;
+    Ok((StatusCode::CREATED, Json(json!({ "name": index_name }))))
+}
+
+pub async fn drop_index(
+    _claims: WriteAccess,
+    State(state): State<AppState>,
+    Path((db, collection, name)): Path<(String, String, String)>,
+) -> Result<Json<Value>, AppError> {
+    if name == "_id_" {
+        return Err(AppError::BadRequest("Cannot drop the _id index".into()));
+    }
+    state.db.drop_index(&db, &collection, &name).await?;
+    Ok(Json(json!({ "dropped": name })))
+}
