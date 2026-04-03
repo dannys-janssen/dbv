@@ -5,7 +5,7 @@ use axum::{
 use std::net::SocketAddr;
 use tower_http::{
     cors::{Any, CorsLayer},
-    services::ServeDir,
+    services::{ServeDir, ServeFile},
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -92,9 +92,14 @@ async fn main() -> anyhow::Result<()> {
         );
 
     let frontend_dist = config.frontend_dist.clone();
+    let index_html = format!("{}/index.html", frontend_dist);
     let app = Router::new()
         .nest("/api", api)
-        .fallback_service(ServeDir::new(&frontend_dist).append_index_html_on_directories(true))
+        .fallback_service(
+            ServeDir::new(&frontend_dist)
+                .append_index_html_on_directories(true)
+                .fallback(ServeFile::new(index_html)),
+        )
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);
