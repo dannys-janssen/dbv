@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getDatabases,
@@ -26,9 +26,15 @@ import {
   type IndexKey,
 } from "../api/mongo";
 import { useAuth } from "../context/AuthContext";
-import Editor from "@monaco-editor/react";
+import Editor, { loader } from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 import DocTreeView from "../components/DocTreeView";
+import {
+  buildDocumentSchema,
+  buildFilterSchema,
+  buildSortSchema,
+  PIPELINE_SCHEMA,
+} from "../utils/mongoSchema";
 
 type View = "documents" | "aggregate" | "schema" | "indexes" | "stats";
 
@@ -195,6 +201,8 @@ export default function BrowserPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   // Document layout: table or tree
   const [docLayout, setDocLayout] = useState<"table" | "tree">("table");
+  // Stable ref to loadDocuments so Monaco onMount handlers don't go stale
+  const loadDocumentsRef = useRef<() => void>(() => {});
 
   // Editor modal
   const [editorOpen, setEditorOpen] = useState(false);
@@ -346,6 +354,24 @@ export default function BrowserPage() {
     if (view === "schema") loadSchema();
   }, [view, loadSchema]);
 
+  // Register Monaco JSON schemas for autocomplete whenever collection/schema changes
+  useEffect(() => {
+    void loader.init().then((monaco) => {
+      const docSchema  = schema ? buildDocumentSchema(schema) : { type: "object" };
+      const filtSchema = schema ? buildFilterSchema(schema)   : { type: "object" };
+      const sortSchema = schema ? buildSortSchema(schema)     : { type: "object" };
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        validate: true,
+        schemas: [
+          { uri: "http://dbv/document-schema.json", fileMatch: ["dbv://document"], schema: docSchema },
+          { uri: "http://dbv/filter-schema.json",   fileMatch: ["dbv://filter"],   schema: filtSchema },
+          { uri: "http://dbv/sort-schema.json",     fileMatch: ["dbv://sort"],     schema: sortSchema },
+          { uri: "http://dbv/pipeline-schema.json", fileMatch: ["dbv://pipeline"], schema: PIPELINE_SCHEMA },
+        ],
+      });
+    });
+  }, [schema]);
+
   const loadIndexes = useCallback(() => {
     if (!selectedDb || !selectedCol) return;
     setIndexesLoading(true);
@@ -385,6 +411,9 @@ export default function BrowserPage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [selectedDb, selectedCol, page, limitVal, filterText, sortText]);
+
+  // Keep ref in sync so Monaco onMount callbacks always call the latest version
+  useEffect(() => { loadDocumentsRef.current = loadDocuments; }, [loadDocuments]);
 
   useEffect(() => {
     loadDocuments();
@@ -991,6 +1020,21 @@ export default function BrowserPage() {
                   const sortValid   = !sortText.trim()   || (() => { try { JSON.parse(sortText);   return true; } catch { return false; } })();
                   const hasFilter   = !!filterText.trim();
                   const hasSort     = !!sortText.trim();
+                  const monoOpts = {
+                    minimap: { enabled: false },
+                    lineNumbers: "off" as const,
+                    folding: false,
+                    renderLineHighlight: "none" as const,
+                    scrollBeyondLastLine: false,
+                    overviewRulerLanes: 0,
+                    hideCursorInOverviewRuler: true,
+                    wordWrap: "on" as const,
+                    padding: { top: 6, bottom: 6 },
+                    fontSize: 13,
+                    contextmenu: false,
+                    suggest: { showSnippets: true, showWords: false },
+                    quickSuggestions: { other: true, comments: false, strings: true },
+                  };
                   return (
                     <div style={{ padding: "10px 20px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                       {/* Row 1: filter + sort inputs */}
@@ -999,6 +1043,7 @@ export default function BrowserPage() {
                         <div style={{ flex: 2 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
                             <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Filter</span>
+                            <span style={{ fontSize: "10px", color: "#94a3b8", fontFamily: FONT }}>Ctrl+Enter to apply</span>
                             {hasFilter && filterValid && (
                               <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>active</span>
                             )}
@@ -1006,18 +1051,25 @@ export default function BrowserPage() {
                               <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
                             )}
                           </div>
-                          <input
-                            style={{
-                              width: "100%", boxSizing: "border-box",
-                              padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
-                              fontFamily: "monospace", outline: "none", background: "#ffffff", color: "#1e293b",
-                              border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-                            }}
-                            placeholder='e.g. {"status":"active"}  or  {"price":{"$gt":20}}'
-                            value={filterText}
-                            onChange={(e) => { setFilterText(e.target.value); setPage(1); }}
-                            onKeyDown={(e) => e.key === "Enter" && filterValid && sortValid && loadDocuments()}
-                          />
+                          <div style={{
+                            border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                            borderRadius: "6px", overflow: "hidden", background: "#ffffff",
+                          }}>
+                            <Editor
+                              height="68px"
+                              language="json"
+                              path="dbv://filter"
+                              value={filterText}
+                              onChange={(v) => { setFilterText(v ?? ""); setPage(1); }}
+                              options={monoOpts}
+                              onMount={(editor, monaco) => {
+                                editor.addCommand(
+                                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                                  () => loadDocumentsRef.current()
+                                );
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Sort */}
@@ -1028,18 +1080,25 @@ export default function BrowserPage() {
                               <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
                             )}
                           </div>
-                          <input
-                            style={{
-                              width: "100%", boxSizing: "border-box",
-                              padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
-                              fontFamily: "monospace", outline: "none", background: "#ffffff", color: "#1e293b",
-                              border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-                            }}
-                            placeholder='e.g. {"price":-1}'
-                            value={sortText}
-                            onChange={(e) => { setSortText(e.target.value); setPage(1); }}
-                            onKeyDown={(e) => e.key === "Enter" && filterValid && sortValid && loadDocuments()}
-                          />
+                          <div style={{
+                            border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                            borderRadius: "6px", overflow: "hidden", background: "#ffffff",
+                          }}>
+                            <Editor
+                              height="68px"
+                              language="json"
+                              path="dbv://sort"
+                              value={sortText}
+                              onChange={(v) => { setSortText(v ?? ""); setPage(1); }}
+                              options={monoOpts}
+                              onMount={(editor, monaco) => {
+                                editor.addCommand(
+                                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                                  () => loadDocumentsRef.current()
+                                );
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Limit */}
@@ -1534,6 +1593,7 @@ export default function BrowserPage() {
                   <Editor
                     height="220px"
                     defaultLanguage="json"
+                    path="dbv://pipeline"
                     value={pipeline}
                     onChange={(v) => setPipeline(v ?? "[]")}
                   />
@@ -1749,6 +1809,7 @@ export default function BrowserPage() {
             <Editor
               height="400px"
               defaultLanguage="json"
+              path="dbv://document"
               value={editorValue}
               onChange={(v) => setEditorValue(v ?? "{}")}
             />
