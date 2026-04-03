@@ -2,9 +2,10 @@ use futures::TryStreamExt;
 use mongodb::{
     Client, Collection, Database,
     IndexModel,
-    options::{ClientOptions, IndexOptions},
+    options::{ClientOptions, IndexOptions, Tls, TlsOptions},
 };
 use serde_json::Value;
+use std::path::PathBuf;
 
 use crate::config::Config;
 use crate::errors::AppError;
@@ -17,7 +18,31 @@ pub struct DbClient {
 
 impl DbClient {
     pub async fn new(config: &Config) -> Result<Self, AppError> {
-        let options = ClientOptions::parse(&config.mongodb_uri).await?;
+        let mut options = ClientOptions::parse(&config.mongodb_uri).await?;
+
+        // Apply TLS overrides that cannot be expressed in a URI string.
+        let needs_tls_override = config.mongodb_tls_ca_file.is_some()
+            || config.mongodb_tls_cert_key_file.is_some()
+            || config.mongodb_tls_allow_invalid_certs;
+
+        if needs_tls_override {
+            // Preserve any TlsOptions already parsed from the URI.
+            let mut tls_opts = match options.tls.take() {
+                Some(Tls::Enabled(existing)) => existing,
+                _ => TlsOptions::default(),
+            };
+            if let Some(ca) = &config.mongodb_tls_ca_file {
+                tls_opts.ca_file_path = Some(PathBuf::from(ca));
+            }
+            if let Some(cert_key) = &config.mongodb_tls_cert_key_file {
+                tls_opts.cert_key_file_path = Some(PathBuf::from(cert_key));
+            }
+            if config.mongodb_tls_allow_invalid_certs {
+                tls_opts.allow_invalid_certificates = Some(true);
+            }
+            options.tls = Some(Tls::Enabled(tls_opts));
+        }
+
         let client = Client::with_options(options)?;
         // Ping to verify connection
         client

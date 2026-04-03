@@ -309,10 +309,12 @@ frontend/src/
 
 All backend configuration is read from environment variables at startup. Missing required variables cause an immediate exit with a clear error message.
 
+#### Core
+
 | Variable | Required | Default | Description |
 |---|:---:|---|---|
-| `MONGODB_URI` | ✅ | — | MongoDB connection string |
-| `MONGODB_DB` | ✅ | — | Default database name |
+| `MONGODB_URI` | ✅ | — | MongoDB connection string (see examples below) |
+| `MONGODB_DB` | ✅ | — | Default database shown on startup |
 | `KEYCLOAK_URL` | ✅ | — | Keycloak base URL (internal, e.g. `http://keycloak:8080`) |
 | `KEYCLOAK_REALM` | ✅ | — | Keycloak realm |
 | `KEYCLOAK_CLIENT_ID` | ✅ | — | OAuth2 client ID |
@@ -323,6 +325,29 @@ All backend configuration is read from environment variables at startup. Missing
 | `KEYCLOAK_PUBLIC_HOST` | | `keycloak.localhost` | Keycloak public hostname (Traefik routing) |
 | `TLS_RESOLVER` | | *(blank)* | Traefik cert resolver. Leave blank for self-signed; set `letsencrypt` for production |
 | `ACME_EMAIL` | | `admin@example.com` | Email for Let's Encrypt (production only) |
+
+#### `MONGODB_URI` connection string examples
+
+| Scenario | Example |
+|---|---|
+| Standalone (no auth) | `mongodb://localhost:27017` |
+| Standalone with auth | `mongodb://user:pass@host:27017/?authSource=admin` |
+| Replica set | `mongodb://h1,h2,h3/?replicaSet=myRS` |
+| Replica set with auth | `mongodb://user:pass@h1,h2,h3/?replicaSet=myRS&authSource=admin` |
+| MongoDB Atlas (SRV) | `mongodb+srv://user:pass@cluster0.example.mongodb.net/?retryWrites=true&w=majority` |
+| Self-hosted with TLS | `mongodb://user:pass@host:27017/?tls=true` |
+
+> Credentials, `authSource`, `authMechanism`, `replicaSet`, `tls`, and most other options are passed directly in the URI. See the [MongoDB Connection String URI](https://www.mongodb.com/docs/manual/reference/connection-string/) reference for the full list.
+
+#### TLS / Certificate overrides *(all optional)*
+
+These variables are needed only when the TLS certificate files cannot be expressed inside a URI string (e.g. custom CA, mutual TLS client certificates, self-signed certs in dev).
+
+| Variable | Description |
+|---|---|
+| `MONGODB_TLS_CA_FILE` | Path to a PEM-encoded CA certificate file. Required when MongoDB uses a private or self-signed CA. Not needed for Atlas. |
+| `MONGODB_TLS_CERT_KEY_FILE` | Path to a PEM file containing the client certificate **and** private key. Required only for x.509 mutual-TLS client authentication. |
+| `MONGODB_TLS_ALLOW_INVALID_CERTS` | Set to `true` to skip server certificate validation. **Dev only — never use in production.** |
 
 ### API Reference
 
