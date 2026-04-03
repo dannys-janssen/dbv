@@ -100,6 +100,7 @@ impl DbClient {
         unique: Option<bool>,
         sparse: Option<bool>,
         ttl: Option<u64>,
+        background: Option<bool>,
     ) -> Result<String, AppError> {
         let coll: Collection<bson::Document> = self.client.database(db).collection(collection);
         let mut opts = IndexOptions::default();
@@ -107,6 +108,7 @@ impl DbClient {
         opts.unique = unique;
         opts.sparse = sparse;
         opts.expire_after = ttl.map(std::time::Duration::from_secs);
+        opts.background = background;
         let model = IndexModel::builder()
             .keys(keys)
             .options(opts)

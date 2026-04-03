@@ -193,6 +193,7 @@ export default function BrowserPage() {
   const [indexName, setIndexName] = useState("");
   const [indexUnique, setIndexUnique] = useState(false);
   const [indexSparse, setIndexSparse] = useState(false);
+  const [indexBackground, setIndexBackground] = useState(true);
   const [indexTtl, setIndexTtl] = useState("");
 
   // Create/Drop dialogs
@@ -934,7 +935,7 @@ export default function BrowserPage() {
                             style={{
                               width: "100%", boxSizing: "border-box",
                               padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
-                              fontFamily: "monospace", outline: "none", background: "#ffffff",
+                              fontFamily: "monospace", outline: "none", background: "#ffffff", color: "#1e293b",
                               border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0",
                             }}
                             placeholder='e.g. {"status":"active"}  or  {"price":{"$gt":20}}'
@@ -956,7 +957,7 @@ export default function BrowserPage() {
                             style={{
                               width: "100%", boxSizing: "border-box",
                               padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
-                              fontFamily: "monospace", outline: "none", background: "#ffffff",
+                              fontFamily: "monospace", outline: "none", background: "#ffffff", color: "#1e293b",
                               border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0",
                             }}
                             placeholder='e.g. {"price":-1}'
@@ -1408,7 +1409,7 @@ export default function BrowserPage() {
                     {indexesLoading ? "Loading…" : `${indexes.length} index${indexes.length !== 1 ? "es" : ""}`}
                   </span>
                   <button
-                    onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexTtl(""); setNewIndexOpen(true); }}
+                    onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexBackground(true); setIndexTtl(""); setNewIndexOpen(true); }}
                     style={{ padding: "6px 14px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
                   >
                     + New Index
@@ -1651,6 +1652,13 @@ export default function BrowserPage() {
                 <input type="checkbox" checked={indexSparse} onChange={(e) => setIndexSparse(e.target.checked)} />
                 Sparse
               </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
+                <input type="checkbox" checked={indexBackground} onChange={(e) => setIndexBackground(e.target.checked)} />
+                <span>
+                  Background
+                  <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "4px" }}>(non-blocking)</span>
+                </span>
+              </label>
             </div>
 
             <label style={modalLabelStyle}>TTL <span style={{ fontWeight: 400, color: "#94a3b8" }}>(seconds, optional)</span></label>
@@ -1674,6 +1682,7 @@ export default function BrowserPage() {
                     name: indexName.trim() || undefined,
                     unique: indexUnique || undefined,
                     sparse: indexSparse || undefined,
+                    background: indexBackground,
                     ttl: indexTtl ? Number(indexTtl) : undefined,
                   })
                     .then(() => { setNewIndexOpen(false); loadIndexes(); })

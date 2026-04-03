@@ -174,7 +174,7 @@ export const createIndex = (
   db: string,
   collection: string,
   keys: Record<string, 1 | -1>,
-  options?: { name?: string; unique?: boolean; sparse?: boolean; ttl?: number }
+  options?: { name?: string; unique?: boolean; sparse?: boolean; ttl?: number; background?: boolean }
 ) =>
   api
     .post(`/databases/${db}/collections/${collection}/indexes`, { keys, ...options })

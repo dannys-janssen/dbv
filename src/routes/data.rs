@@ -258,6 +258,7 @@ pub struct CreateIndexBody {
     pub unique: Option<bool>,
     pub sparse: Option<bool>,
     pub ttl: Option<u64>,
+    pub background: Option<bool>,
 }
 
 pub async fn create_index(
@@ -272,7 +273,7 @@ pub async fn create_index(
         return Err(AppError::BadRequest("Index keys cannot be empty".into()));
     }
     let index_name = state.db
-        .create_index(&db, &collection, keys, body.name, body.unique, body.sparse, body.ttl)
+        .create_index(&db, &collection, keys, body.name, body.unique, body.sparse, body.ttl, body.background)
         .await?;
     Ok((StatusCode::CREATED, Json(json!({ "name": index_name }))))
 }
