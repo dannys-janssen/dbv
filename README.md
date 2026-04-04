@@ -16,6 +16,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Project Structure](#project-structure)
   - [Environment Variables](#environment-variables)
   - [API Reference](#api-reference)
+  - [OpenAPI / Swagger UI](#openapi--swagger-ui)
   - [Kubernetes / Helm](#kubernetes--helm)
 
 ---
@@ -535,6 +536,22 @@ All endpoints are under `/api`.
 2. Register the route in `src/main.rs` inside the `api` router
 3. Add the corresponding typed function in `frontend/src/api/mongo.ts`
 4. Add `pub mod <feature>;` to `src/routes/mod.rs`
+5. Add the new path(s) to `src/openapi.yaml`
+
+### OpenAPI / Swagger UI
+
+The interactive API reference is available at **`/docs`** when the app is running.
+
+- **`GET /docs`** — Swagger UI; loads the spec from `/api/openapi.yaml`
+- **`GET /api/openapi.yaml`** — raw OpenAPI 3.0 spec (no authentication required)
+
+**Testing authenticated endpoints:**
+1. Expand `POST /api/auth/login`, click **Try it out**, enter credentials, execute
+2. Copy the `access_token` from the response
+3. Click **Authorize** (top right), paste the token, click **Authorize**
+4. All subsequent requests will carry the `Authorization: Bearer …` header
+
+The spec is embedded into the binary at compile time from `src/openapi.yaml` — no runtime file access needed.
 
 ### Production Deployment
 

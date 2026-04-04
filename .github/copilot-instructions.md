@@ -43,8 +43,9 @@ browser (HTTPS)
 │       ├── data.rs       # CRUD + aggregate + stats + run_command
 │       ├── schema.rs     # GET schema — samples docs, infers field types
 │       ├── transfer.rs   # GET export, POST import
-│       └── connection.rs # GET /api/connection, POST /api/connection,
-│                         #   POST /api/connection/reconnect
+│       ├── connection.rs # GET /api/connection, POST /api/connection,
+│       │                 #   POST /api/connection/reconnect
+│       └── openapi.rs    # GET /docs (Swagger UI), GET /api/openapi.yaml
 ├── frontend/
 │   ├── src/
 │   │   ├── api/          # client.ts (axios + auth interceptor), mongo.ts
@@ -264,6 +265,16 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
 - The React `dist/` output is served by Axum using `tower-http`'s `ServeDir`.
 - All unmatched routes fall back to `index.html` to support client-side routing.
 - In development, run `npm run dev` in `frontend/` — Vite proxies `/api` to `localhost:8080`.
+
+### OpenAPI / Swagger UI
+
+- The OpenAPI 3.0 spec lives at `src/openapi.yaml` and is embedded into the binary at compile time via `include_str!`.
+- Two routes are served outside the `/api` namespace (no JWT required):
+  - `GET /docs` — Swagger UI (Swagger UI 5, loaded from CDN; topbar hidden; `persistAuthorization: true`)
+  - `GET /api/openapi.yaml` — raw YAML spec
+- Handlers live in `src/routes/openapi.rs` (`swagger_ui`, `openapi_spec`).
+- To test authenticated endpoints in Swagger UI: call `POST /api/auth/login`, copy the `access_token`, click **Authorize**, paste the token (Swagger UI prepends `Bearer ` automatically).
+- When adding or changing routes, update `src/openapi.yaml` to keep the spec in sync.
 
 ### Async
 
