@@ -26,6 +26,7 @@ import {
   buildDocumentSchema,
   buildFilterSchema,
   buildSortSchema,
+  buildProjectionSchema,
   PIPELINE_SCHEMA,
 } from "../utils/mongoSchema";
 import { formatBsonValue } from "../utils/bsonFormat";
@@ -172,6 +173,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [page, setPage] = useState(1);
   const [filterText, setFilterText] = useState("");
   const [sortText, setSortText] = useState("");
+  const [projectionText, setProjectionText] = useState("");
   const [limitVal, setLimitVal] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -218,16 +220,18 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
   useEffect(() => {
     void loader.init().then((monaco) => {
-      const docSchema  = schema ? buildDocumentSchema(schema) : { type: "object" };
-      const filtSchema = schema ? buildFilterSchema(schema)   : { type: "object" };
-      const sortSchema = schema ? buildSortSchema(schema)     : { type: "object" };
+      const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
+      const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
+      const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
+      const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
         schemas: [
-          { uri: "http://dbv/document-schema.json", fileMatch: ["dbv://document"], schema: docSchema },
-          { uri: "http://dbv/filter-schema.json",   fileMatch: ["dbv://filter"],   schema: filtSchema },
-          { uri: "http://dbv/sort-schema.json",     fileMatch: ["dbv://sort"],     schema: sortSchema },
-          { uri: "http://dbv/pipeline-schema.json", fileMatch: ["dbv://pipeline"], schema: PIPELINE_SCHEMA },
+          { uri: "http://dbv/document-schema.json",   fileMatch: ["dbv://document"],   schema: docSchema },
+          { uri: "http://dbv/filter-schema.json",     fileMatch: ["dbv://filter"],     schema: filtSchema },
+          { uri: "http://dbv/sort-schema.json",       fileMatch: ["dbv://sort"],       schema: sortSchema },
+          { uri: "http://dbv/projection-schema.json", fileMatch: ["dbv://projection"], schema: projSchema },
+          { uri: "http://dbv/pipeline-schema.json",   fileMatch: ["dbv://pipeline"],   schema: PIPELINE_SCHEMA },
         ],
       });
     });
@@ -264,14 +268,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     setLoading(true);
     setError("");
     setSelectedIds(new Set());
-    getDocuments(db, col, page, limitVal, filterText || undefined, sortText || undefined)
+    getDocuments(db, col, page, limitVal, filterText || undefined, sortText || undefined, projectionText || undefined)
       .then((r) => {
         setDocuments(r.documents);
         setTotal(r.total);
       })
       .catch((e) => setError((e as Error).message))
       .finally(() => setLoading(false));
-  }, [db, col, page, limitVal, filterText, sortText]);
+  }, [db, col, page, limitVal, filterText, sortText, projectionText]);
 
   useEffect(() => { loadDocumentsRef.current = loadDocuments; }, [loadDocuments]);
 
@@ -501,8 +505,10 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               {(() => {
                 const filterValid = !filterText.trim() || (() => { try { JSON.parse(filterText); return true; } catch { return false; } })();
                 const sortValid   = !sortText.trim()   || (() => { try { JSON.parse(sortText);   return true; } catch { return false; } })();
+                const projValid   = !projectionText.trim() || (() => { try { JSON.parse(projectionText); return true; } catch { return false; } })();
                 const hasFilter   = !!filterText.trim();
                 const hasSort     = !!sortText.trim();
+                const hasProj     = !!projectionText.trim();
                 const monoOpts = {
                   minimap: { enabled: false },
                   lineNumbers: "off" as const,
@@ -584,6 +590,38 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         </div>
                       </div>
 
+                      {/* Projection */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Projection</span>
+                          {hasProj && projValid && (
+                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>active</span>
+                          )}
+                          {hasProj && !projValid && (
+                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                          )}
+                        </div>
+                        <div style={{
+                          border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                          borderRadius: "6px", overflow: "hidden", background: "#ffffff",
+                        }}>
+                          <Editor
+                            height="68px"
+                            language="json"
+                            path="dbv://projection"
+                            value={projectionText}
+                            onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }}
+                            options={monoOpts}
+                            onMount={(editor, monaco) => {
+                              editor.addCommand(
+                                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                                () => loadDocumentsRef.current()
+                              );
+                            }}
+                          />
+                        </div>
+                      </div>
+
                       {/* Limit */}
                       <div style={{ flexShrink: 0 }}>
                         <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>Limit</div>
@@ -601,14 +639,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                       <button
                         onClick={loadDocuments}
-                        disabled={!filterValid || !sortValid}
-                        style={{ background: filterValid && sortValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}
+                        disabled={!filterValid || !sortValid || !projValid}
+                        style={{ background: filterValid && sortValid && projValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid && projValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}
                       >
                         Apply
                       </button>
-                      {(hasFilter || hasSort) && (
+                      {(hasFilter || hasSort || hasProj) && (
                         <button
-                          onClick={() => { setFilterText(""); setSortText(""); setPage(1); }}
+                          onClick={() => { setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
                           style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
                         >
                           Clear
@@ -866,8 +904,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                 fontFamily: FONT,
                               }}
                             >
-                              {filterText
-                                ? "Try adjusting your filter."
+                              {filterText || projectionText
+                                ? "Try adjusting your filter or projection."
                                 : "This collection is empty."}
                             </p>
                           </td>

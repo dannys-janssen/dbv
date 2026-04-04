@@ -38,6 +38,7 @@ pub struct PaginationParams {
     pub limit: i64,
     pub filter: Option<String>,
     pub sort: Option<String>,
+    pub projection: Option<String>,
 }
 
 fn default_page() -> u64 {
@@ -138,12 +139,19 @@ pub async fn list_documents(
         .and_then(|s| serde_json::from_str(s).ok())
         .and_then(|v: Value| json_to_doc(v).ok());
 
+    let projection: Option<Document> = params
+        .projection
+        .as_deref()
+        .and_then(|p| serde_json::from_str(p).ok())
+        .and_then(|v: Value| json_to_doc(v).ok());
+
     let skip = (params.page.saturating_sub(1)) * (params.limit as u64);
 
     let options = FindOptions::builder()
         .skip(skip)
         .limit(params.limit)
         .sort(sort)
+        .projection(projection)
         .build();
 
     let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);

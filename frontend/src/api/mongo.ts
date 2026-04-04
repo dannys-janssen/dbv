@@ -43,11 +43,12 @@ export const getDocuments = (
   page = 1,
   limit = 20,
   filter?: string,
-  sort?: string
+  sort?: string,
+  projection?: string
 ) =>
   api
     .get<DocumentPage>(`/databases/${db}/collections/${collection}/documents`, {
-      params: { page, limit, filter, sort },
+      params: { page, limit, filter, sort, projection },
     })
     .then((r) => r.data);
 

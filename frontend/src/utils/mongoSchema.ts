@@ -202,7 +202,27 @@ export function buildSortSchema(schema: CollectionSchema): object {
   };
 }
 
-// Static JSON Schema for the aggregation pipeline editor
+// Build a JSON Schema for the projection editor
+export function buildProjectionSchema(schema: CollectionSchema): object {
+  const properties: Record<string, object> = {
+    _id: { type: "integer", enum: [0, 1], description: "_id field: 1 = include, 0 = exclude" },
+  };
+  for (const field of schema.fields) {
+    if (field.path.includes(".")) continue;
+    properties[field.path] = {
+      type: "integer",
+      enum: [0, 1],
+      description: `${field.path}: 1 = include, 0 = exclude`,
+    };
+  }
+  return {
+    type: "object",
+    properties,
+    additionalProperties: { type: "integer", enum: [0, 1] },
+  };
+}
+
+
 export const PIPELINE_SCHEMA = {
   type: "array",
   items: {
