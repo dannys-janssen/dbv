@@ -188,6 +188,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
   const [pipeline, setPipeline] = useState("[]");
   const [aggResults, setAggResults] = useState<Record<string, unknown>[]>([]);
+  const [aggError, setAggError] = useState("");
 
   const [schema, setSchema] = useState<CollectionSchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
@@ -332,8 +333,13 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       const p = JSON.parse(pipeline) as unknown[];
       const r = await aggregate(db, col, p);
       setAggResults(r.results);
+      setAggError("");
     } catch (e: unknown) {
-      alert("Error: " + (e as Error).message);
+      setAggResults([]);
+      // Prefer the descriptive message from the backend response body over
+      // the generic axios "Request failed with status code 5xx" message.
+      const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setAggError(axiosBody ?? (e as Error).message ?? "Unknown error");
     }
   }, [pipeline, db, col]);
 
@@ -1132,6 +1138,22 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               >
                 Run Pipeline
               </button>
+              {aggError && (
+                <div style={{
+                  marginTop: "12px",
+                  background: "#fef2f2",
+                  border: "1px solid #fca5a5",
+                  borderRadius: "6px",
+                  padding: "12px 14px",
+                  fontSize: "13px",
+                  color: "#dc2626",
+                  fontFamily: "monospace",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}>
+                  {aggError}
+                </div>
+              )}
               {aggResults.length > 0 && (
                 <pre
                   style={{
