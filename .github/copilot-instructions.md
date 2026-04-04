@@ -276,6 +276,17 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
 - To test authenticated endpoints in Swagger UI: call `POST /api/auth/login`, copy the `access_token`, click **Authorize**, paste the token (Swagger UI prepends `Bearer ` automatically).
 - When adding or changing routes, update `src/openapi.yaml` to keep the spec in sync.
 
+### Internationalisation (i18n)
+
+The UI is fully localised via **react-i18next**. Translation files live in `frontend/src/locales/`.
+
+Supported languages: English (en), German (de), French (fr), Danish (da), Dutch (nl), Spanish (es), Italian (it), Portuguese (pt), Arabic (ar), Hindi (hi), Japanese (ja), Simplified Chinese (zh-CN).
+
+- Language is auto-detected from the browser (`navigator.language`) on first visit, then persisted to `localStorage` key `dbv-language`.
+- The language selector (flag + name dropdown) is shown in the BrowserPage header and on the Login card.
+- `frontend/src/i18n.ts` — i18next configuration and `LANGUAGES` export.
+- To add a new language: copy `en.json`, translate all values, add the locale to `LANGUAGES` and the `resources` map in `i18n.ts`.
+
 ### Async
 
 - All I/O (MongoDB, HTTP calls to Keycloak) must be `async`/`.await`.

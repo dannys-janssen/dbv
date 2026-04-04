@@ -16,6 +16,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Project Structure](#project-structure)
   - [Environment Variables](#environment-variables)
   - [API Reference](#api-reference)
+  - [Internationalisation (i18n)](#internationalisation-i18n)
   - [OpenAPI / Swagger UI](#openapi--swagger-ui)
   - [Kubernetes / Helm](#kubernetes--helm)
 
@@ -537,6 +538,30 @@ All endpoints are under `/api`.
 3. Add the corresponding typed function in `frontend/src/api/mongo.ts`
 4. Add `pub mod <feature>;` to `src/routes/mod.rs`
 5. Add the new path(s) to `src/openapi.yaml`
+
+### Internationalisation (i18n)
+
+The UI is fully localised via **react-i18next**. Translation files live in `frontend/src/locales/`.
+
+| Code | Language |
+|---|---|
+| `en` | English (US) |
+| `de` | Deutsch |
+| `fr` | Français |
+| `da` | Dansk |
+| `nl` | Nederlands |
+| `es` | Español |
+| `it` | Italiano |
+| `pt` | Português |
+| `ar` | العربية |
+| `hi` | हिन्दी |
+| `ja` | 日本語 |
+| `zh-CN` | 中文 (Simplified) |
+
+- Language is auto-detected from the browser (`navigator.language`) on first visit, then persisted to `localStorage` key `dbv-language`.
+- The language selector (flag + name dropdown) is shown in the BrowserPage header and on the Login card.
+- `frontend/src/i18n.ts` — i18next configuration and `LANGUAGES` export.
+- To add a new language: copy `en.json`, translate all values, add the locale to `LANGUAGES` and the `resources` map in `i18n.ts`.
 
 ### OpenAPI / Swagger UI
 
