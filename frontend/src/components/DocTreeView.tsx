@@ -19,6 +19,8 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const indent = depth * 18;
 
+  const contentId = `tree-content-${depth}-${String(nodeKey)}`;
+
   if (isBsonPrimitive(value)) {
     return (
       <div
@@ -48,6 +50,10 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
   return (
     <div>
       <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-controls={contentId}
         style={{
           display: "flex",
           alignItems: "center",
@@ -58,8 +64,14 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
           userSelect: "none",
         }}
         onClick={() => setIsExpanded((e) => !e)}
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            setIsExpanded((ex) => !ex);
+          }
+        }}
       >
-        <span style={{ width: "16px", textAlign: "center", fontSize: "10px", color: "#94a3b8", flexShrink: 0 }}>
+        <span aria-hidden="true" style={{ width: "16px", textAlign: "center", fontSize: "10px", color: "#94a3b8", flexShrink: 0 }}>
           {isExpanded ? "▼" : "▶"}
         </span>
         <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>
@@ -70,7 +82,7 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
         </span>
       </div>
       {isExpanded && (
-        <div style={{ borderLeft: "1px dashed #e2e8f0", marginLeft: indent + 8 }}>
+        <div id={contentId} style={{ borderLeft: "1px dashed #e2e8f0", marginLeft: indent + 8 }}>
           {children.map(({ k, v }) => (
             <TreeNode
               key={String(k)}
@@ -122,6 +134,10 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
     >
       {/* Header */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        aria-controls={`doc-body-${String(idValue)}`}
         style={{
           display: "flex",
           alignItems: "center",
@@ -132,6 +148,12 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           cursor: "pointer",
         }}
         onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            setOpen((o) => !o);
+          }
+        }}
       >
         <div onClick={(e) => e.stopPropagation()}>
           <input
@@ -142,7 +164,7 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           />
         </div>
 
-        <span style={{ fontSize: "10px", color: "#94a3b8", width: "14px", textAlign: "center", flexShrink: 0 }}>
+        <span aria-hidden="true" style={{ fontSize: "10px", color: "#94a3b8", width: "14px", textAlign: "center", flexShrink: 0 }}>
           {open ? "▼" : "▶"}
         </span>
 
@@ -174,7 +196,7 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
 
       {/* Body */}
       {open && (
-        <div style={{ padding: "6px 12px 10px" }}>
+        <div id={`doc-body-${String(idValue)}`} style={{ padding: "6px 12px 10px" }}>
           {/* Expand / collapse all bar */}
           <div style={{ display: "flex", gap: "10px", marginBottom: "6px", paddingBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
             <button
@@ -270,7 +292,7 @@ export default function DocTreeView({
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   return (
-    <div>
+    <div role="tree">
       {/* Select-all bar */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
         <input
@@ -288,15 +310,16 @@ export default function DocTreeView({
       {documents.map((doc) => {
         const id = getDocId(doc);
         return (
-          <DocCard
-            key={id}
-            doc={doc}
-            isSelected={selectedIds.has(id)}
-            canWrite={canWrite}
-            onSelect={(checked) => onSelectOne(id, checked)}
-            onEdit={() => onEdit(doc)}
-            onDelete={() => onDelete(id)}
-          />
+          <div role="treeitem" key={id}>
+            <DocCard
+              doc={doc}
+              isSelected={selectedIds.has(id)}
+              canWrite={canWrite}
+              onSelect={(checked) => onSelectOne(id, checked)}
+              onEdit={() => onEdit(doc)}
+              onDelete={() => onDelete(id)}
+            />
+          </div>
         );
       })}
     </div>

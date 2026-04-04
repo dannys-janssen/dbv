@@ -48,6 +48,7 @@ export default function LoginPage() {
 
   return (
     <div
+      id="root-login"
       style={{
         display: "flex",
         alignItems: "center",
@@ -57,6 +58,8 @@ export default function LoginPage() {
         fontFamily: FONT,
       }}
     >
+      <a href="#login-form" className="skip-link">{t("a11y.skipToContent")}</a>
+      <main>
       <div
         style={{
           background: "#ffffff",
@@ -69,6 +72,7 @@ export default function LoginPage() {
       >
         {/* Logo row */}
         <div
+          aria-hidden="true"
           style={{
             display: "flex",
             alignItems: "center",
@@ -119,9 +123,10 @@ export default function LoginPage() {
           {t("auth.login.subtitle")}
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form id="login-form" onSubmit={handleSubmit}>
           <div style={{ marginBottom: "16px" }}>
             <label
+              htmlFor="login-username"
               style={{
                 display: "block",
                 fontSize: "13px",
@@ -134,6 +139,7 @@ export default function LoginPage() {
               {t("form.labels.username")}
             </label>
             <input
+              id="login-username"
               type="text"
               autoComplete="username"
               value={username}
@@ -155,6 +161,7 @@ export default function LoginPage() {
 
           <div style={{ marginBottom: "16px" }}>
             <label
+              htmlFor="login-password"
               style={{
                 display: "block",
                 fontSize: "13px",
@@ -167,6 +174,7 @@ export default function LoginPage() {
               {t("form.labels.password")}
             </label>
             <input
+              id="login-password"
               type="password"
               autoComplete="current-password"
               value={password}
@@ -188,6 +196,8 @@ export default function LoginPage() {
 
           {error && (
             <p
+              role="alert"
+              aria-live="assertive"
               style={{
                 fontSize: "13px",
                 color: "#dc2626",
@@ -202,6 +212,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
+            aria-busy={loading}
             style={{
               width: "100%",
               background: "#2563eb",
@@ -236,6 +247,7 @@ export default function LoginPage() {
           <LanguageSelector />
         </div>
       </div>
+      </main>
     </div>
   );
 }

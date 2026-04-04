@@ -291,6 +291,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           <select
             value={field.type}
             onChange={(e) => handleType(e.target.value)}
+            aria-label={`${t("form.label.type")} for ${field.key}`}
             style={{
               ...inputStyle,
               width: "auto",
@@ -308,7 +309,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
         {/* Null toggle */}
         {!readOnly && (
           <label style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8, fontSize: 11, color: "#64748b", cursor: "pointer" }}>
-            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "#64748b" }} />
+            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "#64748b" }} aria-label={`${t("form.button.setNull")} ${field.key}`} />
             null
           </label>
         )}
@@ -318,6 +319,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           <button
             onClick={() => onRemove(field.key)}
             title={t("form.button.removeField.title")}
+            aria-label={`${t("form.button.remove")} ${field.key}`}
             style={{
               marginLeft: 8,
               background: "none",
@@ -365,6 +367,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
                 value={datePart}
                 onChange={(e) => handleValue(`${e.target.value}|${timePart || "00:00:00"}`)}
                 style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                aria-label={`${t("form.label.date")} for ${field.key}`}
               />
               <input
                 type="time"
@@ -372,6 +375,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
                 onChange={(e) => handleValue(`${datePart}|${e.target.value}`)}
                 step="1"
                 style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                aria-label={`${t("form.label.time")} for ${field.key}`}
               />
               <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>{t("form.label.utc")}</span>
             </div>
@@ -563,11 +567,13 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             onChange={(e) => { setNewFieldKey(e.target.value); setAddError(""); }}
             onKeyDown={(e) => { if (e.key === "Enter") handleAddField(); }}
             style={{ ...inputStyle, flex: 2 }}
+            aria-label={t("form.label.newFieldName")}
           />
           <select
             value={newFieldType}
             onChange={(e) => setNewFieldType(e.target.value)}
             style={{ ...inputStyle, flex: 1 }}
+            aria-label={t("form.label.newFieldType")}
           >
             {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "object", "array"].map((t) => (
               <option key={t} value={t}>{t}</option>

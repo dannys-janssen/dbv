@@ -160,7 +160,9 @@ export default function CommandsView({ db, collection }: Props) {
         overflowY: "auto",
       }}>
         <div style={{ padding: "10px 12px 6px" }}>
+          <label htmlFor="cmd-search" className="sr-only">{t("commands.search.label")}</label>
           <input
+            id="cmd-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("commands.search.placeholder")}
@@ -176,14 +178,15 @@ export default function CommandsView({ db, collection }: Props) {
 
         {filteredPalette.map((cat) => (
           <div key={cat.label}>
-            <div style={{
+            <h3 style={{
               padding: "8px 12px 4px",
               fontSize: "10px", fontWeight: 700,
               color: "#94a3b8", textTransform: "uppercase",
               letterSpacing: "0.06em", fontFamily: FONT,
+              margin: 0,
             }}>
               {t(`commands.category.${cat.label.toLowerCase()}`)}
-            </div>
+            </h3>
             {cat.commands.map((cmd) => (
               <button
                 key={cmd.name}
@@ -228,6 +231,7 @@ export default function CommandsView({ db, collection }: Props) {
               checked={adminFlag}
               onChange={(e) => setAdminFlag(e.target.checked)}
               style={{ accentColor: "#2563eb" }}
+              aria-label={t("commands.checkbox.useAdminDb")}
             />
             {t("commands.checkbox.useAdminDb")}
           </label>
@@ -235,6 +239,7 @@ export default function CommandsView({ db, collection }: Props) {
           <button
             onClick={() => void executeCommand()}
             disabled={running || !commandValid}
+            aria-busy={running}
             style={{
               marginLeft: "auto",
               padding: "7px 16px", borderRadius: "6px",
@@ -291,23 +296,26 @@ export default function CommandsView({ db, collection }: Props) {
               {t("commands.label.result")}
             </span>
             {error && (
-              <span style={{ fontSize: "11px", background: "#fee2e2", color: "#dc2626", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: "#fee2e2", color: "#dc2626", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.error")}
               </span>
             )}
             {result && !error && (
-              <span style={{ fontSize: "11px", background: "#dcfce7", color: "#166534", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: "#dcfce7", color: "#166534", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.success")}
               </span>
             )}
           </div>
           {error ? (
-            <div style={{
-              flex: 1, background: "#fef2f2", border: "1px solid #fca5a5",
-              borderRadius: "6px", padding: "12px", color: "#dc2626",
-              fontSize: "13px", fontFamily: "monospace", overflowY: "auto",
-              whiteSpace: "pre-wrap", wordBreak: "break-all",
-            }}>
+            <div
+              role="alert"
+              style={{
+                flex: 1, background: "#fef2f2", border: "1px solid #fca5a5",
+                borderRadius: "6px", padding: "12px", color: "#dc2626",
+                fontSize: "13px", fontFamily: "monospace", overflowY: "auto",
+                whiteSpace: "pre-wrap", wordBreak: "break-all",
+              }}
+            >
               {error}
             </div>
           ) : (

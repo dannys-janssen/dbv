@@ -20,7 +20,7 @@ export function LanguageSelector() {
         fontFamily: FONT,
         cursor: 'pointer',
       }}
-      title="Language"
+      aria-label="Select language"
     >
       {LANGUAGES.map((lang) => (
         <option key={lang.code} value={lang.code}>

@@ -20,6 +20,27 @@ import { LanguageSelector } from "../components/LanguageSelector";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
+function getFocusable(container: HTMLElement): HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  );
+}
+
+function handleFocusTrap(e: React.KeyboardEvent<HTMLDivElement>, container: HTMLElement) {
+  if (e.key !== "Tab") return;
+  const focusable = getFocusable(container);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey) {
+    if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+  } else {
+    if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+}
+
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -160,6 +181,16 @@ export default function BrowserPage() {
   // ── Sidebar resize ──
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const isResizing = useRef(false);
+
+  // ── Modal focus management ──
+  const newDbModalRef = useRef<HTMLDivElement>(null);
+  const newColModalRef = useRef<HTMLDivElement>(null);
+  const dbStatsModalRef = useRef<HTMLDivElement>(null);
+  const changeConnModalRef = useRef<HTMLDivElement>(null);
+  const newDbOpenerRef = useRef<HTMLElement | null>(null);
+  const newColOpenerRef = useRef<HTMLElement | null>(null);
+  const dbStatsOpenerRef = useRef<HTMLElement | null>(null);
+  const changeConnOpenerRef = useRef<HTMLElement | null>(null);
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -350,6 +381,39 @@ export default function BrowserPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [newDbOpen, newColOpen, dbStatsOpen, changeConnOpen]);
 
+  // Modal focus management
+  useEffect(() => {
+    if (newDbOpen) {
+      setTimeout(() => getFocusable(newDbModalRef.current!)[0]?.focus(), 0);
+    } else {
+      newDbOpenerRef.current?.focus();
+    }
+  }, [newDbOpen]);
+
+  useEffect(() => {
+    if (newColOpen) {
+      setTimeout(() => getFocusable(newColModalRef.current!)[0]?.focus(), 0);
+    } else {
+      newColOpenerRef.current?.focus();
+    }
+  }, [newColOpen]);
+
+  useEffect(() => {
+    if (dbStatsOpen) {
+      setTimeout(() => getFocusable(dbStatsModalRef.current!)[0]?.focus(), 0);
+    } else {
+      dbStatsOpenerRef.current?.focus();
+    }
+  }, [dbStatsOpen]);
+
+  useEffect(() => {
+    if (changeConnOpen) {
+      setTimeout(() => getFocusable(changeConnModalRef.current!)[0]?.focus(), 0);
+    } else {
+      changeConnOpenerRef.current?.focus();
+    }
+  }, [changeConnOpen]);
+
   const handleReconnect = async () => {
     setConnLoading(true);
     try {
@@ -420,6 +484,7 @@ export default function BrowserPage() {
         overflow: "hidden",
       }}
     >
+      <a href="#main-content" className="skip-link">{t("a11y.skipToContent")}</a>
       {/* ── Sidebar ── */}
       <aside
         style={{
@@ -537,7 +602,8 @@ export default function BrowserPage() {
               {t("connection.button.reconnect.label")}
             </button>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                changeConnOpenerRef.current = e.currentTarget as HTMLElement;
                 setNewUri(connInfo?.uri ?? "");
                 setNewDefaultDb(connInfo?.default_db ?? "");
                 setNewTlsCaFile(connInfo?.tls_ca_file ?? "");
@@ -576,7 +642,7 @@ export default function BrowserPage() {
             <span style={sectionLabelStyle}>{t("nav.section.databases")}</span>
             {canWrite && (
               <button
-                onClick={() => setNewDbOpen(true)}
+                onClick={(e) => { newDbOpenerRef.current = e.currentTarget as HTMLElement; setNewDbOpen(true); }}
                 style={{
                   background: "none",
                   border: "none",
@@ -587,6 +653,7 @@ export default function BrowserPage() {
                   padding: "0 2px",
                 }}
                 title={t("database.button.create.title")}
+                aria-label={t("database.button.create.title")}
               >
                 ＋
               </button>
@@ -622,6 +689,10 @@ export default function BrowserPage() {
                     onClick={() => setSelectedDb(db)}
                     onMouseEnter={() => setHoveredDb(db)}
                     onMouseLeave={() => setHoveredDb(null)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedDb(db); } }}
+                    aria-label={t("a11y.openCollection", { name: db })}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -656,6 +727,7 @@ export default function BrowserPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          dbStatsOpenerRef.current = e.currentTarget as HTMLElement;
                           setDbStats(null);
                           setDbStatsOpen(true);
                           setDbStatsLoading(true);
@@ -674,6 +746,7 @@ export default function BrowserPage() {
                           lineHeight: 1,
                         }}
                         title={t("database.button.stats.title", { db })}
+                        aria-label={t("a11y.collectionStats", { name: db })}
                       >
                         ℹ
                       </button>
@@ -695,6 +768,7 @@ export default function BrowserPage() {
                           lineHeight: 1,
                         }}
                         title={t("database.button.drop.title", { db })}
+                        aria-label={t("a11y.dropDatabase", { name: db })}
                       >
                         🗑
                       </button>
@@ -725,7 +799,7 @@ export default function BrowserPage() {
               <span style={sectionLabelStyle}>{t("nav.section.collections")}</span>
               {canWrite && (
                 <button
-                  onClick={() => setNewColOpen(true)}
+                  onClick={(e) => { newColOpenerRef.current = e.currentTarget as HTMLElement; setNewColOpen(true); }}
                   style={{
                     background: "none",
                     border: "none",
@@ -736,6 +810,7 @@ export default function BrowserPage() {
                     padding: "0 2px",
                   }}
                   title={t("collection.button.create.title")}
+                  aria-label={t("collection.button.create.title")}
                 >
                   ＋
                 </button>
@@ -771,6 +846,10 @@ export default function BrowserPage() {
                       onClick={() => openCollection(selectedDb, col)}
                       onMouseEnter={() => setHoveredCol(col)}
                       onMouseLeave={() => setHoveredCol(null)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCollection(selectedDb, col); } }}
+                      aria-label={t("a11y.openCollection", { name: col })}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -816,6 +895,7 @@ export default function BrowserPage() {
                             lineHeight: 1,
                           }}
                           title={t("collection.button.drop.title", { col })}
+                          aria-label={t("a11y.dropCollection", { name: col })}
                         >
                           ✕
                         </button>
@@ -847,6 +927,7 @@ export default function BrowserPage() {
 
       {/* ── Main area ── */}
       <main
+        id="main-content"
         style={{
           flex: 1,
           background: "#f8fafc",
@@ -858,6 +939,8 @@ export default function BrowserPage() {
         {/* ── Connection error banner ── */}
         {connInfo?.status === "error" && (
           <div
+            role="alert"
+            aria-live="assertive"
             style={{
               background: "#fef2f2",
               borderBottom: "1px solid #fecaca",
@@ -891,6 +974,8 @@ export default function BrowserPage() {
         )}
         {/* ── Tab bar ── */}
         <div
+          role="tablist"
+          aria-label={t("a11y.tabList")}
           style={{
             background: "#f1f5f9",
             borderBottom: "1px solid #e2e8f0",
@@ -907,6 +992,11 @@ export default function BrowserPage() {
             return (
               <div
                 key={tab.id}
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-selected={isActive}
+                aria-controls={`panel-${tab.id}`}
+                tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
                 style={{
                   display: "flex",
@@ -932,34 +1022,39 @@ export default function BrowserPage() {
               >
                 <span>{label}</span>
                 {showClose && (
-                  <span
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       closeTab(tab.id);
                     }}
                     style={{
+                      background: "none",
+                      border: "none",
                       fontSize: "16px",
                       color: "#94a3b8",
                       lineHeight: 1,
                       padding: "0 2px",
                       cursor: "pointer",
                     }}
+                    aria-label={t("a11y.closeTab", { name: label })}
                     title={t("tabs.button.close.title")}
                   >
                     ×
-                  </span>
+                  </button>
                 )}
               </div>
             );
           })}
           {/* + New tab button */}
-          <div
+          <button
             onClick={() => {
               const id = `tab-${Date.now()}`;
               setTabs((prev) => [...prev, { id, db: "", col: "" }]);
               setActiveTabId(id);
             }}
             style={{
+              background: "none",
+              border: "none",
               display: "flex",
               alignItems: "center",
               padding: "8px 12px",
@@ -970,30 +1065,47 @@ export default function BrowserPage() {
               userSelect: "none",
               flexShrink: 0,
             }}
+            aria-label={t("a11y.newTab")}
             title={t("tabs.button.new.title")}
           >
             +
-          </div>
+          </button>
         </div>
 
-        {/* ── Content area (all tabs rendered, shown/hidden via visible prop) ── */}
+        {/* ── Content area (all tabs rendered, shown/hidden via tabpanel) ── */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {tabs.map((tab) => (
-            <CollectionView
+            <div
               key={tab.id}
-              db={tab.db}
-              col={tab.col}
-              visible={tab.id === activeTabId}
-            />
+              role="tabpanel"
+              id={`panel-${tab.id}`}
+              aria-labelledby={`tab-${tab.id}`}
+              tabIndex={0}
+              style={{ flex: 1, display: tab.id === activeTabId ? "flex" : "none", flexDirection: "column", overflow: "hidden" }}
+            >
+              <CollectionView
+                db={tab.db}
+                col={tab.col}
+                visible={tab.id === activeTabId}
+              />
+            </div>
           ))}
         </div>
       </main>
 
       {/* ── Create Database modal ── */}
       {newDbOpen && (
-        <div style={overlayStyle}>
-          <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>{t("modals.createDatabase.title")}</h3>
+        <div role="presentation" style={overlayStyle} onClick={() => setNewDbOpen(false)}>
+          <div
+            ref={newDbModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-createdb-title"
+            style={modalBaseStyle}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => newDbModalRef.current && handleFocusTrap(e, newDbModalRef.current)}
+          >
+            <h3 id="modal-createdb-title" style={modalTitleStyle}>{t("modals.createDatabase.title")}</h3>
             <p style={modalSubtitleStyle}>
               {t("modals.createDatabase.subtitle")}
             </p>
@@ -1032,9 +1144,17 @@ export default function BrowserPage() {
 
       {/* ── Create Collection modal ── */}
       {newColOpen && (
-        <div style={overlayStyle}>
-          <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>{t("modals.createCollection.title")}</h3>
+        <div role="presentation" style={overlayStyle} onClick={() => setNewColOpen(false)}>
+          <div
+            ref={newColModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-createcol-title"
+            style={modalBaseStyle}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => newColModalRef.current && handleFocusTrap(e, newColModalRef.current)}
+          >
+            <h3 id="modal-createcol-title" style={modalTitleStyle}>{t("modals.createCollection.title")}</h3>
             <p style={modalSubtitleStyle}>
               {t("modals.createCollection.subtitle")} <strong>{selectedDb}</strong>.
             </p>
@@ -1069,9 +1189,17 @@ export default function BrowserPage() {
 
       {/* ── Database stats modal ── */}
       {dbStatsOpen && (
-        <div style={overlayStyle}>
-          <div style={{ ...modalBaseStyle, width: "520px" }}>
-            <h3 style={modalTitleStyle}>{t("modals.dbStats.title")} {selectedDb}</h3>
+        <div role="presentation" style={overlayStyle} onClick={() => setDbStatsOpen(false)}>
+          <div
+            ref={dbStatsModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-dbstats-title"
+            style={{ ...modalBaseStyle, width: "520px" }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => dbStatsModalRef.current && handleFocusTrap(e, dbStatsModalRef.current)}
+          >
+            <h3 id="modal-dbstats-title" style={modalTitleStyle}>{t("modals.dbStats.title")} {selectedDb}</h3>
             <p style={modalSubtitleStyle}>{t("modals.dbStats.subtitle")}</p>
 
             {dbStatsLoading ? (
@@ -1107,9 +1235,17 @@ export default function BrowserPage() {
 
       {/* ── Change Connection modal ── */}
       {changeConnOpen && (
-        <div style={overlayStyle}>
-          <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>{t("modals.changeConnection.title")}</h3>
+        <div role="presentation" style={overlayStyle} onClick={() => { setChangeConnOpen(false); setConnError(""); }}>
+          <div
+            ref={changeConnModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-changeconn-title"
+            style={modalBaseStyle}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => changeConnModalRef.current && handleFocusTrap(e, changeConnModalRef.current)}
+          >
+            <h3 id="modal-changeconn-title" style={modalTitleStyle}>{t("modals.changeConnection.title")}</h3>
             <p style={modalSubtitleStyle}>
               {t("modals.changeConnection.subtitle")}
             </p>
@@ -1153,7 +1289,7 @@ export default function BrowserPage() {
               <span style={{ color: "#ef4444", fontSize: 11, fontWeight: 600 }}>{t("modals.changeConnection.warning.insecure")}</span>
             </label>
             {connError && (
-              <p style={{ color: "#dc2626", fontSize: "13px", margin: "-8px 0 12px", fontFamily: FONT }}>
+              <p role="alert" style={{ color: "#dc2626", fontSize: "13px", margin: "-8px 0 12px", fontFamily: FONT }}>
                 {connError}
               </p>
             )}

@@ -37,6 +37,7 @@ export default function SchemaViewer({ fields, sampledDocs }: Props) {
         })}
       </p>
       <table style={styles.table}>
+        <caption className="sr-only">Schema fields</caption>
         <thead>
           <tr>
             <th style={styles.th}>{t("table.header.fieldPath")}</th>
@@ -53,21 +54,26 @@ export default function SchemaViewer({ fields, sampledDocs }: Props) {
               </td>
               <td style={styles.td}>
                 <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
-                  {f.types.map((t) => (
+                  {f.types.map((typeName) => (
                     <span
-                      key={t}
+                      key={typeName}
                       style={{
                         ...styles.badge,
-                        background: TYPE_COLORS[t] ?? "#6b7280",
+                        background: TYPE_COLORS[typeName] ?? "#6b7280",
                       }}
+                      aria-label={`Type: ${typeName}`}
                     >
-                      {t}
+                      {typeName}
                     </span>
                   ))}
                 </div>
               </td>
               <td style={{ ...styles.td, textAlign: "right" }}>
-                <div style={styles.coverageBar}>
+                <div
+                  style={styles.coverageBar}
+                  role="img"
+                  aria-label={`Coverage: ${Math.round(f.coverage * 100)}%`}
+                >
                   <div
                     style={{
                       ...styles.coverageFill,
@@ -80,7 +86,9 @@ export default function SchemaViewer({ fields, sampledDocs }: Props) {
                 </div>
               </td>
               <td style={{ ...styles.td, textAlign: "center" }}>
-                {f.nullable ? "⚠️" : "—"}
+                {f.nullable
+                  ? <span aria-label={t("schema.label.nullable")} title={t("schema.label.nullable")}>⚠️</span>
+                  : <span aria-hidden="true">—</span>}
               </td>
             </tr>
           ))}

@@ -117,10 +117,10 @@
   },
   "form": {
     "labels": { "username": "Username", "password": "Password", "fieldName": "Field name" },
-    "button": { "removeField": { "title": "Remove field" }, "remove": "×" },
+    "button": { "removeField": { "title": "Remove field" }, "remove": "×", "setNull": "Set to null:" },
     "value": { "null": "null" },
     "option": { "true": "true", "false": "false" },
-    "label": { "utc": "UTC" },
+    "label": { "utc": "UTC", "newFieldName": "New field name", "newFieldType": "New field type", "date": "Date", "time": "Time", "type": "Type" },
     "placeholder": { "objectId": "24-character hex string", "jsonValue": "JSON value" },
     "section": { "addField": "Add field" },
     "validation": { "fieldExists": "Field \"{{key}}\" already exists.", "fieldNameRequired": "Field name is required." }
@@ -172,7 +172,7 @@
     "placeholder": { "result": "// Run a command to see results" }
   },
   "schema": {
-    "label": { "sampled": "Sampled", "document": "document", "field": "field" },
+    "label": { "sampled": "Sampled", "document": "document", "field": "field", "nullable": "nullable" },
     "plural": { "documents": "s", "fields": "s" },
     "inferring": "Inferring schema…",
     "unavailable": "No schema data available.",
@@ -200,7 +200,7 @@
     "section": { "indexSizes": "Index sizes" }
   },
   "commands": {
-    "search": { "placeholder": "Search commands…" },
+    "search": { "placeholder": "Search commands…", "label": "Search commands" },
     "category": { "server": "Server", "database": "Database", "collection": "Collection", "replication": "Replication", "administration": "Administration" },
     "description": {
       "ping": "Test server connectivity",
@@ -266,5 +266,15 @@
       "databaseNeeded": "Choose a database from the sidebar to get started."
     }
   },
-  "language": { "label": "Language" }
+  "language": { "label": "Language" },
+  "a11y": {
+    "skipToContent": "Skip to main content",
+    "tabList": "Open tabs",
+    "closeTab": "Close tab {{name}}",
+    "newTab": "New tab",
+    "collectionStats": "Collection stats for {{name}}",
+    "dropCollection": "Drop collection {{name}}",
+    "dropDatabase": "Drop database {{name}}",
+    "openCollection": "Open collection {{name}}"
+  }
 }
