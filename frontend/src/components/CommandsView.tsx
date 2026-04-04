@@ -121,7 +121,8 @@ export default function CommandsView({ db, collection }: Props) {
       const res = await runDbCommand(db, parsed, adminFlag);
       setResult(JSON.stringify(res, null, 2));
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const axiosErr = e as { response?: { data?: { error?: string } }; message?: string };
+      const msg = axiosErr.response?.data?.error ?? (e instanceof Error ? e.message : String(e));
       setError(msg);
     } finally {
       setRunning(false);
