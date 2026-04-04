@@ -35,12 +35,16 @@ browser (HTTPS)
 │   ├── auth/
 │   │   ├── mod.rs        # JwksCache, Claims extractor, JWT RS256 validation
 │   │   └── rbac.rs       # ReadAccess / WriteAccess extractors
-│   ├── db/mod.rs         # DbClient (MongoDB wrapper, ping on startup, run_command helper)
+│   ├── db/mod.rs         # DbClient — wraps mongodb::Client, stores URI + TLS overrides,
+│   │                    #   from_uri_with_tls(), masked_uri(), run_command helper.
+│   │                    #   Wrapped in Arc<RwLock<>> in AppState for runtime swapping.
 │   └── routes/
 │       ├── health.rs     # GET /api/health
 │       ├── data.rs       # CRUD + aggregate + stats + run_command
 │       ├── schema.rs     # GET schema — samples docs, infers field types
-│       └── transfer.rs   # GET export, POST import
+│       ├── transfer.rs   # GET export, POST import
+│       └── connection.rs # GET /api/connection, POST /api/connection,
+│                         #   POST /api/connection/reconnect
 ├── frontend/
 │   ├── src/
 │   │   ├── api/          # client.ts (axios + auth interceptor), mongo.ts
@@ -48,7 +52,8 @@ browser (HTTPS)
 │   │   ├── utils/
 │   │   │   ├── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
 │   │   │   └── bsonFormat.ts   # Shared BSON Extended JSON display utilities
-│   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView, CollectionView, CommandsView
+│   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView,
+│   │   │                 #   DocFormEditor, CollectionView, CommandsView
 │   │   └── pages/        # LoginPage, BrowserPage (sidebar + tab management)
 │   ├── vite.config.ts    # Proxy /api → http://localhost:8080 for dev
 │   └── dist/             # Production build (served by Axum)
@@ -147,8 +152,11 @@ All runtime configuration is read from environment variables. No secrets in sour
 
 ### MongoDB Access
 
-- A single `mongodb::Client` is created at startup and stored in Axum's `State`.
+- `DbClient` is stored in `AppState` as `Arc<tokio::sync::RwLock<DbClient>>`. All route handlers acquire a read lock: `let db = state.db.read().await;`. The connection management routes acquire a write lock only during reconnect/swap.
 - Never create per-request clients.
+- `DbClient` stores: the `mongodb::Client`, `default_db: String`, `uri: String`, and TLS override fields (`tls_ca_file`, `tls_cert_key_file`, `tls_allow_invalid_certs`).
+- `DbClient::from_uri_with_tls(uri, default_db, ca, cert_key, allow_invalid)` is the canonical constructor; `from_uri(uri, default_db)` and `new(&config)` delegate to it.
+- `DbClient::masked_uri()` replaces the password in the URI with `***` for display.
 - Collection names and DB names come from request path params, not hardcoded strings.
 - The schema endpoint samples up to 100 documents to infer field paths and BSON types.
 - `DbClient::run_command(db, doc, admin)` runs arbitrary commands; pass `admin: true` to target the `admin` database.
@@ -176,6 +184,45 @@ All runtime configuration is read from environment variables. No secrets in sour
   | Command runner | `dbv://command` | *(no schema registered — free-form)* |
 
 - To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `CollectionView.tsx`.
+
+### Document Form Editor (`DocFormEditor.tsx`)
+
+A schema-driven form component used alongside the Monaco JSON editor in the document edit/create modal.
+
+- Receives `schema: CollectionSchema | null`, `value: string` (JSON), `onChange`, `isEditing` props.
+- Parses the JSON document and renders one input per top-level field based on its dominant BSON type:
+
+  | Type | Widget |
+  |---|---|
+  | `date` | Separate `<input type="date">` + `<input type="time">` operating in **UTC**. Stored as `{"$date": "ISO"}`. |
+  | `bool` | True / False radio buttons inside a dark container. |
+  | `int` / `double` | `<input type="number">` |
+  | `long` | Number input → `{"$numberLong": "..."}` |
+  | `decimal` | Number input → `{"$numberDecimal": "..."}` |
+  | `objectId` | Text input → `{"$oid": "..."}` |
+  | `string` | `<input type="text">` |
+  | `object` / `array` / mixed | JSON textarea |
+
+- `_id` is read-only when `isEditing` is true.
+- Schema fields **and** extra doc fields both show a **×** remove button (except `_id`).
+- "Add field" section at the bottom lets users append new fields with a type selector.
+- The collection schema is fetched automatically when the editor modal opens (no need to visit the Schema tab).
+- Switching between Form and JSON modes is non-destructive: both share the same `editorValue` string.
+- The `CollectionView` modal header shows a **Form | JSON** pill toggle (`editorMode` state, defaults to `"form"`).
+
+### Connection Management
+
+- `AppState.db` is `Arc<RwLock<DbClient>>`. All standard handlers use `state.db.read().await`; only the connection routes acquire a write lock.
+- **Reconnect flow**: read current `uri` + TLS fields without the lock, call `DbClient::from_uri_with_tls` (potentially slow, no lock held), then take write lock and swap.
+- `routes/connection.rs`:
+  - `GET /api/connection` — pings MongoDB, returns `{ uri (masked), default_db, status, error?, tls_ca_file?, tls_cert_key_file?, tls_allow_invalid_certs }`. No auth required.
+  - `POST /api/connection` — body `{ uri, default_db?, tls_ca_file?, tls_cert_key_file?, tls_allow_invalid_certs? }`. Creates client without holding the lock; returns 400 on failure. Requires `ReadAccess`.
+  - `POST /api/connection/reconnect` — re-creates client from stored URI + TLS settings. Requires `ReadAccess`.
+- Frontend (`BrowserPage.tsx`):
+  - `connInfo: ConnectionInfo | null` state loaded on mount via `getConnection()`.
+  - Status strip in sidebar: coloured dot + masked URI + **↻ Reconnect** + **⚙ Change** buttons.
+  - "Change Connection" modal pre-fills all fields from `connInfo`; passes TLS fields to `setConnection(params)`.
+  - `reloadDatabases` only calls `logout()` / redirects on HTTP 401; MongoDB errors show in the error banner instead.
 
 ### Multi-Tab Architecture
 

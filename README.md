@@ -110,6 +110,23 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 - The left sidebar shows all available databases. Click a database to expand its collections.
 - *(admin only)* Click **＋** next to "Database" to create a new database. MongoDB requires an initial collection name — the database is created along with it.
 - *(admin only)* Click **🗑** next to the selected database to drop it permanently. System databases (`admin`, `config`, `local`) are protected and cannot be dropped.
+- The sidebar is **resizable** — drag the handle on its right edge to adjust the width (range: 180 px – 480 px).
+
+**Connection status and reconnect**
+
+A status strip at the top of the sidebar shows the current MongoDB connection:
+
+- 🟢 / 🔴 coloured dot indicating OK or error state
+- Masked connection URI (password replaced with `***`; full URI on hover)
+- **↻ Reconnect** — retries the existing URI (with the same TLS settings) without restarting the server
+- **⚙ Change** — opens a form to switch to a different MongoDB deployment. Fields:
+  - **Connection URI** — any valid MongoDB connection string (standalone, replica set `replicaSet=…`, Atlas SRV `mongodb+srv://…`)
+  - **Default Database** — pre-filled with the current default; leave blank to keep it
+  - **TLS CA Certificate File** *(optional)* — server-side path to a PEM CA cert
+  - **TLS Client Cert + Key File** *(optional)* — server-side path for mutual TLS
+  - **Allow invalid/self-signed certs** *(⚠ dev only)* — skips certificate validation
+
+  All TLS settings are preserved across reconnects so you do not need to re-enter them.
 
 **Managing collections**
 
@@ -156,10 +173,24 @@ Each collection opens in its own **tab** so you can work with multiple collectio
 
 **Editing documents** *(dbv-admin only)*
 
-- **+ New** — opens a JSON editor to create a new document
-- **Edit** — opens the document in a JSON editor with syntax highlighting
-- Both editors provide **schema-aware autocomplete**: field names from the inferred collection schema are suggested with their BSON type and coverage percentage
-- **BSON Extended JSON** is supported in editors — use the following notation for special types:
+- **+ New** — opens the document editor to create a new document
+- **Edit** — opens the document in the editor
+- The editor has two modes toggled with a **Form / JSON** pill in the modal header:
+  - **Form mode** (default) — a field-by-field form built from the inferred schema with type-aware inputs:
+    - `date` → separate UTC date + time inputs (stored as BSON `$date`)
+    - `bool` → True / False radio buttons
+    - `int` / `double` → number inputs
+    - `long` → number stored as `{"$numberLong": "…"}`
+    - `objectId` → text input stored as `{"$oid": "…"}`
+    - `string` → text input
+    - `object` / `array` / mixed → inline JSON textarea
+    - `_id` is shown read-only when editing an existing document
+    - Any field (except `_id`) can be removed with the **×** button
+    - **Add field** row at the bottom to append new fields with a type selector
+    - The schema is fetched automatically the first time the editor is opened (no need to visit the Schema tab first)
+  - **JSON mode** — full Monaco editor with schema-aware autocomplete, syntax highlighting, and BSON Extended JSON support
+  - Switching between modes is non-destructive: both share the same underlying JSON string
+- **BSON Extended JSON** is supported in JSON mode — use the following notation for special types:
 
   | Type | Format |
   |---|---|
@@ -184,7 +215,7 @@ Run an aggregation pipeline against the selected collection. The Monaco editor p
 ]
 ```
 
-Press **Ctrl+Enter** or **Run** to execute.
+Press **Ctrl+Enter** or **▶ Run** to execute. The pipeline editor occupies the top portion of the tab; results fill the remaining height in a read-only Monaco viewer (syntax-highlighted JSON, line numbers, code folding). A document count badge is shown on success; pipeline errors from MongoDB are displayed inline in red below the Run button.
 
 **Schema**
 
@@ -338,7 +369,8 @@ src/
     ├── health.rs     # GET /api/health  (no auth, pings MongoDB)
     ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection, run_command
     ├── schema.rs     # Schema inference (samples 100 docs, infers BSON types)
-    └── transfer.rs   # Export (GET) and Import (POST)
+    ├── transfer.rs   # Export (GET) and Import (POST)
+    └── connection.rs # GET/POST /api/connection and POST /api/connection/reconnect
 
 frontend/src/
 ├── api/
@@ -348,18 +380,20 @@ frontend/src/
 │   └── AuthContext.tsx  # token storage, auto-refresh timer, role parsing
 ├── utils/
 │   ├── mongoSchema.ts   # JSON Schema builders for Monaco autocomplete
-│   │                    # (buildDocumentSchema, buildFilterSchema, buildSortSchema, PIPELINE_SCHEMA)
+│   │                    # (buildDocumentSchema, buildFilterSchema, buildSortSchema,
+│   │                    #  buildProjectionSchema, PIPELINE_SCHEMA)
 │   └── bsonFormat.ts    # Shared BSON Extended JSON display utilities
 │                        # (formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel)
 ├── components/
 │   ├── ProtectedRoute.tsx
 │   ├── SchemaViewer.tsx
 │   ├── DocTreeView.tsx      # Recursive tree view for documents
+│   ├── DocFormEditor.tsx    # Schema-driven form editor (date-picker, bool, number, etc.)
 │   ├── CollectionView.tsx   # Full per-collection UI (all tabs, query bar, editors)
 │   └── CommandsView.tsx     # Command palette + Monaco editor + results panel
 └── pages/
     ├── LoginPage.tsx        # Username/password login form
-    └── BrowserPage.tsx      # App shell: sidebar, tab bar, CollectionView instances
+    └── BrowserPage.tsx      # App shell: sidebar (with connection status), tab bar, CollectionView instances
 ```
 
 ### Environment Variables
@@ -472,6 +506,14 @@ All endpoints are under `/api`.
 | Method | Path | Role | Body | Description |
 |---|---|---|---|---|
 | POST | `/api/databases/:db/run_command` | admin | `{ "command": {...}, "admin": false }` | Run any MongoDB command on `:db` (or the `admin` database when `admin: true`) |
+
+#### Connection Management
+
+| Method | Path | Role | Description |
+|---|---|---|---|
+| GET | `/api/connection` | *(none)* | Returns current connection info: `{ uri, default_db, status, error?, tls_ca_file?, tls_cert_key_file?, tls_allow_invalid_certs }`. Password in `uri` is masked as `***`. `status` is `"ok"` or `"error"`. |
+| POST | `/api/connection` | viewer+ | Switch to a new MongoDB connection. Body: `{ "uri": "...", "default_db": "...", "tls_ca_file": "...", "tls_cert_key_file": "...", "tls_allow_invalid_certs": false }`. All fields except `uri` are optional. Pings before replacing the live client; returns 400 on failure. |
+| POST | `/api/connection/reconnect` | viewer+ | Reconnects using the current URI and TLS settings (creates a fresh `mongodb::Client`). |
 
 ### Adding a New Route
 
