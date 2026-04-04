@@ -59,6 +59,8 @@ browser (HTTPS)
 │   └── dist/             # Production build (served by Axum)
 ├── Dockerfile            # Multi-stage: cargo-chef + Node builder + debian runtime
 ├── docker-compose.yml
+├── kubernetes/
+│   └── helm/dbv/         # Helm chart for Kubernetes deployment
 └── .env.example
 ```
 
@@ -279,3 +281,14 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
 - The `Dockerfile` uses multi-stage builds: `cargo-chef` for Rust dependency layer caching, a Node stage for the React build, and a minimal `debian:bookworm-slim` runtime image.
 - The `docker-compose.yml` defines four services: `traefik`, `dbv`, `mongo`, `keycloak`. `dbv` depends on `mongo` and `keycloak` via healthchecks.
 - Secrets and connection strings are passed via `.env` file (gitignored) referenced in `docker-compose.yml`.
+
+### Helm / Kubernetes
+
+- The Helm chart at `kubernetes/helm/dbv/` deploys only the **dbv** container. MongoDB and Keycloak are assumed to exist in-cluster or externally.
+- `MONGODB_URI` is stored in a `Secret` (created from `config.mongodbUri` or from an existing secret via `existingSecret`).
+- All other env vars are in a `ConfigMap` (Keycloak URL/realm/clientId, MongoDB DB name, optional TLS paths).
+- The `Deployment` uses `checksum/config` and `checksum/secret` pod annotations so that config changes automatically trigger a rollout.
+- Liveness and readiness probes both hit `GET /api/health`.
+- The `Ingress` resource supports any ingress class and cert-manager TLS annotations.
+- `HorizontalPodAutoscaler` is included but disabled by default (`autoscaling.enabled: false`).
+- Lint with: `helm lint ./kubernetes/helm/dbv --set config.mongodbUri=x --set config.keycloakUrl=x --set config.keycloakRealm=x --set config.keycloakClientId=x`

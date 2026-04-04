@@ -16,6 +16,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Project Structure](#project-structure)
   - [Environment Variables](#environment-variables)
   - [API Reference](#api-reference)
+  - [Kubernetes / Helm](#kubernetes--helm)
 
 ---
 
@@ -394,6 +395,19 @@ frontend/src/
 └── pages/
     ├── LoginPage.tsx        # Username/password login form
     └── BrowserPage.tsx      # App shell: sidebar (with connection status), tab bar, CollectionView instances
+
+kubernetes/
+└── helm/dbv/            # Helm chart — deploys dbv container to Kubernetes
+    ├── Chart.yaml
+    ├── values.yaml      # All configurable values with inline documentation
+    └── templates/
+        ├── deployment.yaml
+        ├── service.yaml
+        ├── ingress.yaml
+        ├── secret.yaml      # MONGODB_URI (or point to existingSecret)
+        ├── configmap.yaml   # Keycloak + other env vars
+        ├── serviceaccount.yaml
+        └── hpa.yaml         # HorizontalPodAutoscaler (disabled by default)
 ```
 
 ### Environment Variables
@@ -524,6 +538,8 @@ All endpoints are under `/api`.
 
 ### Production Deployment
 
+#### Docker Compose
+
 1. Point real DNS records for `DBV_HOST` and `KEYCLOAK_PUBLIC_HOST` to your server
 2. In `.env`, set:
    ```
@@ -534,4 +550,82 @@ All endpoints are under `/api`.
    KEYCLOAK_ADMIN_PASSWORD=<strong-password>
    ```
 3. `docker compose up -d` — Traefik will obtain certificates automatically on first request
+
+### Kubernetes / Helm
+
+A Helm chart is provided at `kubernetes/helm/dbv/`. It deploys only the **dbv** container; MongoDB and Keycloak are assumed to already be available in-cluster (or externally).
+
+**Chart resources:**
+
+| Resource | Notes |
+|---|---|
+| `Deployment` | Liveness + readiness probes on `/api/health` |
+| `Service` | ClusterIP, port 80 → container 8080 |
+| `Ingress` | Any ingress class; optional TLS via cert-manager |
+| `Secret` | `MONGODB_URI` — create from values or point to existing secret |
+| `ConfigMap` | All other env vars (Keycloak, DB name, TLS paths) |
+| `ServiceAccount` | Dedicated service account (opt-out with `serviceAccount.create: false`) |
+| `HorizontalPodAutoscaler` | CPU-based, disabled by default |
+
+**Minimal install:**
+
+```bash
+helm install dbv ./kubernetes/helm/dbv \
+  --set image.repository=ghcr.io/your-org/dbv \
+  --set config.mongodbUri="mongodb://user:pass@mongo:27017" \
+  --set config.keycloakUrl="http://keycloak.keycloak.svc.cluster.local:8080" \
+  --set config.keycloakRealm="dbv" \
+  --set config.keycloakClientId="dbv" \
+  --set ingress.hosts[0].host=dbv.example.com
+```
+
+**With TLS via cert-manager:**
+
+```yaml
+# values-prod.yaml
+ingress:
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: dbv.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: dbv-tls
+      hosts:
+        - dbv.example.com
+```
+
+```bash
+helm install dbv ./kubernetes/helm/dbv -f values-prod.yaml \
+  --set image.repository=ghcr.io/your-org/dbv \
+  --set config.mongodbUri="mongodb+srv://user:pass@cluster.mongodb.net" \
+  --set config.keycloakUrl="https://auth.example.com" \
+  --set config.keycloakRealm="dbv" \
+  --set config.keycloakClientId="dbv"
+```
+
+**Use an existing Secret for `MONGODB_URI`:**
+
+```bash
+kubectl create secret generic my-mongo-secret --from-literal=MONGODB_URI="mongodb://..."
+helm install dbv ./kubernetes/helm/dbv --set existingSecret=my-mongo-secret ...
+```
+
+Key values — see `kubernetes/helm/dbv/values.yaml` for the full reference:
+
+| Value | Default | Description |
+|---|---|---|
+| `image.repository` | `dbv` | Container image (set to your registry path) |
+| `image.tag` | chart `appVersion` | Image tag |
+| `config.mongodbUri` | *(required)* | MongoDB connection string |
+| `config.mongodbDb` | `test` | Default database |
+| `config.keycloakUrl` | *(required)* | Keycloak URL reachable from the pod |
+| `config.keycloakRealm` | *(required)* | Keycloak realm |
+| `config.keycloakClientId` | *(required)* | OAuth2 client ID |
+| `existingSecret` | `""` | Name of existing Secret containing `MONGODB_URI` |
+| `ingress.enabled` | `true` | Create an Ingress resource |
+| `autoscaling.enabled` | `false` | Enable HPA |
 
