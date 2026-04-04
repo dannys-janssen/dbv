@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getDatabases,
@@ -149,6 +149,26 @@ interface Tab {
 export default function BrowserPage() {
   const { logout, canWrite } = useAuth();
   const navigate = useNavigate();
+
+  // ── Sidebar resize ──
+  const [sidebarWidth, setSidebarWidth] = useState(260);
+  const isResizing = useRef(false);
+
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+      setSidebarWidth(Math.min(480, Math.max(180, ev.clientX)));
+    };
+    const onMouseUp = () => {
+      isResizing.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, []);
 
   // ── Tab state ──
   const [tabs, setTabs] = useState<Tab[]>([{ id: "tab-0", db: "", col: "" }]);
@@ -340,8 +360,8 @@ export default function BrowserPage() {
       {/* ── Sidebar ── */}
       <aside
         style={{
-          width: "260px",
-          minWidth: "260px",
+          width: `${sidebarWidth}px`,
+          minWidth: `${sidebarWidth}px`,
           background: "#1a2236",
           display: "flex",
           flexDirection: "column",
@@ -651,6 +671,22 @@ export default function BrowserPage() {
           </div>
         )}
       </aside>
+
+      {/* ── Resize handle ── */}
+      <div
+        onMouseDown={startResize}
+        style={{
+          width: "4px",
+          flexShrink: 0,
+          cursor: "col-resize",
+          background: "transparent",
+          transition: "background 0.15s",
+          zIndex: 10,
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "#3b82f6"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+        title="Drag to resize sidebar"
+      />
 
       {/* ── Main area ── */}
       <main

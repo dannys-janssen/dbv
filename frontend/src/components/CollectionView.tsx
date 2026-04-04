@@ -1095,81 +1095,80 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
           {/* ── Aggregate tab ── */}
           {view === "aggregate" && (
-            <div style={{ padding: "20px", fontFamily: FONT }}>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#64748b",
-                  margin: "0 0 12px 0",
-                }}
-              >
-                Enter an aggregation pipeline (JSON array):
-              </p>
-              <div
-                style={{
-                  height: "220px",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                }}
-              >
-                <Editor
-                  height="220px"
-                  defaultLanguage="json"
-                  path="dbv://pipeline"
-                  value={pipeline}
-                  onChange={(v) => setPipeline(v ?? "[]")}
-                />
-              </div>
-              <button
-                onClick={() => void runAggregate()}
-                style={{
-                  marginTop: "12px",
-                  background: "#2563eb",
-                  color: "#ffffff",
-                  padding: "8px 16px",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: FONT,
-                  fontWeight: 500,
-                }}
-              >
-                Run Pipeline
-              </button>
-              {aggError && (
-                <div style={{
-                  marginTop: "12px",
-                  background: "#fef2f2",
-                  border: "1px solid #fca5a5",
-                  borderRadius: "6px",
-                  padding: "12px 14px",
-                  fontSize: "13px",
-                  color: "#dc2626",
-                  fontFamily: "monospace",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}>
-                  {aggError}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: FONT }}>
+              {/* Pipeline editor */}
+              <div style={{ padding: "16px 20px 0", flexShrink: 0 }}>
+                <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 8px 0" }}>
+                  Enter an aggregation pipeline (JSON array):
+                </p>
+                <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                  <Editor
+                    height="180px"
+                    defaultLanguage="json"
+                    path="dbv://pipeline"
+                    value={pipeline}
+                    onChange={(v) => setPipeline(v ?? "[]")}
+                    options={{
+                      minimap: { enabled: false },
+                      lineNumbers: "off" as const,
+                      folding: false,
+                      scrollBeyondLastLine: false,
+                      fontSize: 13,
+                      padding: { top: 6, bottom: 6 },
+                      wordWrap: "on" as const,
+                      suggest: { showSnippets: true, showWords: false },
+                      quickSuggestions: { other: true, comments: false, strings: true },
+                    }}
+                    onMount={(editor, monaco) => {
+                      editor.addCommand(
+                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                        () => void runAggregate()
+                      );
+                    }}
+                  />
                 </div>
-              )}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", marginBottom: "12px" }}>
+                  <button
+                    onClick={() => void runAggregate()}
+                    style={{ background: "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}
+                  >
+                    ▶ Run
+                  </button>
+                  <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>Ctrl+Enter</span>
+                  {aggResults.length > 0 && !aggError && (
+                    <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 600, marginLeft: "auto" }}>
+                      {aggResults.length} document{aggResults.length !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+                {aggError && (
+                  <div style={{
+                    marginBottom: "12px", background: "#fef2f2", border: "1px solid #fca5a5",
+                    borderRadius: "6px", padding: "10px 14px", fontSize: "13px", color: "#dc2626",
+                    fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-word",
+                  }}>
+                    {aggError}
+                  </div>
+                )}
+              </div>
+              {/* Results — fill remaining height */}
               {aggResults.length > 0 && (
-                <pre
-                  style={{
-                    marginTop: "16px",
-                    background: "#1e2638",
-                    color: "#e2e8f0",
-                    borderRadius: "8px",
-                    padding: "16px",
-                    fontSize: "12px",
-                    overflow: "auto",
-                    maxHeight: "400px",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  {JSON.stringify(aggResults, null, 2)}
-                </pre>
+                <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
+                  <Editor
+                    height="100%"
+                    defaultLanguage="json"
+                    value={JSON.stringify(aggResults, null, 2)}
+                    options={{
+                      readOnly: true,
+                      minimap: { enabled: false },
+                      lineNumbers: "on" as const,
+                      folding: true,
+                      scrollBeyondLastLine: false,
+                      fontSize: 12,
+                      wordWrap: "off" as const,
+                    }}
+                  />
+                </div>
               )}
             </div>
           )}
