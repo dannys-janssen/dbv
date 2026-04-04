@@ -287,6 +287,19 @@ Supported languages: English (en), German (de), French (fr), Danish (da), Dutch 
 - `frontend/src/i18n.ts` — i18next configuration and `LANGUAGES` export.
 - To add a new language: copy `en.json`, translate all values, add the locale to `LANGUAGES` and the `resources` map in `i18n.ts`.
 
+### Accessibility (a11y)
+
+The UI targets WCAG 2.1 Level AA. Key patterns:
+
+- **Skip link**: `<a href="#main-content" className="skip-link">` rendered first in BrowserPage and LoginPage; CSS is in `index.html` (`.skip-link` / `.sr-only` utilities).
+- **Modals**: Every dialog uses `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing at the `<h3>` title. A `getFocusable()` + `handleFocusTrap()` utility (at the top of `BrowserPage.tsx`) traps Tab/Shift-Tab. Focus moves to the first focusable element on open; the opener element reference (`useRef`) is restored on close.
+- **Live regions**: Errors → `role="alert"` (assertive). Status messages → `role="status"` with `aria-live="polite"`. Loading states → `aria-busy="true"`.
+- **Tab pattern**: `role="tablist"` / `role="tab"` / `aria-selected` / `role="tabpanel"` in BrowserPage and CollectionView.
+- **Icon buttons**: Every symbol-only button has an `aria-label`. Decorative icons get `aria-hidden="true"`.
+- **DocTreeView**: `role="tree"`, `role="treeitem"`, `aria-expanded`, keyboard toggle via `onKeyDown` (Space / Enter).
+- **Forms**: All inputs have `<label htmlFor>` or `aria-label`. Date/time inputs in DocFormEditor are individually labelled.
+- When adding new interactive elements, always include: keyboard operability, a visible or sr-only label, and appropriate ARIA role/state.
+
 ### Async
 
 - All I/O (MongoDB, HTTP calls to Keycloak) must be `async`/`.await`.

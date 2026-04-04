@@ -17,6 +17,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Environment Variables](#environment-variables)
   - [API Reference](#api-reference)
   - [Internationalisation (i18n)](#internationalisation-i18n)
+  - [Accessibility (a11y)](#accessibility-a11y)
   - [OpenAPI / Swagger UI](#openapi--swagger-ui)
   - [Kubernetes / Helm](#kubernetes--helm)
 
@@ -562,6 +563,23 @@ The UI is fully localised via **react-i18next**. Translation files live in `fron
 - The language selector (flag + name dropdown) is shown in the BrowserPage header and on the Login card.
 - `frontend/src/i18n.ts` — i18next configuration and `LANGUAGES` export.
 - To add a new language: copy `en.json`, translate all values, add the locale to `LANGUAGES` and the `resources` map in `i18n.ts`.
+
+### Accessibility (a11y)
+
+The UI targets **WCAG 2.1 Level AA** compliance:
+
+| Feature | Implementation |
+|---|---|
+| Skip-to-content link | Appears on focus at the top of LoginPage and BrowserPage |
+| Keyboard navigation | All interactive elements reachable and operable via Tab / Enter / Space |
+| Modal focus trapping | Dialogs trap Tab/Shift-Tab focus; opener element regains focus on close |
+| ARIA live regions | Errors use `role="alert"`; loading states use `aria-live="polite"` |
+| Tab panel pattern | `role="tablist"`, `role="tab"`, `aria-selected`, `role="tabpanel"` |
+| Icon-only buttons | Every symbol button (✕, ▼, +) has an `aria-label` |
+| Tree widget | DocTreeView uses `role="tree"` / `role="treeitem"` with `aria-expanded` |
+| Form labels | All inputs have associated `<label>` or `aria-label` |
+| Semantic landmarks | `<main>`, `<header>`, `<aside>`, `<h3>` used throughout |
+| Screen-reader utilities | `.sr-only` CSS class in `index.html` for visually-hidden text |
 
 ### OpenAPI / Swagger UI
 
