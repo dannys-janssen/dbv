@@ -46,7 +46,8 @@ browser (HTTPS)
 │   │   ├── api/          # client.ts (axios + auth interceptor), mongo.ts
 │   │   ├── context/      # AuthContext (token + roles + canWrite)
 │   │   ├── utils/
-│   │   │   └── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
+│   │   │   ├── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
+│   │   │   └── bsonFormat.ts   # Shared BSON Extended JSON display utilities
 │   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView, CommandsView
 │   │   └── pages/        # LoginPage, BrowserPage (all tabs)
 │   ├── vite.config.ts    # Proxy /api → http://localhost:8080 for dev
@@ -174,7 +175,22 @@ All runtime configuration is read from environment variables. No secrets in sour
 
 - To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `BrowserPage.tsx`.
 
-### Command Runner
+### BSON Extended JSON
+
+- All document writes (create, update, filter, sort, aggregate pipeline) pass through `json_to_doc()` in `data.rs`, which uses `bson::Bson::try_from(value)` (Extended JSON deserialiser) rather than `bson::to_document()` (serde serialiser). This correctly converts `$date`, `$oid`, `$binary`, `$numberLong`, `$numberDecimal`, etc.
+- `_id` resolution: `parse_id_bson(id: &str)` in `data.rs` tries `ObjectId::parse_str` first (24 hex chars) then falls back to `Bson::String`. Both single-document and bulk operations use this helper.
+- BSON serialisation output: `bson v2`'s serde `Serialize` emits **canonical** Extended JSON — dates become `{"$date": {"$numberLong": "ms"}}`. All display code must handle this form.
+- Display utilities live in `frontend/src/utils/bsonFormat.ts`:
+  - `formatBsonValue(v)` — converts any Extended JSON value to a readable string (handles both canonical and relaxed date forms, ObjectId, UUID, Long, Decimal, etc.)
+  - `isBsonPrimitive(v)` — returns true if the value should be displayed inline (not as a nested object)
+  - `bsonTypeColor(v)` / `bsonTypeLabel(v)` — type badge utilities used by DocTreeView
+- Import and use `formatBsonValue` everywhere BSON values are rendered to the UI (table preview cells, tree view node labels, etc.)
+
+### Authentication Token Handling
+
+- JWT bearer tokens use base64url encoding (no padding, `-`/`_` instead of `+`/`/`). The frontend's `base64urlDecode()` in `AuthContext.tsx` adds padding and substitutes characters before `atob()`.
+- `msUntilRefresh` enforces a **10-second minimum** delay to prevent tight refresh loops caused by Docker clock skew (tokens appearing already-expired).
+- The `login` function is wrapped in `useCallback([scheduleRefresh])` and the context value in `useMemo` to prevent unnecessary consumer re-renders.
 
 - `POST /api/databases/:db/run_command` with body `{ "command": {...}, "admin": bool }` runs any MongoDB command.
 - Requires `WriteAccess` (dbv-admin only).

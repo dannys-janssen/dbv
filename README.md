@@ -130,6 +130,7 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 - Press **Ctrl+Enter** or **Apply** to run; **Clear** resets both Filter and Sort
 - The Documents tab badge shows the total matching count
 - Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
+- BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in both views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`
 
 **Selecting and bulk-acting on documents** *(export available to all roles; delete requires dbv-admin)*
 
@@ -145,7 +146,19 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 - **+ New** — opens a JSON editor to create a new document
 - **Edit** — opens the document in a JSON editor with syntax highlighting
 - Both editors provide **schema-aware autocomplete**: field names from the inferred collection schema are suggested with their BSON type and coverage percentage
+- **BSON Extended JSON** is supported in editors — use the following notation for special types:
+
+  | Type | Format |
+  |---|---|
+  | Date | `{"$date": "2024-01-01T00:00:00Z"}` or `{"$date": {"$numberLong": "1704067200000"}}` |
+  | ObjectId | `{"$oid": "507f1f77bcf86cd799439011"}` |
+  | UUID | `{"$binary": {"base64": "...", "subType": "04"}}` |
+  | Int64 | `{"$numberLong": "9007199254740993"}` |
+  | Decimal128 | `{"$numberDecimal": "3.14159265358979323846"}` |
+
+  The Monaco editor autocomplete templates fill these in automatically when a field is known to be a Date, ObjectId, etc.
 - **Delete** — permanently removes the document after confirmation
+- Documents are identified by their `_id` field; both `ObjectId` and plain string `_id` values are supported
 
 **Aggregate**
 
@@ -321,8 +334,10 @@ frontend/src/
 ├── context/
 │   └── AuthContext.tsx  # token storage, auto-refresh timer, role parsing
 ├── utils/
-│   └── mongoSchema.ts   # JSON Schema builders for Monaco autocomplete
-│                        # (buildDocumentSchema, buildFilterSchema, buildSortSchema, PIPELINE_SCHEMA)
+│   ├── mongoSchema.ts   # JSON Schema builders for Monaco autocomplete
+│   │                    # (buildDocumentSchema, buildFilterSchema, buildSortSchema, PIPELINE_SCHEMA)
+│   └── bsonFormat.ts    # Shared BSON Extended JSON display utilities
+│                        # (formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel)
 ├── components/
 │   ├── ProtectedRoute.tsx
 │   ├── SchemaViewer.tsx
@@ -411,10 +426,10 @@ All endpoints are under `/api`.
 |---|---|---|---|
 | GET | `/api/databases/:db/collections/:col/documents` | viewer+ | List documents. Query params: `page`, `limit`, `filter` (JSON), `sort` (JSON) |
 | POST | `/api/databases/:db/collections/:col/documents` | admin | Insert a document |
-| DELETE | `/api/databases/:db/collections/:col/documents` | admin | Bulk delete documents. Body: `{ "ids": ["<objectId>", ...] }` |
-| GET | `/api/databases/:db/collections/:col/documents/:id` | viewer+ | Get document by ObjectId |
-| PUT | `/api/databases/:db/collections/:col/documents/:id` | admin | Replace document by ObjectId |
-| DELETE | `/api/databases/:db/collections/:col/documents/:id` | admin | Delete document by ObjectId |
+| DELETE | `/api/databases/:db/collections/:col/documents` | admin | Bulk delete documents. Body: `{ "ids": ["<id>", ...] }` — IDs can be ObjectId hex strings or plain strings |
+| GET | `/api/databases/:db/collections/:col/documents/:id` | viewer+ | Get document by `_id` (ObjectId or string) |
+| PUT | `/api/databases/:db/collections/:col/documents/:id` | admin | Replace document by `_id` (ObjectId or string) |
+| DELETE | `/api/databases/:db/collections/:col/documents/:id` | admin | Delete document by `_id` (ObjectId or string) |
 
 #### Aggregation & Schema
 
