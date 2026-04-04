@@ -10,14 +10,22 @@ import es from './locales/es.json';
 import it from './locales/it.json';
 import ja from './locales/ja.json';
 import zhCN from './locales/zh-CN.json';
+import nl from './locales/nl.json';
+import ar from './locales/ar.json';
+import pt from './locales/pt.json';
+import hi from './locales/hi.json';
 
 export const LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇺🇸' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
   { code: 'da', label: 'Dansk', flag: '🇩🇰' },
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
   { code: 'es', label: 'Español', flag: '🇪🇸' },
   { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
   { code: 'ja', label: '日本語', flag: '🇯🇵' },
   { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
 ];
@@ -27,13 +35,17 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: en },
-      de: { translation: de },
-      fr: { translation: fr },
-      da: { translation: da },
-      es: { translation: es },
-      it: { translation: it },
-      ja: { translation: ja },
+      en:    { translation: en },
+      de:    { translation: de },
+      fr:    { translation: fr },
+      da:    { translation: da },
+      nl:    { translation: nl },
+      es:    { translation: es },
+      it:    { translation: it },
+      pt:    { translation: pt },
+      ar:    { translation: ar },
+      hi:    { translation: hi },
+      ja:    { translation: ja },
       'zh-CN': { translation: zhCN },
     },
     fallbackLng: 'en',

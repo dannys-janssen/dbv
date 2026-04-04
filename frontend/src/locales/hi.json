@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "साइन इन करें",
+      "subtitle": "अपने MongoDB डेटाबेस तक पहुँचें",
+      "footer": "Keycloak OAuth2 द्वारा सुरक्षित",
+      "button": { "label": "साइन इन करें", "loading": "साइन इन हो रहा है…" },
+      "validation": { "fieldsRequired": "उपयोगकर्ता नाम और पासवर्ड आवश्यक हैं" },
+      "error": { "invalidCredentials": "लॉगिन विफल। अपनी क्रेडेंशियल जाँचें।" }
+    }
+  },
+  "nav": {
+    "signOut": "साइन आउट करें",
+    "section": { "databases": "डेटाबेस", "collections": "संग्रह" }
+  },
+  "connection": {
+    "status": { "noInfo": "कनेक्शन जानकारी नहीं है" },
+    "button": {
+      "reconnect": { "label": "↻ पुनः कनेक्ट करें", "title": "वर्तमान URI का उपयोग करके पुनः कनेक्ट करें" },
+      "change": { "label": "⚙ बदलें", "title": "MongoDB कनेक्शन बदलें" }
+    },
+    "error": { "failed": "⚠ MongoDB कनेक्शन विफल:" }
+  },
+  "database": {
+    "search": { "placeholder": "डेटाबेस खोजें…" },
+    "list": { "empty": "कोई डेटाबेस नहीं मिला" },
+    "button": { "create": { "title": "डेटाबेस बनाएँ" }, "stats": { "title": "\"{{db}}\" का डेटाबेस आँकड़ा" }, "drop": { "title": "डेटाबेस \"{{db}}\" हटाएँ" } }
+  },
+  "collection": {
+    "search": { "placeholder": "संग्रह खोजें…" },
+    "list": { "empty": { "noCollections": "कोई संग्रह नहीं।", "canCreate": "बनाने के लिए ＋ पर क्लिक करें।" } },
+    "button": { "create": { "title": "संग्रह बनाएँ" }, "drop": { "title": "संग्रह \"{{col}}\" हटाएँ" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "टैब बंद करें" }, "new": { "title": "नया टैब" } },
+    "documents": "दस्तावेज़",
+    "aggregate": "एकत्रीकरण",
+    "schema": "स्कीमा",
+    "indexes": "अनुक्रमणिका",
+    "stats": "आँकड़े",
+    "commands": "आदेश"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "डेटाबेस बनाएँ",
+      "subtitle": "MongoDB पहला संग्रह बनाने पर डेटाबेस बनाता है।",
+      "label": { "dbName": "डेटाबेस का नाम", "collectionName": "प्रारंभिक संग्रह का नाम" },
+      "placeholder": { "dbName": "जैसे: myapp", "collectionName": "जैसे: users" }
+    },
+    "createCollection": {
+      "title": "संग्रह बनाएँ",
+      "subtitle": "नया संग्रह जोड़ें",
+      "label": { "name": "संग्रह का नाम" },
+      "placeholder": { "name": "जैसे: products" }
+    },
+    "dbStats": {
+      "title": "डेटाबेस:",
+      "subtitle": "संग्रहण और दस्तावेज़ आँकड़े",
+      "unavailable": "आँकड़े उपलब्ध नहीं हैं।"
+    },
+    "changeConnection": {
+      "title": "MongoDB कनेक्शन बदलें",
+      "subtitle": "नई कनेक्शन URI और डिफ़ॉल्ट डेटाबेस दर्ज करें। TLS ओवरराइड वैकल्पिक हैं।",
+      "label": {
+        "uri": "कनेक्शन URI",
+        "defaultDb": "डिफ़ॉल्ट डेटाबेस",
+        "tlsCaFile": "TLS CA प्रमाणपत्र फ़ाइल",
+        "tlsCertKeyFile": "TLS क्लाइंट प्रमाणपत्र + कुंजी फ़ाइल",
+        "allowInvalidTls": "अमान्य / स्व-हस्ताक्षरित TLS प्रमाणपत्र अनुमत करें"
+      },
+      "placeholder": {
+        "uri": "जैसे: mongodb://user:pass@host:27017 या mongodb+srv://cluster.mongodb.net/",
+        "defaultDb": "जैसे: mydb",
+        "tlsCaFile": "जैसे: /certs/ca.pem",
+        "tlsCertKeyFile": "जैसे: /certs/client.pem"
+      },
+      "optional": "(वैकल्पिक, सर्वर पर पथ)",
+      "warning": { "insecure": "⚠ असुरक्षित" }
+    },
+    "confirmDrop": {
+      "database": "पूरा डेटाबेस \"{{db}}\" हटाएँ? इसे पूर्ववत नहीं किया जा सकता।",
+      "collection": "संग्रह \"{{col}}\" हटाएँ? सभी दस्तावेज़ मिट जाएँगे।",
+      "index": "अनुक्रमणिका \"{{name}}\" हटाएँ?"
+    },
+    "editDocument": { "title": "दस्तावेज़ संपादित करें" },
+    "newDocument": { "title": "नया दस्तावेज़" },
+    "createIndex": {
+      "title": "अनुक्रमणिका बनाएँ",
+      "subtitle": "नई अनुक्रमणिका के लिए फ़ील्ड और विकल्प परिभाषित करें।",
+      "label": { "keys": "अनुक्रमणिका कुंजियाँ", "name": "अनुक्रमणिका का नाम", "unique": "अद्वितीय", "sparse": "विरल", "background": "पृष्ठभूमि", "ttl": "TTL" },
+      "optional": "(वैकल्पिक)",
+      "hint": { "background": "(गैर-अवरोधक)", "ttl": "(सेकंड, वैकल्पिक)" },
+      "placeholder": { "fieldName": "फ़ील्ड नाम", "name": "खाली छोड़ने पर स्वतः उत्पन्न", "ttl": "जैसे: 3600" },
+      "option": { "ascending": "1 (आरोही)", "descending": "-1 (अवरोही)" },
+      "button": { "addField": "+ फ़ील्ड जोड़ें", "submit": "अनुक्रमणिका बनाएँ" },
+      "validation": { "fieldRequired": "कम से कम एक फ़ील्ड आवश्यक है।" }
+    },
+    "import": { "confirmReplace": "{{count}} दस्तावेज़ आयात करें? (मौजूदा प्रतिस्थापित करें?)" },
+    "confirmDelete": { "document": "यह दस्तावेज़ हटाएँ?" }
+  },
+  "buttons": {
+    "cancel": "रद्द करें",
+    "create": "बनाएँ",
+    "close": "बंद करें",
+    "connect": "कनेक्ट करें",
+    "save": "सहेजें",
+    "drop": "हटाएँ",
+    "edit": "संपादित करें",
+    "delete": "मिटाएँ",
+    "export": "निर्यात करें",
+    "import": "आयात करें",
+    "add": "जोड़ें",
+    "refresh": "↻ ताज़ा करें",
+    "form": "⊟ प्रपत्र",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "उपयोगकर्ता नाम", "password": "पासवर्ड", "fieldName": "फ़ील्ड नाम" },
+    "button": { "removeField": { "title": "फ़ील्ड हटाएँ" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "सत्य", "false": "असत्य" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "24-अक्षर हेक्स स्ट्रिंग", "jsonValue": "JSON मान" },
+    "section": { "addField": "फ़ील्ड जोड़ें" },
+    "validation": { "fieldExists": "फ़ील्ड \"{{key}}\" पहले से मौजूद है।", "fieldNameRequired": "फ़ील्ड नाम आवश्यक है।" }
+  },
+  "editor": {
+    "form": { "noSchema": "कोई स्कीमा उपलब्ध नहीं है। इस दस्तावेज़ को संपादित करने के लिए JSON मोड का उपयोग करें।" },
+    "mode": {
+      "form": { "subtitle": "प्रकार-जागरूक इनपुट के साथ फ़ील्ड संपादित करें। कच्चे संपादन के लिए JSON पर स्विच करें।" },
+      "json": { "subtitle": "कच्चे JSON दस्तावेज़ को संपादित करें। निर्देशित संपादन के लिए प्रपत्र पर स्विच करें।" }
+    },
+    "error": { "saveFailure": "अमान्य JSON या सहेजने में विफल:" }
+  },
+  "query": {
+    "label": { "filter": "फ़िल्टर", "sort": "क्रमबद्ध करें", "projection": "प्रक्षेपण", "limit": "सीमा" },
+    "hint": { "ctrlEnter": "लागू करने के लिए Ctrl+Enter" },
+    "badge": { "active": "सक्रिय", "invalidJson": "अमान्य JSON" },
+    "button": { "apply": "लागू करें", "clear": "साफ़ करें" }
+  },
+  "views": {
+    "table": { "title": "तालिका दृश्य" },
+    "tree": { "title": "वृक्ष दृश्य" }
+  },
+  "selection": {
+    "count_one": "{{count}} दस्तावेज़ चुना गया",
+    "count_other": "{{count}} दस्तावेज़ चुने गए",
+    "button": { "export": "चुने गए निर्यात करें", "delete": "चुने गए मिटाएँ", "clear": "✕ साफ़ करें" },
+    "confirmDelete_one": "{{count}} चुना गया दस्तावेज़ मिटाएँ? इसे पूर्ववत नहीं किया जा सकता।",
+    "confirmDelete_other": "{{count}} चुने गए दस्तावेज़ मिटाएँ? इसे पूर्ववत नहीं किया जा सकता।"
+  },
+  "documents": {
+    "list": { "empty": "कोई दस्तावेज़ नहीं मिला", "emptyWithFilter": "अपना फ़िल्टर या प्रक्षेपण समायोजित करने का प्रयास करें।", "emptyNoFilter": "यह संग्रह खाली है।" },
+    "button": { "create": "+ नया दस्तावेज़" },
+    "fieldCount_one": "{{count}} फ़ील्ड",
+    "fieldCount_other": "{{count}} फ़ील्ड"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "पूर्वावलोकन", "actions": "क्रियाएँ", "name": "नाम", "keys": "कुंजियाँ", "unique": "अद्वितीय", "sparse": "विरल", "ttl": "TTL (से.)", "index": "अनुक्रमणिका", "size": "आकार", "fieldPath": "फ़ील्ड पथ", "types": "प्रकार", "coverage": "कवरेज", "nullable": "Nullable" }
+  },
+  "pagination": {
+    "label": "{{total}} में से {{start}}–{{end}} दस्तावेज़ दिखाए जा रहे हैं",
+    "label_page": "पृष्ठ {{page}}",
+    "button": { "prev": "← पिछला", "next": "अगला →" }
+  },
+  "aggregate": {
+    "prompt": "एकत्रीकरण पाइपलाइन दर्ज करें (JSON सरणी):",
+    "button": { "run": "▶ चलाएँ" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} दस्तावेज़", "count_other": "{{count}} दस्तावेज़" },
+    "placeholder": { "result": "// परिणाम देखने के लिए कोई आदेश चलाएँ" }
+  },
+  "schema": {
+    "label": { "sampled": "नमूना लिया", "document": "दस्तावेज़", "field": "फ़ील्ड" },
+    "plural": { "documents": "", "fields": "" },
+    "inferring": "स्कीमा अनुमानित हो रहा है…",
+    "unavailable": "कोई स्कीमा डेटा उपलब्ध नहीं है।",
+    "summary": "{{docCount}} दस्तावेज़{{docPlural}} का नमूना · {{fieldCount}} फ़ील्ड{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "कोई अनुक्रमणिका नहीं मिली।" },
+    "button": { "create": "+ नई अनुक्रमणिका" },
+    "label": { "count_one": "{{count}} अनुक्रमणिका", "count_other": "{{count}} अनुक्रमणिकाएँ", "loading": "लोड हो रहा है…" }
+  },
+  "stats": {
+    "loading": "आँकड़े लोड हो रहे हैं…",
+    "unavailable": "कोई आँकड़े उपलब्ध नहीं हैं।",
+    "title": "संग्रह आँकड़े",
+    "label": {
+      "collections": "संग्रह",
+      "documents": "दस्तावेज़",
+      "avgDocSize": "औसत दस्तावेज़ आकार",
+      "dataSize": "डेटा आकार",
+      "storageSize": "संग्रहण आकार",
+      "indexes": "अनुक्रमणिका",
+      "indexSize": "अनुक्रमणिका आकार",
+      "totalSize": "कुल आकार"
+    },
+    "section": { "indexSizes": "अनुक्रमणिका आकार" }
+  },
+  "commands": {
+    "search": { "placeholder": "आदेश खोजें…" },
+    "category": { "server": "सर्वर", "database": "डेटाबेस", "collection": "संग्रह", "replication": "प्रतिकृति", "administration": "प्रशासन" },
+    "description": {
+      "ping": "सर्वर कनेक्टिविटी परीक्षण",
+      "buildInfo": "सर्वर संस्करण और बिल्ड जानकारी",
+      "hostInfo": "होस्ट सिस्टम जानकारी",
+      "serverStatus": "रनटाइम आँकड़े",
+      "connectionStatus": "वर्तमान कनेक्शन विवरण",
+      "hello": "सर्वर भूमिका / टोपोलॉजी जानकारी",
+      "listDatabases": "सभी डेटाबेस सूचीबद्ध करें",
+      "currentOp": "प्रगति में ऑपरेशन",
+      "killOp": "opId द्वारा चल रहे ऑपरेशन को समाप्त करें",
+      "getLog": "हाल की लॉग प्रविष्टियाँ",
+      "getParameter": "सर्वर पैरामीटर प्राप्त करें",
+      "setParameter": "सर्वर पैरामीटर सेट करें",
+      "dbStats": "डेटाबेस संग्रहण आँकड़े",
+      "listCollections": "इस डेटाबेस में संग्रह सूचीबद्ध करें",
+      "usersInfo": "उपयोगकर्ता सूचीबद्ध करें",
+      "createUser": "डेटाबेस उपयोगकर्ता बनाएँ",
+      "dropUser": "उपयोगकर्ता हटाएँ",
+      "grantRolesToUser": "उपयोगकर्ता को भूमिकाएँ दें",
+      "revokeRolesFromUser": "उपयोगकर्ता से भूमिकाएँ हटाएँ",
+      "collStats": "संग्रह संग्रहण आँकड़े",
+      "count": "मेल खाने वाले दस्तावेज़ गिनें",
+      "validate": "संग्रह अखंडता सत्यापित करें",
+      "compact": "संग्रह को संकुचित/डीफ्रैगमेंट करें",
+      "reIndex": "सभी अनुक्रमणिकाएँ पुनर्निर्माण करें",
+      "convertToCapped": "कैप्ड संग्रह में परिवर्तित करें",
+      "replSetGetStatus": "रेप्लिका सेट स्थिति",
+      "replSetGetConfig": "रेप्लिका सेट कॉन्फ़िगरेशन",
+      "isMaster": "सर्वर भूमिका जाँच (विरासत)",
+      "renameCollection": "संग्रह का नाम बदलें",
+      "dropDatabase": "डेटाबेस हटाएँ",
+      "fsync": "फ्लश और वैकल्पिक रूप से लॉक करें",
+      "rotateCertificates": "TLS प्रमाणपत्र रोटेट करें",
+      "listIndexes": "संग्रह पर अनुक्रमणिकाएँ सूचीबद्ध करें",
+      "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें"
+    },
+    "context": { "runningOn": "डेटाबेस पर चल रहा है:" },
+    "checkbox": { "useAdminDb": "Admin डेटाबेस का उपयोग करें" },
+    "button": { "run": "▶ चलाएँ  (Ctrl+Enter)", "running": "⏳ चल रहा है…" },
+    "label": { "command": "आदेश", "result": "परिणाम" },
+    "error": { "invalidJson": "अमान्य JSON — चलाने से पहले आदेश ठीक करें।" }
+  },
+  "badge": {
+    "admin": "● व्यवस्थापक",
+    "viewer": "● दर्शक",
+    "error": "त्रुटि",
+    "success": "ठीक है"
+  },
+  "tree": {
+    "button": { "expandAll": "सब विस्तृत करें", "collapseAll": "सब संकुचित करें" },
+    "checkbox": { "selectAllLabel": "पृष्ठ पर सभी चुनें" }
+  },
+  "ui": {
+    "loading": "लोड हो रहा है…",
+    "connecting": "कनेक्ट हो रहा है…",
+    "sidebar": { "resize": { "title": "साइडबार का आकार बदलने के लिए खींचें" } }
+  },
+  "empty": {
+    "title": "एक डेटाबेस और संग्रह चुनें",
+    "subtitle": {
+      "collectionNeeded": "दस्तावेज़ ब्राउज़ करने के लिए साइडबार से एक संग्रह चुनें।",
+      "databaseNeeded": "शुरू करने के लिए साइडबार से एक डेटाबेस चुनें।"
+    }
+  },
+  "language": { "label": "भाषा" }
+}

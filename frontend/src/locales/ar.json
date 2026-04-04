@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "الوصول إلى قواعد بيانات MongoDB",
+      "footer": "مؤمَّن بواسطة Keycloak OAuth2",
+      "button": { "label": "تسجيل الدخول", "loading": "جارٍ تسجيل الدخول…" },
+      "validation": { "fieldsRequired": "اسم المستخدم وكلمة المرور مطلوبان" },
+      "error": { "invalidCredentials": "فشل تسجيل الدخول. تحقق من بيانات الاعتماد." }
+    }
+  },
+  "nav": {
+    "signOut": "تسجيل الخروج",
+    "section": { "databases": "قواعد البيانات", "collections": "المجموعات" }
+  },
+  "connection": {
+    "status": { "noInfo": "لا توجد معلومات اتصال" },
+    "button": {
+      "reconnect": { "label": "↻ إعادة الاتصال", "title": "إعادة الاتصال باستخدام URI الحالي" },
+      "change": { "label": "⚙ تغيير", "title": "تغيير اتصال MongoDB" }
+    },
+    "error": { "failed": "⚠ فشل اتصال MongoDB:" }
+  },
+  "database": {
+    "search": { "placeholder": "البحث في قواعد البيانات…" },
+    "list": { "empty": "لم يتم العثور على قواعد بيانات" },
+    "button": { "create": { "title": "إنشاء قاعدة بيانات" }, "stats": { "title": "إحصائيات قاعدة البيانات \"{{db}}\"" }, "drop": { "title": "حذف قاعدة البيانات \"{{db}}\"" } }
+  },
+  "collection": {
+    "search": { "placeholder": "البحث في المجموعات…" },
+    "list": { "empty": { "noCollections": "لا توجد مجموعات.", "canCreate": "انقر على ＋ لإنشاء واحدة." } },
+    "button": { "create": { "title": "إنشاء مجموعة" }, "drop": { "title": "حذف المجموعة \"{{col}}\"" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "إغلاق التبويب" }, "new": { "title": "تبويب جديد" } },
+    "documents": "المستندات",
+    "aggregate": "التجميع",
+    "schema": "المخطط",
+    "indexes": "الفهارس",
+    "stats": "الإحصائيات",
+    "commands": "الأوامر"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "إنشاء قاعدة بيانات",
+      "subtitle": "تنشئ MongoDB قاعدة البيانات عند إنشاء أول مجموعة.",
+      "label": { "dbName": "اسم قاعدة البيانات", "collectionName": "اسم المجموعة الأولى" },
+      "placeholder": { "dbName": "مثال: تطبيقي", "collectionName": "مثال: مستخدمون" }
+    },
+    "createCollection": {
+      "title": "إنشاء مجموعة",
+      "subtitle": "إضافة مجموعة جديدة إلى",
+      "label": { "name": "اسم المجموعة" },
+      "placeholder": { "name": "مثال: منتجات" }
+    },
+    "dbStats": {
+      "title": "قاعدة البيانات:",
+      "subtitle": "إحصائيات التخزين والمستندات",
+      "unavailable": "الإحصائيات غير متاحة."
+    },
+    "changeConnection": {
+      "title": "تغيير اتصال MongoDB",
+      "subtitle": "أدخل URI اتصال جديدًا وقاعدة البيانات الافتراضية. تجاوزات TLS اختيارية.",
+      "label": {
+        "uri": "URI الاتصال",
+        "defaultDb": "قاعدة البيانات الافتراضية",
+        "tlsCaFile": "ملف شهادة TLS CA",
+        "tlsCertKeyFile": "شهادة عميل TLS + ملف المفتاح",
+        "allowInvalidTls": "السماح بشهادات TLS غير الصالحة / الموقعة ذاتيًا"
+      },
+      "placeholder": {
+        "uri": "مثال: mongodb://مستخدم:كلمة_مرور@مضيف:27017",
+        "defaultDb": "مثال: قاعدتي",
+        "tlsCaFile": "مثال: /certs/ca.pem",
+        "tlsCertKeyFile": "مثال: /certs/client.pem"
+      },
+      "optional": "(اختياري، المسار على الخادم)",
+      "warning": { "insecure": "⚠ غير آمن" }
+    },
+    "confirmDrop": {
+      "database": "حذف قاعدة البيانات كاملة \"{{db}}\"؟ لا يمكن التراجع عن هذا.",
+      "collection": "حذف المجموعة \"{{col}}\"؟ سيتم حذف جميع المستندات.",
+      "index": "حذف الفهرس \"{{name}}\"؟"
+    },
+    "editDocument": { "title": "تعديل المستند" },
+    "newDocument": { "title": "مستند جديد" },
+    "createIndex": {
+      "title": "إنشاء فهرس",
+      "subtitle": "حدد الحقول والخيارات للفهرس الجديد.",
+      "label": { "keys": "مفاتيح الفهرس", "name": "اسم الفهرس", "unique": "فريد", "sparse": "متفرق", "background": "خلفية", "ttl": "TTL" },
+      "optional": "(اختياري)",
+      "hint": { "background": "(غير محجوب)", "ttl": "(ثوانٍ، اختياري)" },
+      "placeholder": { "fieldName": "اسم الحقل", "name": "يُنشأ تلقائيًا إذا كان فارغًا", "ttl": "مثال: 3600" },
+      "option": { "ascending": "1 (تصاعدي)", "descending": "-1 (تنازلي)" },
+      "button": { "addField": "+ إضافة حقل", "submit": "إنشاء فهرس" },
+      "validation": { "fieldRequired": "مطلوب حقل واحد على الأقل." }
+    },
+    "import": { "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)" },
+    "confirmDelete": { "document": "حذف هذا المستند؟" }
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "create": "إنشاء",
+    "close": "إغلاق",
+    "connect": "اتصال",
+    "save": "حفظ",
+    "drop": "حذف",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "export": "تصدير",
+    "import": "استيراد",
+    "add": "إضافة",
+    "refresh": "↻ تحديث",
+    "form": "⊟ نموذج",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "اسم المستخدم", "password": "كلمة المرور", "fieldName": "اسم الحقل" },
+    "button": { "removeField": { "title": "إزالة الحقل" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "صحيح", "false": "خطأ" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "سلسلة سداسية عشرية من 24 حرفًا", "jsonValue": "قيمة JSON" },
+    "section": { "addField": "إضافة حقل" },
+    "validation": { "fieldExists": "الحقل \"{{key}}\" موجود بالفعل.", "fieldNameRequired": "اسم الحقل مطلوب." }
+  },
+  "editor": {
+    "form": { "noSchema": "لا يوجد مخطط متاح. استخدم وضع JSON لتعديل هذا المستند." },
+    "mode": {
+      "form": { "subtitle": "عدّل الحقول باستخدام مدخلات واعية بالأنواع. انتقل إلى JSON للتعديل الخام." },
+      "json": { "subtitle": "عدّل مستند JSON الخام. انتقل إلى النموذج للتعديل الموجَّه." }
+    },
+    "error": { "saveFailure": "JSON غير صالح أو فشل الحفظ:" }
+  },
+  "query": {
+    "label": { "filter": "تصفية", "sort": "ترتيب", "projection": "إسقاط", "limit": "الحد" },
+    "hint": { "ctrlEnter": "Ctrl+Enter للتطبيق" },
+    "badge": { "active": "نشط", "invalidJson": "JSON غير صالح" },
+    "button": { "apply": "تطبيق", "clear": "مسح" }
+  },
+  "views": {
+    "table": { "title": "عرض الجدول" },
+    "tree": { "title": "عرض الشجرة" }
+  },
+  "selection": {
+    "count_one": "{{count}} مستند محدد",
+    "count_other": "{{count}} مستندات محددة",
+    "button": { "export": "تصدير المحدد", "delete": "حذف المحدد", "clear": "✕ مسح" },
+    "confirmDelete_one": "حذف {{count}} مستند محدد؟ لا يمكن التراجع عن هذا.",
+    "confirmDelete_other": "حذف {{count}} مستندات محددة؟ لا يمكن التراجع عن هذا."
+  },
+  "documents": {
+    "list": { "empty": "لم يتم العثور على مستندات", "emptyWithFilter": "حاول تعديل الفلتر أو الإسقاط.", "emptyNoFilter": "هذه المجموعة فارغة." },
+    "button": { "create": "+ مستند جديد" },
+    "fieldCount_one": "{{count}} حقل",
+    "fieldCount_other": "{{count}} حقول"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "معاينة", "actions": "إجراءات", "name": "الاسم", "keys": "المفاتيح", "unique": "فريد", "sparse": "متفرق", "ttl": "TTL (ث)", "index": "الفهرس", "size": "الحجم", "fieldPath": "مسار الحقل", "types": "الأنواع", "coverage": "التغطية", "nullable": "قابل للإهمال" }
+  },
+  "pagination": {
+    "label": "عرض {{start}}–{{end}} من {{total}} مستندات",
+    "label_page": "صفحة {{page}}",
+    "button": { "prev": "→ السابق", "next": "التالي ←" }
+  },
+  "aggregate": {
+    "prompt": "أدخل خط أنابيب التجميع (مصفوفة JSON):",
+    "button": { "run": "▶ تشغيل" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} مستند", "count_other": "{{count}} مستندات" },
+    "placeholder": { "result": "// شغّل أمرًا لرؤية النتائج" }
+  },
+  "schema": {
+    "label": { "sampled": "تم أخذ عينة من", "document": "مستند", "field": "حقل" },
+    "plural": { "documents": "ات", "fields": "ول" },
+    "inferring": "جارٍ استنتاج المخطط…",
+    "unavailable": "لا تتوفر بيانات مخطط.",
+    "summary": "تم أخذ عينة من {{docCount}} مستند{{docPlural}} · {{fieldCount}} حقل{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "لم يتم العثور على فهارس." },
+    "button": { "create": "+ فهرس جديد" },
+    "label": { "count_one": "{{count}} فهرس", "count_other": "{{count}} فهارس", "loading": "جارٍ التحميل…" }
+  },
+  "stats": {
+    "loading": "جارٍ تحميل الإحصائيات…",
+    "unavailable": "لا تتوفر إحصائيات.",
+    "title": "إحصائيات المجموعة",
+    "label": {
+      "collections": "المجموعات",
+      "documents": "المستندات",
+      "avgDocSize": "متوسط حجم المستند",
+      "dataSize": "حجم البيانات",
+      "storageSize": "حجم التخزين",
+      "indexes": "الفهارس",
+      "indexSize": "حجم الفهرس",
+      "totalSize": "الحجم الإجمالي"
+    },
+    "section": { "indexSizes": "أحجام الفهارس" }
+  },
+  "commands": {
+    "search": { "placeholder": "البحث في الأوامر…" },
+    "category": { "server": "الخادم", "database": "قاعدة البيانات", "collection": "المجموعة", "replication": "النسخ المتماثل", "administration": "الإدارة" },
+    "description": {
+      "ping": "اختبار اتصال الخادم",
+      "buildInfo": "إصدار الخادم ومعلومات البناء",
+      "hostInfo": "معلومات نظام المضيف",
+      "serverStatus": "إحصائيات وقت التشغيل",
+      "connectionStatus": "تفاصيل الاتصال الحالية",
+      "hello": "دور الخادم / معلومات الطوبولوجيا",
+      "listDatabases": "سرد جميع قواعد البيانات",
+      "currentOp": "العمليات الجارية",
+      "killOp": "إنهاء عملية جارية بواسطة opId",
+      "getLog": "إدخالات السجل الأخيرة",
+      "getParameter": "الحصول على معامل الخادم",
+      "setParameter": "تعيين معامل الخادم",
+      "dbStats": "إحصائيات تخزين قاعدة البيانات",
+      "listCollections": "سرد المجموعات في هذه القاعدة",
+      "usersInfo": "سرد المستخدمين",
+      "createUser": "إنشاء مستخدم قاعدة البيانات",
+      "dropUser": "حذف مستخدم",
+      "grantRolesToUser": "منح أدوار لمستخدم",
+      "revokeRolesFromUser": "سحب أدوار من مستخدم",
+      "collStats": "إحصائيات تخزين المجموعة",
+      "count": "عدد المستندات المطابقة",
+      "validate": "التحقق من سلامة المجموعة",
+      "compact": "ضغط المجموعة / إلغاء التجزئة",
+      "reIndex": "إعادة بناء جميع الفهارس",
+      "convertToCapped": "تحويل إلى مجموعة محدودة",
+      "replSetGetStatus": "حالة مجموعة النسخ المتماثل",
+      "replSetGetConfig": "تكوين مجموعة النسخ المتماثل",
+      "isMaster": "فحص دور الخادم (قديم)",
+      "renameCollection": "إعادة تسمية مجموعة",
+      "dropDatabase": "حذف قاعدة بيانات",
+      "fsync": "مسح وقفل اختياري",
+      "rotateCertificates": "تدوير شهادات TLS",
+      "listIndexes": "سرد الفهارس على مجموعة",
+      "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات"
+    },
+    "context": { "runningOn": "يعمل على قاعدة البيانات:" },
+    "checkbox": { "useAdminDb": "استخدام قاعدة بيانات المسؤول" },
+    "button": { "run": "▶ تشغيل  (Ctrl+Enter)", "running": "⏳ جارٍ التشغيل…" },
+    "label": { "command": "الأمر", "result": "النتيجة" },
+    "error": { "invalidJson": "JSON غير صالح — صحح الأمر قبل التشغيل." }
+  },
+  "badge": {
+    "admin": "● مسؤول",
+    "viewer": "● مشاهد",
+    "error": "خطأ",
+    "success": "موافق"
+  },
+  "tree": {
+    "button": { "expandAll": "توسيع الكل", "collapseAll": "طي الكل" },
+    "checkbox": { "selectAllLabel": "تحديد الكل في الصفحة" }
+  },
+  "ui": {
+    "loading": "جارٍ التحميل…",
+    "connecting": "جارٍ الاتصال…",
+    "sidebar": { "resize": { "title": "اسحب لتغيير حجم الشريط الجانبي" } }
+  },
+  "empty": {
+    "title": "اختر قاعدة بيانات ومجموعة",
+    "subtitle": {
+      "collectionNeeded": "اختر مجموعة من الشريط الجانبي لاستعراض المستندات.",
+      "databaseNeeded": "اختر قاعدة بيانات من الشريط الجانبي للبدء."
+    }
+  },
+  "language": { "label": "اللغة" }
+}
