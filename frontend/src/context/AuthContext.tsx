@@ -1,6 +1,5 @@
 import {
   createContext,
-  useContext,
   useState,
   useEffect,
   useRef,
@@ -54,7 +53,9 @@ interface AuthContextValue {
   canWrite: boolean;
 }
 
-const AuthContext = createContext<AuthContextValue>({
+// AuthContext and AuthProvider are intentionally co-located; context export alongside component is the standard pattern.
+// eslint-disable-next-line react-refresh/only-export-components -- context object is not a component
+export const AuthContext = createContext<AuthContextValue>({
   token: null,
   roles: [],
   login: () => {},
@@ -133,5 +134,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(AuthContext);

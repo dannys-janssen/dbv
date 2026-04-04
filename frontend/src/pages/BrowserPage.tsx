@@ -13,7 +13,7 @@ import {
   reconnectMongo,
   type ConnectionInfo,
 } from "../api/mongo";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import CollectionView from "../components/CollectionView";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';

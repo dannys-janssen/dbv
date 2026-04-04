@@ -456,6 +456,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   useEffect(() => {
     if (value !== prevValue.current) {
       prevValue.current = value;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reinitialises fields when value prop changes
       initFields(value);
     }
   }, [value, initFields]);

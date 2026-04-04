@@ -17,7 +17,7 @@ import {
   type IndexInfo,
   type IndexKey,
 } from "../api/mongo";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import Editor, { loader } from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 import DocTreeView from "../components/DocTreeView";
@@ -218,6 +218,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   }, [db, col]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
     if (view === "schema") loadSchema();
   }, [view, loadSchema]);
 
@@ -250,6 +251,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   }, [db, col]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
     if (view === "indexes") loadIndexes();
   }, [view, loadIndexes]);
 
@@ -263,6 +265,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   }, [db, col]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
     if (view === "stats") loadColStats();
   }, [view, loadColStats]);
 
@@ -283,6 +286,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   useEffect(() => { loadDocumentsRef.current = loadDocuments; }, [loadDocuments]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
     loadDocuments();
   }, [loadDocuments]);
 
