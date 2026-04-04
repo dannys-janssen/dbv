@@ -22,6 +22,7 @@ import Editor, { loader } from "@monaco-editor/react";
 import SchemaViewer from "../components/SchemaViewer";
 import DocTreeView from "../components/DocTreeView";
 import CommandsView from "../components/CommandsView";
+import DocFormEditor from "../components/DocFormEditor";
 import {
   buildDocumentSchema,
   buildFilterSchema,
@@ -185,6 +186,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorValue, setEditorValue] = useState("{}");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editorMode, setEditorMode] = useState<"form" | "json">("form");
 
   const [pipeline, setPipeline] = useState("[]");
   const [aggResults, setAggResults] = useState<Record<string, unknown>[]>([]);
@@ -293,6 +295,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const openCreate = () => {
     setEditingId(null);
     setEditorValue("{}");
+    setEditorMode("form");
+    if (!schema) loadSchema();
     setEditorOpen(true);
   };
 
@@ -300,6 +304,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     const id = getDocId(doc);
     setEditingId(id);
     setEditorValue(JSON.stringify(doc, null, 2));
+    setEditorMode("form");
+    if (!schema) loadSchema();
     setEditorOpen(true);
   };
 
@@ -1338,22 +1344,56 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       {/* ── Editor modal ── */}
       {editorOpen && (
         <div style={overlayStyle}>
-          <div style={{ ...modalBaseStyle, width: "680px" }}>
-            <h3 style={modalTitleStyle}>
-              {editingId ? "Edit Document" : "New Document"}
-            </h3>
+          <div style={{ ...modalBaseStyle, width: "700px" }}>
+            {/* Header row: title + Form/JSON toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+              <h3 style={{ ...modalTitleStyle, marginBottom: 0 }}>
+                {editingId ? "Edit Document" : "New Document"}
+              </h3>
+              <div style={{ display: "flex", background: "#0f172a", borderRadius: 6, border: "1px solid #334155", overflow: "hidden" }}>
+                {(["form", "json"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setEditorMode(m)}
+                    style={{
+                      padding: "4px 14px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      border: "none",
+                      background: editorMode === m ? "#1e3a5f" : "transparent",
+                      color: editorMode === m ? "#93c5fd" : "#64748b",
+                      transition: "background 0.15s",
+                    }}
+                  >
+                    {m === "form" ? "⊟ Form" : "{ } JSON"}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p style={modalSubtitleStyle}>
-              {editingId
-                ? "Edit the JSON document below."
-                : "Enter a JSON document to insert."}
+              {editorMode === "form"
+                ? "Edit fields using type-aware inputs. Switch to JSON for raw editing."
+                : "Edit the raw JSON document. Switch to Form for guided editing."}
             </p>
-            <Editor
-              height="400px"
-              defaultLanguage="json"
-              path="dbv://document"
-              value={editorValue}
-              onChange={(v) => setEditorValue(v ?? "{}")}
-            />
+
+            {editorMode === "form" ? (
+              <DocFormEditor
+                schema={schema}
+                value={editorValue}
+                onChange={setEditorValue}
+                isEditing={editingId !== null}
+              />
+            ) : (
+              <Editor
+                height="400px"
+                defaultLanguage="json"
+                path="dbv://document"
+                value={editorValue}
+                onChange={(v) => setEditorValue(v ?? "{}")}
+              />
+            )}
+
             <div style={modalFooterStyle}>
               <button
                 onClick={() => setEditorOpen(false)}
