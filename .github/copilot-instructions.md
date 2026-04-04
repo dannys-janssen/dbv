@@ -227,9 +227,9 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
 ### Multi-Tab Architecture
 
 - `BrowserPage` manages a `tabs: Tab[]` array (`{ id, db, col }`) and `activeTabId`.
-- Clicking a collection in the sidebar calls `openCollection(db, col)` which either focuses an existing tab for that db+col or creates a new one.
+- Clicking a collection in the sidebar calls `openCollection(db, col)` which always creates a new tab (no deduplication). Multiple tabs for the same `db/col` are allowed.
 - Each `CollectionView` instance is always mounted (never unmounted on tab switch); `display: none` is used to hide inactive tabs, preserving all their React state.
-- `CollectionView` receives `db`, `col`, and `visible` props. Since `db`/`col` are fixed at tab creation time (new collection always = new tab), no state-reset-on-prop-change logic is needed.
+- Tab labels: collection name; `db/col` if the same collection name exists in multiple databases; `col (N)` suffix (1-based) when multiple tabs point to the same db+col.
 - Dropping a database or collection from the sidebar closes any open tabs referencing it.
 - `BrowserPage` owns only: sidebar state, tab array, DB/collection management modals, DB stats modal.
 - All per-collection state (filter, sort, projection, pagination, view mode, documents, schema, indexes, stats, pipeline, editor modals) lives inside `CollectionView`.

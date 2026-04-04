@@ -138,7 +138,7 @@ A status strip at the top of the sidebar shows the current MongoDB connection:
 
 Each collection opens in its own **tab** so you can work with multiple collections simultaneously without losing your query state:
 
-- **Clicking a collection** in the sidebar always opens it in a new tab. If a tab for that collection is already open, it is focused instead of duplicated.
+- **Clicking a collection** in the sidebar always opens it in a new tab. Multiple tabs for the same collection are allowed and are distinguished by a *(1)*, *(2)*, … suffix.
 - **`+` button** (right side of the tab bar) opens a new empty tab.
 - **`×` button** on each tab closes it. At least one tab is always kept open.
 - Each tab independently preserves its filter, projection, sort, pagination, view mode (table/tree), aggregate pipeline, and all other per-collection state.
