@@ -35,22 +35,26 @@ function bsonDateToIso(v: unknown): string {
   return "";
 }
 
-/** Format an ISO string for <input type="datetime-local"> (YYYY-MM-DDTHH:MM:SS). */
-function isoToInputValue(iso: string): string {
-  if (!iso) return "";
+/**
+ * Format an ISO string for display as UTC date + time pair.
+ * Returns { date: "YYYY-MM-DD", time: "HH:MM:SS" } in UTC.
+ */
+function isoToUtcParts(iso: string): { date: string; time: string } {
+  if (!iso) return { date: "", time: "" };
   try {
     const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    // datetime-local format: YYYY-MM-DDTHH:MM:SS (seconds optional but nice)
-    return d.toISOString().slice(0, 19);
+    if (isNaN(d.getTime())) return { date: "", time: "" };
+    const full = d.toISOString(); // always UTC, e.g. "2024-03-01T14:30:00.000Z"
+    return { date: full.slice(0, 10), time: full.slice(11, 19) };
   } catch {
-    return "";
+    return { date: "", time: "" };
   }
 }
 
-/** Convert a datetime-local input value back to a BSON $date object. */
-function inputValueToBsonDate(v: string): Record<string, string> {
-  return { $date: v ? new Date(v).toISOString() : new Date(0).toISOString() };
+/** Combine UTC date + time strings back into a BSON $date object. */
+function utcPartsToBsonDate(date: string, time: string): Record<string, string> {
+  const iso = date && time ? `${date}T${time}.000Z` : date ? `${date}T00:00:00.000Z` : new Date(0).toISOString();
+  return { $date: iso };
 }
 
 /** Extract a hex string from a BSON $oid value. */
@@ -132,9 +136,11 @@ function docValueToFieldState(key: string, v: unknown, schemaType: string | null
 
   if (!isNull) {
     switch (type) {
-      case "date":
-        displayValue = isoToInputValue(bsonDateToIso(v));
+      case "date": {
+        const parts = isoToUtcParts(bsonDateToIso(v));
+        displayValue = parts.date && parts.time ? `${parts.date}|${parts.time}` : "";
         break;
+      }
       case "objectId":
         displayValue = bsonOidToHex(v);
         break;
@@ -166,8 +172,10 @@ function fieldStateToBsonValue(f: FieldState): unknown {
   if (f.isNull) return null;
 
   switch (f.type) {
-    case "date":
-      return f.displayValue ? inputValueToBsonDate(f.displayValue) : null;
+    case "date": {
+      const [datePart, timePart] = f.displayValue.split("|");
+      return f.displayValue ? utcPartsToBsonDate(datePart ?? "", timePart ?? "") : null;
+    }
     case "objectId":
       return f.displayValue ? hexToBsonOid(f.displayValue) : null;
     case "bool":
@@ -191,12 +199,11 @@ function fieldStateToBsonValue(f: FieldState): unknown {
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: 600,
-  color: "#94a3b8",
+  color: "#cbd5e1",
   marginBottom: 4,
-  letterSpacing: "0.04em",
-  textTransform: "uppercase",
+  textAlign: "left",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -304,8 +311,8 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           </label>
         )}
 
-        {/* Remove button for extra fields */}
-        {!field.fromSchema && !isId && (
+        {/* Remove button — all fields except _id can be removed */}
+        {!isId && (
           <button
             onClick={() => onRemove(field.key)}
             title="Remove field"
@@ -331,32 +338,43 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }}
         />
       ) : field.type === "bool" ? (
-        <div style={{ display: "flex", gap: 16, padding: "6px 0" }}>
+        <div style={{ display: "flex", gap: 16, padding: "6px 10px", background: "#1e293b", border: "1px solid #334155", borderRadius: 6 }}>
           {["true", "false"].map((opt) => (
-            <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#f1f5f9", fontSize: 14 }}>
+            <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#f1f5f9", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
                 name={`bool-${field.key}`}
                 value={opt}
                 checked={field.displayValue === opt}
                 onChange={() => handleValue(opt)}
-                style={{ accentColor: "#3b82f6" }}
+                style={{ accentColor: "#3b82f6", cursor: "pointer" }}
               />
               {opt}
             </label>
           ))}
         </div>
       ) : field.type === "date" ? (
-        <input
-          type="datetime-local"
-          value={field.displayValue}
-          onChange={(e) => handleValue(e.target.value)}
-          step="1"
-          style={{
-            ...inputStyle,
-            colorScheme: "dark",
-          }}
-        />
+        (() => {
+          const [datePart = "", timePart = ""] = field.displayValue.split("|");
+          return (
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                type="date"
+                value={datePart}
+                onChange={(e) => handleValue(`${e.target.value}|${timePart || "00:00:00"}`)}
+                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+              />
+              <input
+                type="time"
+                value={timePart}
+                onChange={(e) => handleValue(`${datePart}|${e.target.value}`)}
+                step="1"
+                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+              />
+              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>UTC</span>
+            </div>
+          );
+        })()
       ) : isSimpleType(field.type) ? (
         <input
           type={["int", "double", "long", "decimal"].includes(field.type) ? "number" : "text"}
