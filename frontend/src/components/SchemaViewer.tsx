@@ -98,7 +98,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   row: { borderBottom: "1px solid #f3f4f6" },
-  td: { padding: "0.4rem 0.75rem", verticalAlign: "middle" },
+  td: { padding: "0.4rem 0.75rem", verticalAlign: "middle", textAlign: "left" },
   fieldName: {
     fontFamily: "monospace",
     fontSize: "0.82rem",
