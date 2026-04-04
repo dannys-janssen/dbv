@@ -210,15 +210,10 @@ export default function BrowserPage() {
 
   // ── Tab management ──
   const openCollection = useCallback((db: string, col: string) => {
-    const existing = tabs.find((t) => t.db === db && t.col === col);
-    if (existing) {
-      setActiveTabId(existing.id);
-      return;
-    }
     const id = `tab-${Date.now()}`;
     setTabs((prev) => [...prev, { id, db, col }]);
     setActiveTabId(id);
-  }, [tabs]);
+  }, []);
 
   const closeTab = useCallback((id: string) => {
     setTabs((prev) => {
@@ -403,9 +398,14 @@ export default function BrowserPage() {
 
   const getTabLabel = (tab: Tab): string => {
     if (!tab.col) return "New Tab";
-    const hasDup = tabs.some((t) => t.col === tab.col && t.db !== tab.db);
-    const label = hasDup ? `${tab.db}/${tab.col}` : tab.col;
-    return label.length > 20 ? label.slice(0, 20) + "…" : label;
+    const siblings = tabs.filter((t) => t.col === tab.col && t.db === tab.db);
+    const hasCrossDbDup = tabs.some((t) => t.col === tab.col && t.db !== tab.db);
+    const base = hasCrossDbDup ? `${tab.db}/${tab.col}` : tab.col;
+    const label =
+      siblings.length > 1
+        ? `${base} (${siblings.findIndex((t) => t.id === tab.id) + 1})`
+        : base;
+    return label.length > 22 ? label.slice(0, 22) + "…" : label;
   };
 
   return (
