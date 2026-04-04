@@ -1,0 +1,98 @@
+# Default values for dbv.
+
+replicaCount: 1
+
+image:
+  # Set to your registry/image, e.g. ghcr.io/your-org/dbv
+  repository: dbv
+  pullPolicy: IfNotPresent
+  # Overrides the image tag; defaults to the chart appVersion
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: dbv.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: dbv-tls
+  #   hosts:
+  #     - dbv.example.com
+
+resources: {}
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # limits:
+  #   cpu: 500m
+  #   memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ── dbv application configuration ───────────────────────────────────────────
+config:
+  # MongoDB connection string — stored in a Secret
+  # Example: mongodb://user:password@mongo-host:27017/mydb
+  mongodbUri: ""
+
+  # Default database to show on startup
+  mongodbDb: "test"
+
+  # Keycloak base URL reachable from inside the cluster
+  # Example: http://keycloak.keycloak.svc.cluster.local:8080
+  keycloakUrl: ""
+
+  # Keycloak realm name
+  keycloakRealm: ""
+
+  # OAuth2 client ID configured in Keycloak
+  keycloakClientId: ""
+
+  # Optional: MongoDB TLS settings
+  mongodbTlsCaFile: ""
+  mongodbTlsCertKeyFile: ""
+  mongodbTlsAllowInvalidCerts: "false"
+
+# Use an existing Secret instead of creating one from config.mongodbUri.
+# The secret must contain a key named MONGODB_URI.
+existingSecret: ""

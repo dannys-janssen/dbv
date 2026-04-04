@@ -1,0 +1,14 @@
+apiVersion: v2
+name: dbv
+description: Browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - mongodb
+  - database
+  - viewer
+  - keycloak
+home: https://github.com/your-org/dbv
+sources:
+  - https://github.com/your-org/dbv

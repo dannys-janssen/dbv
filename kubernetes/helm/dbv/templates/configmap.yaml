@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dbv.fullname" . }}
+  labels:
+    {{- include "dbv.labels" . | nindent 4 }}
+data:
+  MONGODB_DB: {{ .Values.config.mongodbDb | quote }}
+  KEYCLOAK_URL: {{ .Values.config.keycloakUrl | required "config.keycloakUrl is required" | quote }}
+  KEYCLOAK_REALM: {{ .Values.config.keycloakRealm | required "config.keycloakRealm is required" | quote }}
+  KEYCLOAK_CLIENT_ID: {{ .Values.config.keycloakClientId | required "config.keycloakClientId is required" | quote }}
+  SERVER_HOST: "0.0.0.0"
+  SERVER_PORT: "8080"
+  FRONTEND_DIST: "./frontend/dist"
+  {{- if .Values.config.mongodbTlsCaFile }}
+  MONGODB_TLS_CA_FILE: {{ .Values.config.mongodbTlsCaFile | quote }}
+  {{- end }}
+  {{- if .Values.config.mongodbTlsCertKeyFile }}
+  MONGODB_TLS_CERT_KEY_FILE: {{ .Values.config.mongodbTlsCertKeyFile | quote }}
+  {{- end }}
+  {{- if .Values.config.mongodbTlsAllowInvalidCerts }}
+  MONGODB_TLS_ALLOW_INVALID_CERTS: {{ .Values.config.mongodbTlsAllowInvalidCerts | quote }}
+  {{- end }}
