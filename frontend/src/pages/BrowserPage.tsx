@@ -641,6 +641,7 @@ export default function BrowserPage() {
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                         fontFamily: FONT,
+                        textAlign: "left",
                       }}
                     >
                       {db}
@@ -788,6 +789,7 @@ export default function BrowserPage() {
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           fontFamily: FONT,
+                          textAlign: "left",
                         }}
                       >
                         {col}

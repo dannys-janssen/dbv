@@ -679,7 +679,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           onClick={() => setDocLayout("tree")}
                           style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
-                          🌲
+                          ⊞
                         </button>
                       </div>
                       <button
