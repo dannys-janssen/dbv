@@ -25,6 +25,12 @@ use state::AppState;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // Install a rustls CryptoProvider before any TLS or JWT operations.
+    // Required when multiple providers (ring, aws-lc-rs) are present in the dep tree.
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
