@@ -15,43 +15,39 @@ pub struct DbClient {
     client: Client,
     pub default_db: String,
     pub uri: String,
+    // TLS overrides (stored so reconnect can reapply them)
+    pub tls_ca_file: Option<String>,
+    pub tls_cert_key_file: Option<String>,
+    pub tls_allow_invalid_certs: bool,
 }
 
 impl DbClient {
-    pub async fn from_uri(uri: &str, default_db: &str) -> Result<Self, AppError> {
-        let options = ClientOptions::parse(uri).await?;
-        let client = Client::with_options(options)?;
-        client
-            .database("admin")
-            .run_command(bson::doc! { "ping": 1 }, None)
-            .await?;
-        tracing::info!("Connected to MongoDB at {}", uri);
-        Ok(Self {
-            client,
-            default_db: default_db.to_string(),
-            uri: uri.to_string(),
-        })
-    }
+    /// Connect with explicit TLS override fields (mirrors the env-var config path).
+    pub async fn from_uri_with_tls(
+        uri: &str,
+        default_db: &str,
+        tls_ca_file: Option<String>,
+        tls_cert_key_file: Option<String>,
+        tls_allow_invalid_certs: bool,
+    ) -> Result<Self, AppError> {
+        let mut options = ClientOptions::parse(uri).await?;
 
-    pub async fn new(config: &Config) -> Result<Self, AppError> {
-        let mut options = ClientOptions::parse(&config.mongodb_uri).await?;
-
-        let needs_tls_override = config.mongodb_tls_ca_file.is_some()
-            || config.mongodb_tls_cert_key_file.is_some()
-            || config.mongodb_tls_allow_invalid_certs;
+        let needs_tls_override = tls_ca_file.is_some()
+            || tls_cert_key_file.is_some()
+            || tls_allow_invalid_certs;
 
         if needs_tls_override {
             let mut tls_opts = match options.tls.take() {
                 Some(Tls::Enabled(existing)) => existing,
                 _ => TlsOptions::default(),
             };
-            if let Some(ca) = &config.mongodb_tls_ca_file {
+            if let Some(ca) = &tls_ca_file {
                 tls_opts.ca_file_path = Some(PathBuf::from(ca));
             }
-            if let Some(cert_key) = &config.mongodb_tls_cert_key_file {
+            if let Some(cert_key) = &tls_cert_key_file {
                 tls_opts.cert_key_file_path = Some(PathBuf::from(cert_key));
             }
-            if config.mongodb_tls_allow_invalid_certs {
+            if tls_allow_invalid_certs {
                 tls_opts.allow_invalid_certificates = Some(true);
             }
             options.tls = Some(Tls::Enabled(tls_opts));
@@ -62,12 +58,31 @@ impl DbClient {
             .database("admin")
             .run_command(bson::doc! { "ping": 1 }, None)
             .await?;
-        tracing::info!("Connected to MongoDB at {}", config.mongodb_uri);
+        tracing::info!("Connected to MongoDB at {}", uri);
         Ok(Self {
             client,
-            default_db: config.mongodb_db.clone(),
-            uri: config.mongodb_uri.clone(),
+            default_db: default_db.to_string(),
+            uri: uri.to_string(),
+            tls_ca_file,
+            tls_cert_key_file,
+            tls_allow_invalid_certs,
         })
+    }
+
+    /// Convenience constructor: connect with no extra TLS overrides.
+    pub async fn from_uri(uri: &str, default_db: &str) -> Result<Self, AppError> {
+        Self::from_uri_with_tls(uri, default_db, None, None, false).await
+    }
+
+    pub async fn new(config: &Config) -> Result<Self, AppError> {
+        Self::from_uri_with_tls(
+            &config.mongodb_uri,
+            &config.mongodb_db,
+            config.mongodb_tls_ca_file.clone(),
+            config.mongodb_tls_cert_key_file.clone(),
+            config.mongodb_tls_allow_invalid_certs,
+        )
+        .await
     }
 
     /// Returns the URI with any password replaced by `***`.

@@ -203,6 +203,9 @@ export default function BrowserPage() {
   const [changeConnOpen, setChangeConnOpen] = useState(false);
   const [newUri, setNewUri] = useState("");
   const [newDefaultDb, setNewDefaultDb] = useState("");
+  const [newTlsCaFile, setNewTlsCaFile] = useState("");
+  const [newTlsCertKeyFile, setNewTlsCertKeyFile] = useState("");
+  const [newTlsAllowInvalid, setNewTlsAllowInvalid] = useState(false);
   const [connError, setConnError] = useState("");
 
   // ── Tab management ──
@@ -367,7 +370,13 @@ export default function BrowserPage() {
     setConnError("");
     setConnLoading(true);
     try {
-      const info = await setConnection(newUri, newDefaultDb || undefined);
+      const info = await setConnection({
+        uri: newUri,
+        default_db: newDefaultDb || undefined,
+        tls_ca_file: newTlsCaFile || undefined,
+        tls_cert_key_file: newTlsCertKeyFile || undefined,
+        tls_allow_invalid_certs: newTlsAllowInvalid || undefined,
+      });
       setConnInfo(info);
       setChangeConnOpen(false);
       reloadDatabases();
@@ -525,6 +534,9 @@ export default function BrowserPage() {
               onClick={() => {
                 setNewUri(connInfo?.uri ?? "");
                 setNewDefaultDb(connInfo?.default_db ?? "");
+                setNewTlsCaFile(connInfo?.tls_ca_file ?? "");
+                setNewTlsCertKeyFile(connInfo?.tls_cert_key_file ?? "");
+                setNewTlsAllowInvalid(connInfo?.tls_allow_invalid_certs ?? false);
                 setConnError("");
                 setChangeConnOpen(true);
               }}
@@ -1091,12 +1103,12 @@ export default function BrowserPage() {
           <div style={modalBaseStyle}>
             <h3 style={modalTitleStyle}>Change MongoDB Connection</h3>
             <p style={modalSubtitleStyle}>
-              Enter a new connection URI and default database.
+              Enter a new connection URI and default database. TLS overrides are optional — they supplement parameters already in the URI.
             </p>
             <label style={modalLabelStyle}>Connection URI</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. mongodb://user:pass@host:27017"
+              placeholder="e.g. mongodb://user:pass@host:27017 or mongodb+srv://cluster.mongodb.net/"
               value={newUri}
               onChange={(e) => setNewUri(e.target.value)}
               autoFocus
@@ -1107,8 +1119,31 @@ export default function BrowserPage() {
               placeholder="e.g. mydb"
               value={newDefaultDb}
               onChange={(e) => setNewDefaultDb(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && void handleSetConnection()}
             />
+            <label style={{ ...modalLabelStyle, marginTop: 8 }}>TLS CA Certificate File <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional, path on server)</span></label>
+            <input
+              style={modalInputStyle}
+              placeholder="e.g. /certs/ca.pem"
+              value={newTlsCaFile}
+              onChange={(e) => setNewTlsCaFile(e.target.value)}
+            />
+            <label style={modalLabelStyle}>TLS Client Certificate + Key File <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional, path on server)</span></label>
+            <input
+              style={modalInputStyle}
+              placeholder="e.g. /certs/client.pem"
+              value={newTlsCertKeyFile}
+              onChange={(e) => setNewTlsCertKeyFile(e.target.value)}
+            />
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "13px", color: "#374151", margin: "8px 0 12px", fontFamily: FONT }}>
+              <input
+                type="checkbox"
+                checked={newTlsAllowInvalid}
+                onChange={(e) => setNewTlsAllowInvalid(e.target.checked)}
+                style={{ accentColor: "#ef4444", width: 14, height: 14 }}
+              />
+              Allow invalid / self-signed TLS certificates
+              <span style={{ color: "#ef4444", fontSize: 11, fontWeight: 600 }}>⚠ insecure</span>
+            </label>
             {connError && (
               <p style={{ color: "#dc2626", fontSize: "13px", margin: "-8px 0 12px", fontFamily: FONT }}>
                 {connError}

@@ -208,13 +208,24 @@ export interface ConnectionInfo {
   default_db: string;
   status: "ok" | "error";
   error?: string;
+  tls_ca_file?: string;
+  tls_cert_key_file?: string;
+  tls_allow_invalid_certs?: boolean;
 }
 
 export const getConnection = (): Promise<ConnectionInfo> =>
   api.get<ConnectionInfo>("/connection").then((r) => r.data);
 
-export const setConnection = (uri: string, default_db?: string): Promise<ConnectionInfo> =>
-  api.post<ConnectionInfo>("/connection", { uri, default_db }).then((r) => r.data);
+export interface SetConnectionParams {
+  uri: string;
+  default_db?: string;
+  tls_ca_file?: string;
+  tls_cert_key_file?: string;
+  tls_allow_invalid_certs?: boolean;
+}
+
+export const setConnection = (params: SetConnectionParams): Promise<ConnectionInfo> =>
+  api.post<ConnectionInfo>("/connection", params).then((r) => r.data);
 
 export const reconnectMongo = (): Promise<ConnectionInfo> =>
   api.post<ConnectionInfo>("/connection/reconnect").then((r) => r.data);
