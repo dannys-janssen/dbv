@@ -68,63 +68,63 @@ async fn main() -> anyhow::Result<()> {
             get(routes::data::list_databases),
         )
         .route(
-            "/databases/:db",
+            "/databases/{db}",
             post(routes::data::create_database).delete(routes::data::drop_database),
         )
         .route(
-            "/databases/:db/collections",
+            "/databases/{db}/collections",
             get(routes::data::list_collections).post(routes::data::create_collection),
         )
         .route(
-            "/databases/:db/collections/:collection",
+            "/databases/{db}/collections/{collection}",
             delete(routes::data::drop_collection),
         )
         .route(
-            "/databases/:db/collections/:collection/documents",
+            "/databases/{db}/collections/{collection}/documents",
             get(routes::data::list_documents)
                 .post(routes::data::create_document)
                 .delete(routes::data::bulk_delete_documents),
         )
         .route(
-            "/databases/:db/collections/:collection/documents/:id",
+            "/databases/{db}/collections/{collection}/documents/{id}",
             get(routes::data::get_document)
                 .put(routes::data::update_document)
                 .delete(routes::data::delete_document),
         )
         .route(
-            "/databases/:db/collections/:collection/aggregate",
+            "/databases/{db}/collections/{collection}/aggregate",
             post(routes::data::aggregate),
         )
         .route(
-            "/databases/:db/stats",
+            "/databases/{db}/stats",
             get(routes::data::database_stats),
         )
         .route(
-            "/databases/:db/collections/:collection/stats",
+            "/databases/{db}/collections/{collection}/stats",
             get(routes::data::collection_stats),
         )
         .route(
-            "/databases/:db/collections/:collection/indexes",
+            "/databases/{db}/collections/{collection}/indexes",
             get(routes::data::list_indexes).post(routes::data::create_index),
         )
         .route(
-            "/databases/:db/collections/:collection/indexes/:name",
+            "/databases/{db}/collections/{collection}/indexes/{name}",
             delete(routes::data::drop_index),
         )
         .route(
-            "/databases/:db/collections/:collection/schema",
+            "/databases/{db}/collections/{collection}/schema",
             get(routes::schema::collection_schema),
         )
         .route(
-            "/databases/:db/collections/:collection/export",
+            "/databases/{db}/collections/{collection}/export",
             get(routes::transfer::export_collection),
         )
         .route(
-            "/databases/:db/collections/:collection/import",
+            "/databases/{db}/collections/{collection}/import",
             post(routes::transfer::import_collection),
         )
         .route(
-            "/databases/:db/run_command",
+            "/databases/{db}/run_command",
             post(routes::data::run_command),
         )
         .route("/connection", get(routes::connection::get_connection).post(routes::connection::set_connection))
