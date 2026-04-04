@@ -1,16 +1,13 @@
 use axum::{
-    http::{StatusCode, Uri},
-    response::{Html, IntoResponse, Response},
-    routing::{delete, get, post, put},
+    routing::{delete, get, post},
     Router,
 };
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::fs;
 use tokio::sync::RwLock;
 use tower_http::{
     cors::{Any, CorsLayer},
-    services::ServeDir,
+    services::{ServeDir, ServeFile},
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -135,23 +132,12 @@ async fn main() -> anyhow::Result<()> {
 
     let frontend_dist = config.frontend_dist.clone();
     let index_html = format!("{}/index.html", frontend_dist);
+    // Serve the entire frontend dist, falling back to index.html for SPA client-side routing.
+    let spa_service = ServeDir::new(&frontend_dist)
+        .not_found_service(ServeFile::new(&index_html));
     let app = Router::new()
         .nest("/api", api)
-        // Serve static assets (JS, CSS, images, etc.) from the dist folder.
-        .nest_service("/assets", ServeDir::new(format!("{}/assets", frontend_dist)))
-        // Catch-all: API paths that didn't match get 404; everything else gets index.html.
-        .fallback(move |uri: Uri| {
-            let index_html = index_html.clone();
-            async move {
-                if uri.path().starts_with("/api") {
-                    return (StatusCode::NOT_FOUND, "Not found").into_response();
-                }
-                match fs::read_to_string(&index_html).await {
-                    Ok(html) => Html(html).into_response(),
-                    Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "index.html not found").into_response(),
-                }
-            }
-        })
+        .fallback_service(spa_service)
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);
