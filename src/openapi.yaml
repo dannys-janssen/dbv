@@ -1,0 +1,828 @@
+openapi: "3.0.3"
+
+info:
+  title: dbv — MongoDB Browser API
+  description: |
+    REST API for the **dbv** MongoDB browser.
+
+    **Authentication flow:**
+    1. `POST /api/auth/login` with username + password → get `access_token`
+    2. Click **Authorize** (top right) and enter the token (without the `Bearer ` prefix — Swagger UI adds it)
+    3. All other endpoints will now include the `Authorization: Bearer <token>` header
+
+    **Roles:**
+    - `dbv-viewer` — read-only (GET endpoints, export, aggregate, schema, stats)
+    - `dbv-admin` — read + write (all endpoints)
+  version: "0.1.0"
+  license:
+    name: MIT
+
+servers:
+  - url: /api
+    description: Current server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Login and token refresh (no JWT required)
+  - name: Health
+    description: Health check
+  - name: Connection
+    description: MongoDB connection management
+  - name: Databases
+    description: Database listing and management
+  - name: Collections
+    description: Collection listing and management
+  - name: Documents
+    description: Document CRUD and bulk operations
+  - name: Query
+    description: Aggregation, schema inference, and statistics
+  - name: Indexes
+    description: Index listing and management
+  - name: Transfer
+    description: Export and import
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    db:
+      name: db
+      in: path
+      required: true
+      description: Database name
+      schema:
+        type: string
+    col:
+      name: col
+      in: path
+      required: true
+      description: Collection name
+      schema:
+        type: string
+    id:
+      name: id
+      in: path
+      required: true
+      description: Document `_id` — 24-char hex ObjectId or plain string
+      schema:
+        type: string
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+          example: "secret"
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+          description: Seconds until the access token expires
+
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    Document:
+      type: object
+      additionalProperties: true
+      description: A MongoDB document in BSON Extended JSON format
+
+    Pipeline:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+      description: MongoDB aggregation pipeline (array of stage objects)
+
+    ConnectionInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: Masked URI — password replaced with ***
+        default_db:
+          type: string
+        status:
+          type: string
+          enum: [ok, error]
+        error:
+          type: string
+        tls_ca_file:
+          type: string
+        tls_cert_key_file:
+          type: string
+        tls_allow_invalid_certs:
+          type: boolean
+
+    SchemaField:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Dot-notation field path
+        types:
+          type: array
+          items:
+            type: string
+          description: BSON type(s) observed for this field
+        count:
+          type: integer
+          description: Number of documents containing this field
+
+    IndexInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        keys:
+          type: object
+          additionalProperties: true
+          example: {"field": 1}
+        unique:
+          type: boolean
+        sparse:
+          type: boolean
+        ttl:
+          type: integer
+          description: expireAfterSeconds (TTL indexes only)
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Pings MongoDB. No authentication required.
+      operationId: health
+      security: []
+      tags: [Health]
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /auth/login:
+    post:
+      summary: Login
+      description: |
+        Authenticates against Keycloak and returns JWT tokens.
+        Copy the `access_token` value and use it in the **Authorize** dialog.
+      operationId: login
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Exchanges a refresh token for a new access token. No authentication required.
+      operationId: refreshToken
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid or expired refresh token
+
+  /connection:
+    get:
+      summary: Get connection info
+      description: Returns masked URI, default database, and connection status. No authentication required.
+      operationId: getConnection
+      security: []
+      tags: [Connection]
+      responses:
+        "200":
+          description: Current connection info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionInfo"
+    post:
+      summary: Change connection
+      description: |
+        Switches to a new MongoDB URI. Pings the new server before replacing the live client; returns 400 if the ping fails.
+        Requires `dbv-viewer` or `dbv-admin` role.
+      operationId: setConnection
+      tags: [Connection]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [uri]
+              properties:
+                uri:
+                  type: string
+                  example: "mongodb://user:pass@host:27017"
+                default_db:
+                  type: string
+                tls_ca_file:
+                  type: string
+                  description: Path to PEM CA certificate
+                tls_cert_key_file:
+                  type: string
+                  description: Path to PEM client cert+key (mutual TLS)
+                tls_allow_invalid_certs:
+                  type: boolean
+                  description: Skip certificate validation (dev only)
+      responses:
+        "200":
+          description: Connection switched
+        "400":
+          description: Ping failed — invalid URI or unreachable server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection/reconnect:
+    post:
+      summary: Reconnect
+      description: Re-creates the MongoDB client from the currently stored URI and TLS settings. Requires viewer role.
+      operationId: reconnect
+      tags: [Connection]
+      responses:
+        "200":
+          description: Reconnected successfully
+        "500":
+          description: Reconnect failed
+
+  /databases:
+    get:
+      summary: List databases
+      operationId: listDatabases
+      tags: [Databases]
+      responses:
+        "200":
+          description: Array of database names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /databases/{db}:
+    post:
+      summary: Create database
+      description: |
+        MongoDB creates databases lazily — this creates the database by inserting an initial collection.
+        Requires `dbv-admin` role.
+      operationId: createDatabase
+      tags: [Databases]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [collection]
+              properties:
+                collection:
+                  type: string
+                  description: Name of the initial collection to create
+      responses:
+        "200":
+          description: Database and initial collection created
+        "400":
+          description: Bad request
+    delete:
+      summary: Drop database
+      description: |
+        Permanently drops the database and all its collections.
+        System databases (`admin`, `config`, `local`) are protected and cannot be dropped.
+        Requires `dbv-admin` role.
+      operationId: dropDatabase
+      tags: [Databases]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      responses:
+        "200":
+          description: Database dropped
+        "403":
+          description: System database — drop not allowed
+
+  /databases/{db}/collections:
+    get:
+      summary: List collections
+      operationId: listCollections
+      tags: [Collections]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      responses:
+        "200":
+          description: Array of collection names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      summary: Create collection
+      description: Requires `dbv-admin` role.
+      operationId: createCollection
+      tags: [Collections]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+      responses:
+        "200":
+          description: Collection created
+
+  /databases/{db}/collections/{col}:
+    delete:
+      summary: Drop collection
+      description: Permanently drops the collection and all its documents. Requires `dbv-admin` role.
+      operationId: dropCollection
+      tags: [Collections]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: Collection dropped
+
+  /databases/{db}/collections/{col}/documents:
+    get:
+      summary: List documents
+      description: Returns a paginated, filtered, sorted, and projected list of documents.
+      operationId: listDocuments
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 1000
+        - name: filter
+          in: query
+          description: MongoDB query filter as a JSON string
+          schema:
+            type: string
+            example: '{"status":"active"}'
+        - name: sort
+          in: query
+          description: MongoDB sort specification as a JSON string
+          schema:
+            type: string
+            example: '{"createdAt":-1}'
+        - name: projection
+          in: query
+          description: MongoDB projection as a JSON string
+          schema:
+            type: string
+            example: '{"name":1,"email":1}'
+      responses:
+        "200":
+          description: Paginated document list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Document"
+                  total:
+                    type: integer
+                    description: Total matching document count
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+    post:
+      summary: Insert document
+      description: Inserts a single document. Requires `dbv-admin` role.
+      operationId: insertDocument
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+      responses:
+        "200":
+          description: Document inserted
+    delete:
+      summary: Bulk delete documents
+      description: Deletes multiple documents by their `_id` values. Requires `dbv-admin` role.
+      operationId: bulkDeleteDocuments
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of `_id` values (ObjectId hex strings or plain strings)
+      responses:
+        "200":
+          description: Documents deleted
+
+  /databases/{db}/collections/{col}/documents/{id}:
+    get:
+      summary: Get document by _id
+      operationId: getDocument
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Document found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "404":
+          description: Document not found
+    put:
+      summary: Replace document by _id
+      description: Fully replaces a document. Requires `dbv-admin` role.
+      operationId: replaceDocument
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+      responses:
+        "200":
+          description: Document replaced
+    delete:
+      summary: Delete document by _id
+      description: Requires `dbv-admin` role.
+      operationId: deleteDocument
+      tags: [Documents]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Document deleted
+
+  /databases/{db}/collections/{col}/aggregate:
+    post:
+      summary: Run aggregation pipeline
+      operationId: aggregate
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pipeline]
+              properties:
+                pipeline:
+                  $ref: "#/components/schemas/Pipeline"
+            example:
+              pipeline:
+                - $match: {status: "active"}
+                - $group: {_id: "$category", count: {$sum: 1}}
+      responses:
+        "200":
+          description: Aggregation results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+
+  /databases/{db}/collections/{col}/schema:
+    get:
+      summary: Infer collection schema
+      description: Samples up to 100 documents to infer field paths and BSON types.
+      operationId: getSchema
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: Inferred schema fields
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SchemaField"
+
+  /databases/{db}/collections/{col}/stats:
+    get:
+      summary: Collection statistics
+      description: Returns MongoDB `collStats` output for the collection.
+      operationId: getStats
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: Collection stats (raw collStats document)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /databases/{db}/stats:
+    get:
+      summary: Database statistics
+      description: Returns MongoDB `dbStats` output for the database.
+      operationId: getDatabaseStats
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      responses:
+        "200":
+          description: Database stats (raw dbStats document)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /databases/{db}/collections/{col}/indexes:
+    get:
+      summary: List indexes
+      operationId: listIndexes
+      tags: [Indexes]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: Array of index descriptors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IndexInfo"
+    post:
+      summary: Create index
+      description: Requires `dbv-admin` role.
+      operationId: createIndex
+      tags: [Indexes]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [keys]
+              properties:
+                keys:
+                  type: object
+                  additionalProperties: true
+                  description: Index key specification
+                  example: {"field": 1}
+                name:
+                  type: string
+                unique:
+                  type: boolean
+                  default: false
+                sparse:
+                  type: boolean
+                  default: false
+                ttl:
+                  type: integer
+                  description: expireAfterSeconds for TTL indexes
+      responses:
+        "200":
+          description: Index created
+
+  /databases/{db}/collections/{col}/indexes/{name}:
+    delete:
+      summary: Drop index
+      description: |
+        Drops an index by name. The `_id_` index cannot be dropped.
+        Requires `dbv-admin` role.
+      operationId: dropIndex
+      tags: [Indexes]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - name: name
+          in: path
+          required: true
+          description: Index name
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Index dropped
+        "400":
+          description: Cannot drop the `_id_` index
+
+  /databases/{db}/collections/{col}/export:
+    get:
+      summary: Export collection as JSON
+      description: Downloads all documents in the collection as a JSON array.
+      operationId: exportCollection
+      tags: [Transfer]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: JSON array of all documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+
+  /databases/{db}/collections/{col}/import:
+    post:
+      summary: Import documents
+      description: |
+        Inserts documents into the collection.
+        If `replace` is true, drops the collection first.
+        Requires `dbv-admin` role.
+      operationId: importCollection
+      tags: [Transfer]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documents]
+              properties:
+                documents:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Document"
+                replace:
+                  type: boolean
+                  default: false
+                  description: Drop the collection before importing
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inserted:
+                    type: integer
+
+  /databases/{db}/run_command:
+    post:
+      summary: Run MongoDB command
+      description: |
+        Runs any MongoDB command on `:db` (or the `admin` database when `admin: true`).
+        Requires `dbv-admin` role.
+
+        **Common commands:**
+        - `{"ping": 1}` — connectivity check
+        - `{"dbStats": 1}` — database statistics
+        - `{"listCollections": 1}` — list collections with metadata
+        - `{"serverStatus": 1}` — full server status (use `admin: true`)
+        - `{"replSetGetStatus": 1}` — replica set status (use `admin: true`)
+      operationId: runCommand
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [command]
+              properties:
+                command:
+                  type: object
+                  additionalProperties: true
+                  example: {"ping": 1}
+                admin:
+                  type: boolean
+                  default: false
+                  description: Route command to the `admin` database
+      responses:
+        "200":
+          description: Command result document
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true

@@ -128,7 +128,8 @@ async fn main() -> anyhow::Result<()> {
             post(routes::data::run_command),
         )
         .route("/connection", get(routes::connection::get_connection).post(routes::connection::set_connection))
-        .route("/connection/reconnect", post(routes::connection::reconnect));
+        .route("/connection/reconnect", post(routes::connection::reconnect))
+        .route("/openapi.yaml", get(routes::openapi::openapi_spec));
 
     let frontend_dist = config.frontend_dist.clone();
     let index_html = format!("{}/index.html", frontend_dist);
@@ -140,6 +141,7 @@ async fn main() -> anyhow::Result<()> {
         .fallback(ServeFile::new(&index_html));
     let app = Router::new()
         .nest("/api", api)
+        .route("/docs", get(routes::openapi::swagger_ui))
         .fallback_service(spa_service)
         .layer(cors)
         .layer(TraceLayer::new_for_http())
