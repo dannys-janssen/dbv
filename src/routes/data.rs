@@ -146,8 +146,8 @@ pub async fn list_documents(
         .build();
 
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let total = coll.count_documents(filter.clone(), None).await?;
-    let mut cursor = coll.find(filter, options).await?;
+    let total = coll.count_documents(filter.clone()).await?;
+    let mut cursor = coll.find(filter).with_options(options).await?;
     let mut docs = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
         docs.push(serde_json::to_value(doc).unwrap_or(Value::Null));
@@ -176,7 +176,7 @@ pub async fn get_document(
     let doc_id = parse_id_bson(&id);
 
     let doc = coll
-        .find_one(doc! { "_id": doc_id }, None)
+        .find_one(doc! { "_id": doc_id })
         .await?
         .ok_or_else(|| AppError::NotFound(format!("Document {id} not found")))?;
 
@@ -191,7 +191,7 @@ pub async fn create_document(
 ) -> Result<Json<Value>, AppError> {
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let document = json_to_doc(body)?;
-    let result = coll.insert_one(document, None).await?;
+    let result = coll.insert_one(document).await?;
     let inserted_id = serde_json::to_value(result.inserted_id)?;
     Ok(Json(json!({ "inserted_id": inserted_id })))
 }
@@ -207,7 +207,7 @@ pub async fn update_document(
 
     let replacement = json_to_doc(body)?;
     let result = coll
-        .replace_one(doc! { "_id": doc_id }, replacement, None)
+        .replace_one(doc! { "_id": doc_id }, replacement)
         .await?;
 
     Ok(Json(json!({
@@ -224,7 +224,7 @@ pub async fn delete_document(
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
-    let result = coll.delete_one(doc! { "_id": doc_id }, None).await?;
+    let result = coll.delete_one(doc! { "_id": doc_id }).await?;
     if result.deleted_count == 0 {
         return Err(AppError::NotFound(format!("Document {id} not found")));
     }
@@ -248,7 +248,7 @@ pub async fn bulk_delete_documents(
     }
     let ids: Vec<bson::Bson> = body.ids.iter().map(|id| parse_id_bson(id)).collect();
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let result = coll.delete_many(doc! { "_id": { "$in": &ids } }, None).await?;
+    let result = coll.delete_many(doc! { "_id": { "$in": &ids } }).await?;
     Ok(Json(json!({ "deleted": result.deleted_count })))
 }
 
@@ -271,7 +271,7 @@ pub async fn aggregate(
         .map(json_to_doc)
         .collect::<Result<_, _>>()?;
 
-    let mut cursor = coll.aggregate(pipeline, None).await?;
+    let mut cursor = coll.aggregate(pipeline).await?;
     let mut results = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
         results.push(serde_json::to_value(doc).unwrap_or(Value::Null));
@@ -335,7 +335,7 @@ pub async fn database_stats(
 ) -> Result<Json<Value>, AppError> {
     let database = state.db.read().await.database(&db);
     let doc = database
-        .run_command(bson::doc! { "dbStats": 1, "scale": 1 }, None)
+        .run_command(bson::doc! { "dbStats": 1, "scale": 1 })
         .await?;
     Ok(Json(serde_json::to_value(doc)?))
 }
@@ -347,7 +347,7 @@ pub async fn collection_stats(
 ) -> Result<Json<Value>, AppError> {
     let database = state.db.read().await.database(&db);
     let doc = database
-        .run_command(bson::doc! { "collStats": &collection, "scale": 1 }, None)
+        .run_command(bson::doc! { "collStats": &collection, "scale": 1 })
         .await?;
     Ok(Json(serde_json::to_value(doc)?))
 }

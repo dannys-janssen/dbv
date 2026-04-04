@@ -100,7 +100,6 @@ impl Claims {
 }
 
 /// Axum extractor that validates the Bearer JWT and returns Claims.
-#[axum::async_trait]
 impl<S> FromRequestParts<S> for Claims
 where
     Config: FromRef<S>,

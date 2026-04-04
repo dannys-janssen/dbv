@@ -19,7 +19,7 @@ pub async fn export_collection(
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Response, AppError> {
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let mut cursor = coll.find(bson::doc! {}, None).await?;
+    let mut cursor = coll.find(bson::doc! {}).await?;
     let mut docs: Vec<Value> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
         docs.push(serde_json::to_value(doc).unwrap_or(Value::Null));
@@ -57,7 +57,7 @@ pub async fn import_collection(
     let coll: mongodb::Collection<Document> = state.db.read().await.collection::<Document>(&db, &collection);
 
     if body.replace {
-        coll.drop(None).await?;
+        coll.drop().await?;
     }
 
     let documents: Vec<Document> = body
@@ -70,7 +70,7 @@ pub async fn import_collection(
         return Ok(Json(serde_json::json!({ "inserted": 0 })));
     }
 
-    let result = coll.insert_many(documents, None).await?;
+    let result = coll.insert_many(documents).await?;
     Ok(Json(serde_json::json!({
         "inserted": result.inserted_ids.len()
     })))

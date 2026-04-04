@@ -11,7 +11,6 @@ pub struct ReadAccess(pub Claims);
 /// Accepted only by users with `dbv-admin`.
 pub struct WriteAccess(pub Claims);
 
-#[axum::async_trait]
 impl<S> FromRequestParts<S> for ReadAccess
 where
     Config: FromRef<S>,
@@ -32,7 +31,6 @@ where
     }
 }
 
-#[axum::async_trait]
 impl<S> FromRequestParts<S> for WriteAccess
 where
     Config: FromRef<S>,

@@ -26,7 +26,7 @@ pub async fn collection_schema(
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
 
     let options = FindOptions::builder().limit(100).build();
-    let mut cursor = coll.find(bson::doc! {}, options).await?;
+    let mut cursor = coll.find(bson::doc! {}).with_options(options).await?;
 
     let mut field_map: BTreeMap<String, FieldInfo> = BTreeMap::new();
     let mut doc_count = 0usize;

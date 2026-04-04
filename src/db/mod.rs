@@ -56,7 +56,7 @@ impl DbClient {
         let client = Client::with_options(options)?;
         client
             .database("admin")
-            .run_command(bson::doc! { "ping": 1 }, None)
+            .run_command(bson::doc! { "ping": 1 })
             .await?;
         tracing::info!("Connected to MongoDB at {}", uri);
         Ok(Self {
@@ -111,38 +111,38 @@ impl DbClient {
         self.client.database(&self.default_db)
     }
 
-    pub fn collection<T>(&self, db: &str, collection: &str) -> Collection<T> {
+    pub fn collection<T: Send + Sync>(&self, db: &str, collection: &str) -> Collection<T> {
         self.client.database(db).collection(collection)
     }
 
     pub async fn list_databases(&self) -> Result<Vec<String>, AppError> {
-        let names = self.client.list_database_names(None, None).await?;
+        let names = self.client.list_database_names().await?;
         Ok(names)
     }
 
     pub async fn list_collections(&self, db: &str) -> Result<Vec<String>, AppError> {
-        let names = self.client.database(db).list_collection_names(None).await?;
+        let names = self.client.database(db).list_collection_names().await?;
         Ok(names)
     }
 
     pub async fn create_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).create_collection(collection, None).await?;
+        self.client.database(db).create_collection(collection).await?;
         Ok(())
     }
 
     pub async fn drop_database(&self, db: &str) -> Result<(), AppError> {
-        self.client.database(db).drop(None).await?;
+        self.client.database(db).drop().await?;
         Ok(())
     }
 
     pub async fn drop_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).collection::<bson::Document>(collection).drop(None).await?;
+        self.client.database(db).collection::<bson::Document>(collection).drop().await?;
         Ok(())
     }
 
     pub async fn list_indexes(&self, db: &str, collection: &str) -> Result<Vec<Value>, AppError> {
         let coll: Collection<bson::Document> = self.client.database(db).collection(collection);
-        let mut cursor = coll.list_indexes(None).await?;
+        let mut cursor = coll.list_indexes().await?;
         let mut result = Vec::new();
         while let Some(model) = cursor.try_next().await? {
             let mut map = serde_json::Map::new();
@@ -185,19 +185,19 @@ impl DbClient {
             .keys(keys)
             .options(opts)
             .build();
-        let res = coll.create_index(model, None).await?;
+        let res = coll.create_index(model).await?;
         Ok(res.index_name)
     }
 
     pub async fn drop_index(&self, db: &str, collection: &str, name: &str) -> Result<(), AppError> {
         let coll: Collection<bson::Document> = self.client.database(db).collection(collection);
-        coll.drop_index(name, None).await?;
+        coll.drop_index(name).await?;
         Ok(())
     }
 
     pub async fn run_command(&self, db_name: &str, command: bson::Document, admin: bool) -> Result<Value, AppError> {
         let db = if admin { self.client.database("admin") } else { self.client.database(db_name) };
-        let result = db.run_command(command, None).await?;
+        let result = db.run_command(command).await?;
         Ok(serde_json::to_value(result)?)
     }
 }
