@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "Log ind",
+      "subtitle": "Få adgang til dine MongoDB-databaser",
+      "footer": "Sikret af Keycloak OAuth2",
+      "button": { "label": "Log ind", "loading": "Logger ind…" },
+      "validation": { "fieldsRequired": "Brugernavn og adgangskode er påkrævet" },
+      "error": { "invalidCredentials": "Login mislykkedes. Kontroller dine legitimationsoplysninger." }
+    }
+  },
+  "nav": {
+    "signOut": "Log ud",
+    "section": { "databases": "DATABASER", "collections": "SAMLINGER" }
+  },
+  "connection": {
+    "status": { "noInfo": "Ingen forbindelsesinfo" },
+    "button": {
+      "reconnect": { "label": "↻ Genoprette forbindelsen", "title": "Genoprette forbindelsen med den aktuelle URI" },
+      "change": { "label": "⚙ Skift", "title": "Skift MongoDB-forbindelsen" }
+    },
+    "error": { "failed": "⚠ MongoDB-forbindelsen mislykkedes:" }
+  },
+  "database": {
+    "search": { "placeholder": "Søg databaser…" },
+    "list": { "empty": "Ingen databaser fundet" },
+    "button": { "create": { "title": "Opret database" }, "stats": { "title": "Databasestatistikker for \"{{db}}\"" }, "drop": { "title": "Slet database \"{{db}}\"" } }
+  },
+  "collection": {
+    "search": { "placeholder": "Søg samlinger…" },
+    "list": { "empty": { "noCollections": "Ingen samlinger.", "canCreate": "Klik ＋ for at oprette en." } },
+    "button": { "create": { "title": "Opret samling" }, "drop": { "title": "Slet samling \"{{col}}\"" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "Luk fane" }, "new": { "title": "Ny fane" } },
+    "documents": "Dokumenter",
+    "aggregate": "Aggregering",
+    "schema": "Skema",
+    "indexes": "Indekser",
+    "stats": "Statistikker",
+    "commands": "Kommandoer"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "Opret database",
+      "subtitle": "MongoDB opretter en database, når dens første samling oprettes.",
+      "label": { "dbName": "Databasenavn", "collectionName": "Indledende samlingsnavn" },
+      "placeholder": { "dbName": "f.eks. myapp", "collectionName": "f.eks. users" }
+    },
+    "createCollection": {
+      "title": "Opret samling",
+      "subtitle": "Tilføj en ny samling til",
+      "label": { "name": "Samlingsnavnet" },
+      "placeholder": { "name": "f.eks. products" }
+    },
+    "dbStats": {
+      "title": "Database:",
+      "subtitle": "Lager- og dokumentstatistikker",
+      "unavailable": "Statistikker ikke tilgængelige."
+    },
+    "changeConnection": {
+      "title": "Skift MongoDB-forbindelsen",
+      "subtitle": "Indtast en ny forbindelses-URI og standarddatabase. TLS-tilsidesættelser er valgfrie — de supplerer parametre, der allerede er i URI'en.",
+      "label": {
+        "uri": "Forbindelses-URI",
+        "defaultDb": "Standarddatabase",
+        "tlsCaFile": "TLS CA-certifikatfil",
+        "tlsCertKeyFile": "TLS-klientcertifikat + nøglefil",
+        "allowInvalidTls": "Tillad ugyldige / selvsignerede TLS-certifikater"
+      },
+      "placeholder": {
+        "uri": "f.eks. mongodb://user:pass@host:27017 eller mongodb+srv://cluster.mongodb.net/",
+        "defaultDb": "f.eks. mydb",
+        "tlsCaFile": "f.eks. /certs/ca.pem",
+        "tlsCertKeyFile": "f.eks. /certs/client.pem"
+      },
+      "optional": "(valgfrit, sti på serveren)",
+      "warning": { "insecure": "⚠ usikker" }
+    },
+    "confirmDrop": {
+      "database": "Slet hele databasen \"{{db}}\"? Dette kan ikke fortrydes.",
+      "collection": "Slet samling \"{{col}}\"? Alle dokumenter slettes.",
+      "index": "Slet indeks \"{{name}}\"?"
+    },
+    "editDocument": { "title": "Rediger dokument" },
+    "newDocument": { "title": "Nyt dokument" },
+    "createIndex": {
+      "title": "Opret indeks",
+      "subtitle": "Definer felterne og mulighederne for det nye indeks.",
+      "label": { "keys": "Indeksnøgler", "name": "Indeksnavn", "unique": "Unikt", "sparse": "Sparsomt", "background": "Baggrund", "ttl": "TTL" },
+      "optional": "(valgfrit)",
+      "hint": { "background": "(ikke-blokerende)", "ttl": "(sekunder, valgfrit)" },
+      "placeholder": { "fieldName": "feltnavn", "name": "auto-genereret hvis tom", "ttl": "f.eks. 3600" },
+      "option": { "ascending": "1 (stg.)", "descending": "-1 (fld.)" },
+      "button": { "addField": "+ Tilføj felt", "submit": "Opret indeks" },
+      "validation": { "fieldRequired": "Mindst ét felt er påkrævet." }
+    },
+    "import": { "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)" },
+    "confirmDelete": { "document": "Slet dette dokument?" }
+  },
+  "buttons": {
+    "cancel": "Annuller",
+    "create": "Opret",
+    "close": "Luk",
+    "connect": "Forbind",
+    "save": "Gem",
+    "drop": "Slet",
+    "edit": "Rediger",
+    "delete": "Slet",
+    "export": "Eksporter",
+    "import": "Importer",
+    "add": "Tilføj",
+    "refresh": "↻ Opdater",
+    "form": "⊟ Formular",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "Brugernavn", "password": "Adgangskode", "fieldName": "Feltnavn" },
+    "button": { "removeField": { "title": "Fjern felt" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "sand", "false": "falsk" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "24-tegns hex-streng", "jsonValue": "JSON-værdi" },
+    "section": { "addField": "Tilføj felt" },
+    "validation": { "fieldExists": "Felt \"{{key}}\" findes allerede.", "fieldNameRequired": "Feltnavn er påkrævet." }
+  },
+  "editor": {
+    "form": { "noSchema": "Intet skema tilgængeligt. Brug JSON-tilstand til at redigere dette dokument." },
+    "mode": {
+      "form": { "subtitle": "Rediger felter med typebevidste input. Skift til JSON for rå redigering." },
+      "json": { "subtitle": "Rediger det rå JSON-dokument. Skift til Formular for guidet redigering." }
+    },
+    "error": { "saveFailure": "Ugyldigt JSON eller gemning mislykkedes:" }
+  },
+  "query": {
+    "label": { "filter": "Filter", "sort": "Sortering", "projection": "Projektion", "limit": "Grænse" },
+    "hint": { "ctrlEnter": "Ctrl+Enter for at anvende" },
+    "badge": { "active": "aktiv", "invalidJson": "ugyldigt JSON" },
+    "button": { "apply": "Anvend", "clear": "Ryd" }
+  },
+  "views": {
+    "table": { "title": "Tabelvisning" },
+    "tree": { "title": "Trævisning" }
+  },
+  "selection": {
+    "count_one": "{{count}} dokument valgt",
+    "count_other": "{{count}} dokumenter valgt",
+    "button": { "export": "Eksporter valgte", "delete": "Slet valgte", "clear": "✕ Ryd" },
+    "confirmDelete_one": "Slet {{count}} valgt dokument? Dette kan ikke fortrydes.",
+    "confirmDelete_other": "Slet {{count}} valgte dokumenter? Dette kan ikke fortrydes."
+  },
+  "documents": {
+    "list": { "empty": "Ingen dokumenter fundet", "emptyWithFilter": "Prøv at justere dit filter eller din projektion.", "emptyNoFilter": "Denne samling er tom." },
+    "button": { "create": "+ Nyt dokument" },
+    "fieldCount_one": "{{count}} felt",
+    "fieldCount_other": "{{count}} felter"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "Forhåndsvisning", "actions": "Handlinger", "name": "Navn", "keys": "Nøgler", "unique": "Unikt", "sparse": "Sparsomt", "ttl": "TTL (s)", "index": "Indeks", "size": "Størrelse", "fieldPath": "Feltsti", "types": "Typer", "coverage": "Dækning", "nullable": "Nullable" }
+  },
+  "pagination": {
+    "label": "Viser {{start}}–{{end}} af {{total}} dokumenter",
+    "label_page": "Side {{page}}",
+    "button": { "prev": "← Forrige", "next": "Næste →" }
+  },
+  "aggregate": {
+    "prompt": "Indtast en aggregeringspipeline (JSON-array):",
+    "button": { "run": "▶ Kør" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} dokument", "count_other": "{{count}} dokumenter" },
+    "placeholder": { "result": "// Kør en kommando for at se resultater" }
+  },
+  "schema": {
+    "label": { "sampled": "Samplet", "document": "dokument", "field": "felt" },
+    "plural": { "documents": "er", "fields": "er" },
+    "inferring": "Udleder skema…",
+    "unavailable": "Ingen skedata tilgængeligt.",
+    "summary": "Samplet {{docCount}} dokument{{docPlural}} · {{fieldCount}} felt{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "Ingen indekser fundet." },
+    "button": { "create": "+ Nyt indeks" },
+    "label": { "count_one": "{{count}} indeks", "count_other": "{{count}} indekser", "loading": "Indlæser…" }
+  },
+  "stats": {
+    "loading": "Indlæser statistikker…",
+    "unavailable": "Ingen statistikker tilgængelige.",
+    "title": "Samlingsstatistikker",
+    "label": {
+      "collections": "Samlinger",
+      "documents": "Dokumenter",
+      "avgDocSize": "Gns. dokumentstørrelse",
+      "dataSize": "Datastørrelse",
+      "storageSize": "Lagerstørrelse",
+      "indexes": "Indekser",
+      "indexSize": "Indeksstørrelse",
+      "totalSize": "Samlet størrelse"
+    },
+    "section": { "indexSizes": "Indeksstørrelser" }
+  },
+  "commands": {
+    "search": { "placeholder": "Søg kommandoer…" },
+    "category": { "server": "Server", "database": "Database", "collection": "Samling", "replication": "Replikering", "administration": "Administration" },
+    "description": {
+      "ping": "Test serverforbindelsen",
+      "buildInfo": "Serverversion og build-info",
+      "hostInfo": "Værtssystemoplysninger",
+      "serverStatus": "Kørselsstatistikker",
+      "connectionStatus": "Aktuelle forbindelsesdetaljer",
+      "hello": "Serverrolle / topologiinfo",
+      "listDatabases": "List alle databaser",
+      "currentOp": "Igangværende operationer",
+      "killOp": "Stop en kørende operation ved opId",
+      "getLog": "Seneste logposter",
+      "getParameter": "Hent en serverparameter",
+      "setParameter": "Indstil en serverparameter",
+      "dbStats": "Databaselagringsstatistikker",
+      "listCollections": "List samlinger i denne database",
+      "usersInfo": "List brugere",
+      "createUser": "Opret en databasebruger",
+      "dropUser": "Slet en bruger",
+      "grantRolesToUser": "Tildel roller til en bruger",
+      "revokeRolesFromUser": "Tilbagekald roller fra en bruger",
+      "collStats": "Samlingslagringsstatistikker",
+      "count": "Tæl matchende dokumenter",
+      "validate": "Valider samlingsintegritet",
+      "compact": "Komprimer/defragmenter en samling",
+      "reIndex": "Genopbyg alle indekser",
+      "convertToCapped": "Konverter til en capped samling",
+      "replSetGetStatus": "Replikasetstatus",
+      "replSetGetConfig": "Replikasetkonfiguration",
+      "isMaster": "Serverrollekontrol (gammelt)",
+      "renameCollection": "Omdøb en samling",
+      "dropDatabase": "Slet en database",
+      "fsync": "Tøm og lås valgfrit",
+      "rotateCertificates": "Roter TLS-certifikater",
+      "listIndexes": "List indekser på en samling",
+      "profile": "Hent/indstil database-profilerniveau"
+    },
+    "context": { "runningOn": "Kører på database:" },
+    "checkbox": { "useAdminDb": "Brug admin-database" },
+    "button": { "run": "▶ Kør  (Ctrl+Enter)", "running": "⏳ Kører…" },
+    "label": { "command": "Kommando", "result": "Resultat" },
+    "error": { "invalidJson": "Ugyldigt JSON — ret kommandoen inden kørsel." }
+  },
+  "badge": {
+    "admin": "● Admin",
+    "viewer": "● Betragter",
+    "error": "Fejl",
+    "success": "OK"
+  },
+  "tree": {
+    "button": { "expandAll": "Udvid alle", "collapseAll": "Skjul alle" },
+    "checkbox": { "selectAllLabel": "Vælg alle på siden" }
+  },
+  "ui": {
+    "loading": "Indlæser…",
+    "connecting": "Forbinder…",
+    "sidebar": { "resize": { "title": "Træk for at ændre sidebjælkens størrelse" } }
+  },
+  "empty": {
+    "title": "Vælg en database og samling",
+    "subtitle": {
+      "collectionNeeded": "Vælg en samling fra sidebjælken for at gennemse dokumenter.",
+      "databaseNeeded": "Vælg en database fra sidebjælken for at komme i gang."
+    }
+  },
+  "language": { "label": "Sprog" }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getDocuments,
   deleteDocument,
@@ -167,6 +168,7 @@ interface CollectionViewProps {
 
 export default function CollectionView({ db, col, visible }: CollectionViewProps) {
   const { canWrite } = useAuth();
+  const { t } = useTranslation();
 
   const [view, setView] = useState<View>("documents");
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
@@ -291,7 +293,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   }, [loadDocuments]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this document?")) return;
+    if (!confirm(t("modals.confirmDelete.document"))) return;
     await deleteDocument(db, col, id);
     loadDocuments();
   };
@@ -324,7 +326,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       setEditorOpen(false);
       loadDocuments();
     } catch (e: unknown) {
-      alert("Invalid JSON or save failed: " + (e as Error).message);
+      alert(t("editor.error.saveFailure") + " " + (e as Error).message);
     }
   }, [editorValue, editingId, db, col, loadDocuments]);
 
@@ -333,7 +335,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     if (!file) return;
     const text = await file.text();
     const docs = JSON.parse(text) as unknown[];
-    if (!confirm(`Import ${docs.length} documents? (replace existing?)`)) return;
+    if (!confirm(t("modals.import.confirmReplace", { count: docs.length }))) return;
     await importCollection(db, col, docs, true);
     loadDocuments();
   };
@@ -398,7 +400,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               fontFamily: FONT,
             }}
           >
-            Select a database and collection
+            {t("empty.title")}
           </h2>
           <p
             style={{
@@ -409,8 +411,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
             }}
           >
             {db
-              ? "Choose a collection from the sidebar to browse documents."
-              : "Choose a database from the sidebar to get started."}
+              ? t("empty.subtitle.collectionNeeded")
+              : t("empty.subtitle.databaseNeeded")}
           </p>
         </div>
       ) : (
@@ -455,7 +457,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 color: canWrite ? "#166534" : "#64748b",
               }}
             >
-              {canWrite ? "● Admin" : "● Viewer"}
+              {canWrite ? t("badge.admin") : t("badge.viewer")}
             </span>
           </div>
 
@@ -471,7 +473,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
           >
             {(["documents", "aggregate", "schema", "indexes", "stats", "commands"] as View[]).map((tab) => {
               const isActive = view === tab;
-              const label = tab.charAt(0).toUpperCase() + tab.slice(1);
+              const label = t(`tabs.${tab}`);
               return (
                 <button
                   key={tab}
@@ -547,13 +549,13 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       {/* Filter */}
                       <div style={{ flex: 2 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Filter</span>
-                          <span style={{ fontSize: "10px", color: "#94a3b8", fontFamily: FONT }}>Ctrl+Enter to apply</span>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.filter")}</span>
+                          <span style={{ fontSize: "10px", color: "#94a3b8", fontFamily: FONT }}>{t("query.hint.ctrlEnter")}</span>
                           {hasFilter && filterValid && (
-                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>active</span>
+                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
                           )}
                           {hasFilter && !filterValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                           )}
                         </div>
                         <div style={{
@@ -580,9 +582,9 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       {/* Sort */}
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Sort</span>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.sort")}</span>
                           {hasSort && !sortValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                           )}
                         </div>
                         <div style={{
@@ -609,12 +611,12 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       {/* Projection */}
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>Projection</span>
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.projection")}</span>
                           {hasProj && projValid && (
-                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>active</span>
+                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
                           )}
                           {hasProj && !projValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>invalid JSON</span>
+                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                           )}
                         </div>
                         <div style={{
@@ -640,7 +642,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
                       {/* Limit */}
                       <div style={{ flexShrink: 0 }}>
-                        <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>Limit</div>
+                        <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>{t("query.label.limit")}</div>
                         <select
                           value={limitVal}
                           onChange={(e) => { setLimitVal(Number(e.target.value)); setPage(1); }}
@@ -658,28 +660,28 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         disabled={!filterValid || !sortValid || !projValid}
                         style={{ background: filterValid && sortValid && projValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid && projValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}
                       >
-                        Apply
+                        {t("query.button.apply")}
                       </button>
                       {(hasFilter || hasSort || hasProj) && (
                         <button
                           onClick={() => { setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
                           style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
                         >
-                          Clear
+                          {t("query.button.clear")}
                         </button>
                       )}
                       <div style={{ flex: 1 }} />
                       {/* Layout toggle */}
                       <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
                         <button
-                          title="Table view"
+                          title={t("views.table.title")}
                           onClick={() => setDocLayout("table")}
                           style={{ background: docLayout === "table" ? "#2563eb" : "transparent", color: docLayout === "table" ? "#fff" : "#64748b", border: "none", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
                           ☰
                         </button>
                         <button
-                          title="Tree view"
+                          title={t("views.tree.title")}
                           onClick={() => setDocLayout("tree")}
                           style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
@@ -690,16 +692,16 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         onClick={() => exportCollection(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
                         style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
                       >
-                        Export
+                        {t("buttons.export")}
                       </button>
                       {canWrite && (
                         <>
                           <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
-                            Import
+                            {t("buttons.import")}
                             <input type="file" accept=".json" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
                           <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
-                            + New Document
+                            {t("documents.button.create")}
                           </button>
                         </>
                       )}
@@ -719,7 +721,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   gap: "10px",
                 }}>
                   <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8", flex: 1 }}>
-                    {selectedIds.size} document{selectedIds.size !== 1 ? "s" : ""} selected
+                    {t("selection.count", { count: selectedIds.size })}
                   </span>
                   <button
                     onClick={() => {
@@ -734,12 +736,12 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     }}
                     style={{ padding: "5px 14px", background: "#fff", border: "1px solid #bfdbfe", color: "#1d4ed8", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
                   >
-                    Export Selected
+                    {t("selection.button.export")}
                   </button>
                   {canWrite && (
                     <button
                       onClick={async () => {
-                        if (!confirm(`Delete ${selectedIds.size} selected document${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+                        if (!confirm(t("selection.confirmDelete", { count: selectedIds.size }))) return;
                         try {
                           await bulkDeleteDocuments(db, col, [...selectedIds]);
                           loadDocuments();
@@ -749,14 +751,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       }}
                       style={{ padding: "5px 14px", background: "#fee2e2", border: "none", color: "#dc2626", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
                     >
-                      Delete Selected
+                      {t("selection.button.delete")}
                     </button>
                   )}
                   <button
                     onClick={() => setSelectedIds(new Set())}
                     style={{ padding: "5px 10px", background: "transparent", border: "none", color: "#64748b", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT }}
                   >
-                    ✕ Clear
+                    {t("selection.button.clear")}
                   </button>
                 </div>
               )}
@@ -784,7 +786,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       fontFamily: FONT,
                     }}
                   >
-                    Loading…
+                    {t("ui.loading")}
                   </p>
                 ) : docLayout === "tree" ? (
                   <DocTreeView
@@ -853,7 +855,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                             fontSize: "11px",
                           }}
                         >
-                          _id
+                          {t("table.header.id")}
                         </th>
                         <th
                           style={{
@@ -866,7 +868,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                             fontSize: "11px",
                           }}
                         >
-                          Preview
+                          {t("table.header.preview")}
                         </th>
                         <th
                           style={{
@@ -880,7 +882,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                             fontSize: "11px",
                           }}
                         >
-                          Actions
+                          {t("table.header.actions")}
                         </th>
                       </tr>
                     </thead>
@@ -910,7 +912,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                 fontFamily: FONT,
                               }}
                             >
-                              No documents found
+                              {t("documents.list.empty")}
                             </p>
                             <p
                               style={{
@@ -921,8 +923,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               }}
                             >
                               {filterText || projectionText
-                                ? "Try adjusting your filter or projection."
-                                : "This collection is empty."}
+                                ? t("documents.list.emptyWithFilter")
+                                : t("documents.list.emptyNoFilter")}
                             </p>
                           </td>
                         </tr>
@@ -1000,7 +1002,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                     fontFamily: FONT,
                                   }}
                                 >
-                                  Edit
+                                  {t("buttons.edit")}
                                 </button>
                                 {canWrite && (
                                   <button
@@ -1016,7 +1018,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                       fontFamily: FONT,
                                     }}
                                   >
-                                    Delete
+                                    {t("buttons.delete")}
                                   </button>
                                 )}
                               </td>
@@ -1049,7 +1051,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       fontFamily: FONT,
                     }}
                   >
-                    Showing {startDoc}–{endDoc} of {total} documents
+                    {t("pagination.label", { start: startDoc, end: endDoc, total })}
                   </span>
                   <div
                     style={{
@@ -1072,7 +1074,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         fontFamily: FONT,
                       }}
                     >
-                      ← Prev
+                      {t("pagination.button.prev")}
                     </button>
                     <span
                       style={{
@@ -1081,7 +1083,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         fontFamily: FONT,
                       }}
                     >
-                      Page {page}
+                      {t("pagination.label_page", { page })}
                     </span>
                     <button
                       onClick={() => setPage((p) => p + 1)}
@@ -1097,7 +1099,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         fontFamily: FONT,
                       }}
                     >
-                      Next →
+                      {t("pagination.button.next")}
                     </button>
                   </div>
                 </div>
@@ -1111,7 +1113,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               {/* Pipeline editor */}
               <div style={{ padding: "16px 20px 0", flexShrink: 0 }}>
                 <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 8px 0" }}>
-                  Enter an aggregation pipeline (JSON array):
+                  {t("aggregate.prompt")}
                 </p>
                 <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
                   <Editor
@@ -1144,12 +1146,12 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     onClick={() => void runAggregate()}
                     style={{ background: "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}
                   >
-                    ▶ Run
+                    {t("aggregate.button.run")}
                   </button>
-                  <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>Ctrl+Enter</span>
+                  <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("aggregate.hint.ctrlEnter")}</span>
                   {aggResults.length > 0 && !aggError && (
                     <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 600, marginLeft: "auto" }}>
-                      {aggResults.length} document{aggResults.length !== 1 ? "s" : ""}
+                      {t("aggregate.results.count", { count: aggResults.length })}
                     </span>
                   )}
                 </div>
@@ -1190,7 +1192,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
             <div style={{ padding: "20px", fontFamily: FONT }}>
               {schemaLoading ? (
                 <p style={{ color: "#64748b", fontSize: "13px" }}>
-                  Inferring schema…
+                  {t("schema.inferring")}
                 </p>
               ) : schema ? (
                 <SchemaViewer
@@ -1199,7 +1201,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 />
               ) : (
                 <p style={{ color: "#94a3b8", fontSize: "13px" }}>
-                  No schema data available.
+                  {t("schema.unavailable")}
                 </p>
               )}
             </div>
@@ -1210,25 +1212,25 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
             <div style={{ padding: "20px", fontFamily: FONT }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
                 <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>
-                  {indexesLoading ? "Loading…" : `${indexes.length} index${indexes.length !== 1 ? "es" : ""}`}
+                  {indexesLoading ? t("indexes.label.loading") : t("indexes.label.count", { count: indexes.length })}
                 </span>
                 <button
                   onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexBackground(true); setIndexTtl(""); setNewIndexOpen(true); }}
                   style={{ padding: "6px 14px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
                 >
-                  + New Index
+                  {t("indexes.button.create")}
                 </button>
               </div>
 
               {indexes.length === 0 && !indexesLoading ? (
-                <p style={{ color: "#94a3b8", fontSize: "13px" }}>No indexes found.</p>
+                <p style={{ color: "#94a3b8", fontSize: "13px" }}>{t("indexes.list.empty")}</p>
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                     <thead>
                       <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                        {["Name", "Keys", "Unique", "Sparse", "TTL (s)", ""].map((h) => (
-                          <th key={h} style={{ padding: "8px 12px", textAlign: ["Unique", "Sparse", "TTL (s)"].includes(h) ? "center" : "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                        {[t("table.header.name"), t("table.header.keys"), t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl"), ""].map((h) => (
+                          <th key={h} style={{ padding: "8px 12px", textAlign: [t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl")].includes(h) ? "center" : "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1254,14 +1256,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                             {idx.name !== "_id_" && (
                               <button
                                 onClick={() => {
-                                  if (!confirm(`Drop index "${idx.name}"?`)) return;
+                                  if (!confirm(t("modals.confirmDrop.index", { name: idx.name }))) return;
                                   dropIndex(db, col, idx.name)
                                     .then(loadIndexes)
                                     .catch((e: unknown) => alert("Error: " + (e as Error).message));
                                 }}
                                 style={{ padding: "3px 10px", background: "#fff", border: "1px solid #fca5a5", color: "#dc2626", borderRadius: "5px", cursor: "pointer", fontSize: "12px", fontWeight: 500 }}
                               >
-                                Drop
+                                {t("buttons.drop")}
                               </button>
                             )}
                           </td>
@@ -1278,24 +1280,24 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
           {view === "stats" && (
             <div style={{ padding: "20px", fontFamily: FONT }}>
               {colStatsLoading ? (
-                <p style={{ color: "#64748b", fontSize: "13px" }}>Loading stats…</p>
+                <p style={{ color: "#64748b", fontSize: "13px" }}>{t("stats.loading")}</p>
               ) : !colStats ? (
-                <p style={{ color: "#94a3b8", fontSize: "13px" }}>No stats available.</p>
+                <p style={{ color: "#94a3b8", fontSize: "13px" }}>{t("stats.unavailable")}</p>
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                    <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>Collection statistics</span>
-                    <button onClick={loadColStats} style={{ padding: "5px 12px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", fontSize: "12px", color: "#374151", fontFamily: FONT }}>↻ Refresh</button>
+                    <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>{t("stats.title")}</span>
+                    <button onClick={loadColStats} style={{ padding: "5px 12px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", fontSize: "12px", color: "#374151", fontFamily: FONT }}>{t("buttons.refresh")}</button>
                   </div>
                   {(() => {
                     const s = colStats;
                     const cards: { label: string; value: string; sub?: string }[] = [
-                      { label: "Documents",        value: numVal(s["count"]).toLocaleString() },
-                      { label: "Avg document size", value: formatBytes(numVal(s["avgObjSize"])) },
-                      { label: "Data size",         value: formatBytes(numVal(s["size"])) },
-                      { label: "Storage size",      value: formatBytes(numVal(s["storageSize"])) },
-                      { label: "Indexes",           value: numVal(s["nindexes"]).toLocaleString() },
-                      { label: "Index size",        value: formatBytes(numVal(s["totalIndexSize"])) },
+                      { label: t("stats.label.documents"),  value: numVal(s["count"]).toLocaleString() },
+                      { label: t("stats.label.avgDocSize"), value: formatBytes(numVal(s["avgObjSize"])) },
+                      { label: t("stats.label.dataSize"),   value: formatBytes(numVal(s["size"])) },
+                      { label: t("stats.label.storageSize"),value: formatBytes(numVal(s["storageSize"])) },
+                      { label: t("stats.label.indexes"),    value: numVal(s["nindexes"]).toLocaleString() },
+                      { label: t("stats.label.indexSize"),  value: formatBytes(numVal(s["totalIndexSize"])) },
                     ];
                     return (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px", marginBottom: "24px" }}>
@@ -1312,12 +1314,12 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
                   {colStats["indexSizes"] && typeof colStats["indexSizes"] === "object" && (
                     <>
-                      <h4 style={{ fontSize: "13px", fontWeight: 600, color: "#374151", margin: "0 0 10px 0" }}>Index sizes</h4>
+                      <h4 style={{ fontSize: "13px", fontWeight: 600, color: "#374151", margin: "0 0 10px 0" }}>{t("stats.section.indexSizes")}</h4>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                         <thead>
                           <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                            <th style={{ padding: "6px 12px", textAlign: "left", color: "#475569", fontWeight: 600 }}>Index</th>
-                            <th style={{ padding: "6px 12px", textAlign: "right", color: "#475569", fontWeight: 600 }}>Size</th>
+                            <th style={{ padding: "6px 12px", textAlign: "left", color: "#475569", fontWeight: 600 }}>{t("table.header.index")}</th>
+                            <th style={{ padding: "6px 12px", textAlign: "right", color: "#475569", fontWeight: 600 }}>{t("table.header.size")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1354,7 +1356,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
             {/* Header row: title + Form/JSON toggle */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
               <h3 style={{ ...modalTitleStyle, marginBottom: 0 }}>
-                {editingId ? "Edit Document" : "New Document"}
+                {editingId ? t("modals.editDocument.title") : t("modals.newDocument.title")}
               </h3>
               <div style={{ display: "flex", background: "#0f172a", borderRadius: 6, border: "1px solid #334155", overflow: "hidden" }}>
                 {(["form", "json"] as const).map((m) => (
@@ -1372,15 +1374,15 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       transition: "background 0.15s",
                     }}
                   >
-                    {m === "form" ? "⊟ Form" : "{ } JSON"}
+                    {m === "form" ? t("buttons.form") : t("buttons.json")}
                   </button>
                 ))}
               </div>
             </div>
             <p style={modalSubtitleStyle}>
               {editorMode === "form"
-                ? "Edit fields using type-aware inputs. Switch to JSON for raw editing."
-                : "Edit the raw JSON document. Switch to Form for guided editing."}
+                ? t("editor.mode.form.subtitle")
+                : t("editor.mode.json.subtitle")}
             </p>
 
             {editorMode === "form" ? (
@@ -1405,10 +1407,10 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 onClick={() => setEditorOpen(false)}
                 style={cancelBtnStyle}
               >
-                Cancel
+                {t("buttons.cancel")}
               </button>
               <button onClick={() => void handleSave()} style={primaryBtnStyle}>
-                Save
+                {t("buttons.save")}
               </button>
             </div>
           </div>
@@ -1419,17 +1421,17 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       {newIndexOpen && (
         <div style={overlayStyle}>
           <div style={{ ...modalBaseStyle, width: "560px" }}>
-            <h3 style={modalTitleStyle}>Create Index</h3>
+            <h3 style={modalTitleStyle}>{t("modals.createIndex.title")}</h3>
             <p style={modalSubtitleStyle}>
-              Define the fields and options for the new index.
+              {t("modals.createIndex.subtitle")}
             </p>
 
-            <label style={modalLabelStyle}>Index Keys</label>
+            <label style={modalLabelStyle}>{t("modals.createIndex.label.keys")}</label>
             {indexKeys.map((k, i) => (
               <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
                 <input
                   style={{ ...modalInputStyle, flex: 2, marginBottom: 0 }}
-                  placeholder="field name"
+                  placeholder={t("modals.createIndex.placeholder.fieldName")}
                   value={k.field}
                   onChange={(e) => {
                     const updated = [...indexKeys];
@@ -1446,8 +1448,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   }}
                   style={{ padding: "9px 8px", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "13px", fontFamily: FONT, background: "#fff", color: "#374151" }}
                 >
-                  <option value={1}>1 (asc)</option>
-                  <option value={-1}>-1 (desc)</option>
+                  <option value={1}>{t("modals.createIndex.option.ascending")}</option>
+                  <option value={-1}>{t("modals.createIndex.option.descending")}</option>
                 </select>
                 {indexKeys.length > 1 && (
                   <button
@@ -1461,13 +1463,13 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               onClick={() => setIndexKeys([...indexKeys, { field: "", direction: 1 }])}
               style={{ fontSize: "12px", color: "#2563eb", background: "none", border: "none", cursor: "pointer", marginBottom: "16px", padding: 0 }}
             >
-              + Add field
+              {t("modals.createIndex.button.addField")}
             </button>
 
-            <label style={modalLabelStyle}>Index Name <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional)</span></label>
+            <label style={modalLabelStyle}>{t("modals.createIndex.label.name")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.createIndex.optional")}</span></label>
             <input
               style={modalInputStyle}
-              placeholder="auto-generated if empty"
+              placeholder={t("modals.createIndex.placeholder.name")}
               value={indexName}
               onChange={(e) => setIndexName(e.target.value)}
             />
@@ -1475,38 +1477,38 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
             <div style={{ display: "flex", gap: "24px", marginBottom: "16px" }}>
               <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
                 <input type="checkbox" checked={indexUnique} onChange={(e) => setIndexUnique(e.target.checked)} />
-                Unique
+                {t("modals.createIndex.label.unique")}
               </label>
               <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
                 <input type="checkbox" checked={indexSparse} onChange={(e) => setIndexSparse(e.target.checked)} />
-                Sparse
+                {t("modals.createIndex.label.sparse")}
               </label>
               <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }}>
                 <input type="checkbox" checked={indexBackground} onChange={(e) => setIndexBackground(e.target.checked)} />
                 <span>
-                  Background
-                  <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "4px" }}>(non-blocking)</span>
+                  {t("modals.createIndex.label.background")}
+                  <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "4px" }}>{t("modals.createIndex.hint.background")}</span>
                 </span>
               </label>
             </div>
 
-            <label style={modalLabelStyle}>TTL <span style={{ fontWeight: 400, color: "#94a3b8" }}>(seconds, optional)</span></label>
+            <label style={modalLabelStyle}>{t("modals.createIndex.label.ttl")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.createIndex.hint.ttl")}</span></label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. 3600"
+              placeholder={t("modals.createIndex.placeholder.ttl")}
               type="number"
               value={indexTtl}
               onChange={(e) => setIndexTtl(e.target.value)}
             />
 
             <div style={modalFooterStyle}>
-              <button onClick={() => setNewIndexOpen(false)} style={cancelBtnStyle}>Cancel</button>
+              <button onClick={() => setNewIndexOpen(false)} style={cancelBtnStyle}>{t("buttons.cancel")}</button>
               <button
                 onClick={() => {
                   const keys = Object.fromEntries(
                     indexKeys.filter((k) => k.field.trim()).map((k) => [k.field.trim(), k.direction])
                   ) as Record<string, 1 | -1>;
-                  if (Object.keys(keys).length === 0) { alert("At least one field is required."); return; }
+                  if (Object.keys(keys).length === 0) { alert(t("modals.createIndex.validation.fieldRequired")); return; }
                   createIndex(db, col, keys, {
                     name: indexName.trim() || undefined,
                     unique: indexUnique || undefined,
@@ -1519,7 +1521,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 }}
                 style={primaryBtnStyle}
               >
-                Create Index
+                {t("modals.createIndex.button.submit")}
               </button>
             </div>
           </div>

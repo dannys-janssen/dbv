@@ -17,6 +17,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { CollectionSchema } from "../api/mongo";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -262,6 +263,7 @@ interface FieldRowProps {
 }
 
 const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, onRemove }) => {
+  const { t } = useTranslation();
   const readOnly = isId && isEditing;
 
   const handleNull = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,7 +317,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
         {!isId && (
           <button
             onClick={() => onRemove(field.key)}
-            title="Remove field"
+            title={t("form.button.removeField.title")}
             style={{
               marginLeft: 8,
               background: "none",
@@ -326,7 +328,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
               padding: "0 4px",
               lineHeight: 1,
             }}
-          >×</button>
+          >{t("form.button.remove")}</button>
         )}
       </div>
 
@@ -334,12 +336,12 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
         <input
           type="text"
           readOnly
-          value={readOnly ? (field.displayValue || field.key) : "null"}
+          value={readOnly ? (field.displayValue || field.key) : t("form.value.null")}
           style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }}
         />
       ) : field.type === "bool" ? (
         <div style={{ display: "flex", gap: 16, padding: "6px 10px", background: "#1e293b", border: "1px solid #334155", borderRadius: 6 }}>
-          {["true", "false"].map((opt) => (
+          {(["true", "false"] as const).map((opt) => (
             <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#f1f5f9", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
@@ -349,7 +351,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
                 onChange={() => handleValue(opt)}
                 style={{ accentColor: "#3b82f6", cursor: "pointer" }}
               />
-              {opt}
+              {opt === "true" ? t("form.option.true") : t("form.option.false")}
             </label>
           ))}
         </div>
@@ -371,7 +373,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
                 step="1"
                 style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
               />
-              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>UTC</span>
+              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>{t("form.label.utc")}</span>
             </div>
           );
         })()
@@ -380,7 +382,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           type={["int", "double", "long", "decimal"].includes(field.type) ? "number" : "text"}
           value={field.displayValue}
           onChange={(e) => handleValue(e.target.value)}
-          placeholder={field.type === "objectId" ? "24-character hex string" : ""}
+          placeholder={field.type === "objectId" ? t("form.placeholder.objectId") : ""}
           step={field.type === "double" || field.type === "decimal" ? "any" : undefined}
           style={inputStyle}
         />
@@ -388,7 +390,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
         <textarea
           value={field.displayValue}
           onChange={(e) => handleValue(e.target.value)}
-          placeholder="JSON value"
+          placeholder={t("form.placeholder.jsonValue")}
           style={textareaStyle}
           spellCheck={false}
         />
@@ -407,6 +409,7 @@ interface DocFormEditorProps {
 }
 
 const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, isEditing }) => {
+  const { t } = useTranslation();
   const [fields, setFields] = useState<FieldState[]>([]);
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState("string");
@@ -488,8 +491,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
 
   const handleAddField = useCallback(() => {
     const key = newFieldKey.trim();
-    if (!key) { setAddError("Field name is required."); return; }
-    if (fields.some((f) => f.key === key)) { setAddError(`Field "${key}" already exists.`); return; }
+    if (!key) { setAddError(t("form.validation.fieldNameRequired")); return; }
+    if (fields.some((f) => f.key === key)) { setAddError(t("form.validation.fieldExists", { key })); return; }
     setAddError("");
     const newField: FieldState = {
       key,
@@ -513,7 +516,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   if (fieldCount === 0 && !schema) {
     return (
       <div style={{ color: "#64748b", fontSize: 13, padding: "16px 0" }}>
-        No schema available. Use JSON mode to edit this document.
+        {t("editor.form.noSchema")}
       </div>
     );
   }
@@ -550,12 +553,12 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
       {/* Add new field */}
       <div style={{ marginTop: 12, padding: "10px 12px", background: "#0f172a", borderRadius: 8, border: "1px dashed #334155" }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-          Add field
+          {t("form.section.addField")}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <input
             type="text"
-            placeholder="Field name"
+            placeholder={t("form.labels.fieldName")}
             value={newFieldKey}
             onChange={(e) => { setNewFieldKey(e.target.value); setAddError(""); }}
             onKeyDown={(e) => { if (e.key === "Enter") handleAddField(); }}
@@ -584,7 +587,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
               whiteSpace: "nowrap",
             }}
           >
-            Add
+            {t("buttons.add")}
           </button>
         </div>
         {addError && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>{addError}</div>}

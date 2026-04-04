@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import Editor from "@monaco-editor/react";
 import { runDbCommand } from "../api/mongo";
 
@@ -94,6 +95,7 @@ export default function CommandsView({ db, collection }: Props) {
   const [result, setResult]           = useState<string | null>(null);
   const [error, setError]             = useState<string | null>(null);
   const [search, setSearch]           = useState("");
+  const { t } = useTranslation();
 
   const applyTemplate = useCallback((cmd: PaletteCommand) => {
     // Replace placeholder collection names with the current one when known
@@ -111,7 +113,7 @@ export default function CommandsView({ db, collection }: Props) {
     try {
       parsed = JSON.parse(commandText) as Record<string, unknown>;
     } catch {
-      setError("Invalid JSON — fix the command before running.");
+      setError(t("commands.error.invalidJson"));
       return;
     }
     setRunning(true);
@@ -161,7 +163,7 @@ export default function CommandsView({ db, collection }: Props) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search commands…"
+            placeholder={t("commands.search.placeholder")}
             style={{
               width: "100%", boxSizing: "border-box",
               padding: "6px 10px", borderRadius: "6px",
@@ -180,13 +182,13 @@ export default function CommandsView({ db, collection }: Props) {
               color: "#94a3b8", textTransform: "uppercase",
               letterSpacing: "0.06em", fontFamily: FONT,
             }}>
-              {cat.label}
+              {t(`commands.category.${cat.label.toLowerCase()}`)}
             </div>
             {cat.commands.map((cmd) => (
               <button
                 key={cmd.name}
                 onClick={() => applyTemplate(cmd)}
-                title={cmd.description}
+                title={t(`commands.description.${cmd.name}`)}
                 style={{
                   display: "block", width: "100%", textAlign: "left",
                   padding: "7px 12px", border: "none",
@@ -195,7 +197,7 @@ export default function CommandsView({ db, collection }: Props) {
                 }}
               >
                 <div style={{ fontSize: "12px", fontWeight: 600, color: "#1e293b" }}>{cmd.name}</div>
-                <div style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>{cmd.description}</div>
+                <div style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>{t(`commands.description.${cmd.name}`)}</div>
                 {cmd.admin && (
                   <span style={{ fontSize: "10px", background: "#fef9c3", color: "#854d0e", borderRadius: "4px", padding: "0 5px", fontWeight: 600 }}>
                     admin
@@ -218,7 +220,7 @@ export default function CommandsView({ db, collection }: Props) {
           background: "#fff", flexWrap: "wrap",
         }}>
           <div style={{ fontSize: "12px", color: "#475569", fontFamily: FONT }}>
-            Running on database: <strong style={{ color: "#0f172a" }}>{adminFlag ? "admin" : db}</strong>
+            {t("commands.context.runningOn")} <strong style={{ color: "#0f172a" }}>{adminFlag ? "admin" : db}</strong>
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", userSelect: "none" }}>
             <input
@@ -227,7 +229,7 @@ export default function CommandsView({ db, collection }: Props) {
               onChange={(e) => setAdminFlag(e.target.checked)}
               style={{ accentColor: "#2563eb" }}
             />
-            <span style={{ fontSize: "12px", color: "#475569", fontFamily: FONT }}>Use admin database</span>
+            {t("commands.checkbox.useAdminDb")}
           </label>
 
           <button
@@ -242,7 +244,7 @@ export default function CommandsView({ db, collection }: Props) {
               fontFamily: FONT, display: "flex", alignItems: "center", gap: "6px",
             }}
           >
-            {running ? "⏳ Running…" : "▶ Run  (Ctrl+Enter)"}
+            {running ? t("commands.button.running") : t("commands.button.run")}
           </button>
         </div>
 
@@ -250,7 +252,7 @@ export default function CommandsView({ db, collection }: Props) {
         <div style={{ flex: "0 0 auto", borderBottom: "1px solid #e2e8f0" }}>
           <div style={{ padding: "6px 16px 4px" }}>
             <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
-              Command
+              {t("commands.label.command")}
             </span>
           </div>
           <div style={{
@@ -286,16 +288,16 @@ export default function CommandsView({ db, collection }: Props) {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", padding: "0 16px 12px" }}>
           <div style={{ padding: "6px 0 4px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
-              Result
+              {t("commands.label.result")}
             </span>
             {error && (
               <span style={{ fontSize: "11px", background: "#fee2e2", color: "#dc2626", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
-                Error
+                {t("badge.error")}
               </span>
             )}
             {result && !error && (
               <span style={{ fontSize: "11px", background: "#dcfce7", color: "#166534", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
-                OK
+                {t("badge.success")}
               </span>
             )}
           </div>
@@ -313,7 +315,7 @@ export default function CommandsView({ db, collection }: Props) {
               <Editor
                 height="100%"
                 defaultLanguage="json"
-                value={result ?? "// Run a command to see results"}
+                value={result ?? t("aggregate.placeholder.result")}
                 options={{
                   readOnly: true,
                   minimap: { enabled: false },

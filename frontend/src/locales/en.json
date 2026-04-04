@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Access your MongoDB databases",
+      "footer": "Secured by Keycloak OAuth2",
+      "button": { "label": "Sign In", "loading": "Signing in…" },
+      "validation": { "fieldsRequired": "Username and password are required" },
+      "error": { "invalidCredentials": "Login failed. Check your credentials." }
+    }
+  },
+  "nav": {
+    "signOut": "Sign out",
+    "section": { "databases": "DATABASES", "collections": "COLLECTIONS" }
+  },
+  "connection": {
+    "status": { "noInfo": "No connection info" },
+    "button": {
+      "reconnect": { "label": "↻ Reconnect", "title": "Reconnect using current URI" },
+      "change": { "label": "⚙ Change", "title": "Change MongoDB connection" }
+    },
+    "error": { "failed": "⚠ MongoDB connection failed:" }
+  },
+  "database": {
+    "search": { "placeholder": "Search databases…" },
+    "list": { "empty": "No databases found" },
+    "button": { "create": { "title": "Create database" }, "stats": { "title": "Database stats for \"{{db}}\"" }, "drop": { "title": "Drop database \"{{db}}\"" } }
+  },
+  "collection": {
+    "search": { "placeholder": "Search collections…" },
+    "list": { "empty": { "noCollections": "No collections.", "canCreate": "Click ＋ to create one." } },
+    "button": { "create": { "title": "Create collection" }, "drop": { "title": "Drop collection \"{{col}}\"" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "Close tab" }, "new": { "title": "New tab" } },
+    "documents": "Documents",
+    "aggregate": "Aggregate",
+    "schema": "Schema",
+    "indexes": "Indexes",
+    "stats": "Stats",
+    "commands": "Commands"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "Create Database",
+      "subtitle": "MongoDB creates a database when its first collection is created.",
+      "label": { "dbName": "Database name", "collectionName": "Initial collection name" },
+      "placeholder": { "dbName": "e.g. myapp", "collectionName": "e.g. users" }
+    },
+    "createCollection": {
+      "title": "Create Collection",
+      "subtitle": "Add a new collection to",
+      "label": { "name": "Collection name" },
+      "placeholder": { "name": "e.g. products" }
+    },
+    "dbStats": {
+      "title": "Database:",
+      "subtitle": "Storage and document statistics",
+      "unavailable": "Stats unavailable."
+    },
+    "changeConnection": {
+      "title": "Change MongoDB Connection",
+      "subtitle": "Enter a new connection URI and default database. TLS overrides are optional — they supplement parameters already in the URI.",
+      "label": {
+        "uri": "Connection URI",
+        "defaultDb": "Default Database",
+        "tlsCaFile": "TLS CA Certificate File",
+        "tlsCertKeyFile": "TLS Client Certificate + Key File",
+        "allowInvalidTls": "Allow invalid / self-signed TLS certificates"
+      },
+      "placeholder": {
+        "uri": "e.g. mongodb://user:pass@host:27017 or mongodb+srv://cluster.mongodb.net/",
+        "defaultDb": "e.g. mydb",
+        "tlsCaFile": "e.g. /certs/ca.pem",
+        "tlsCertKeyFile": "e.g. /certs/client.pem"
+      },
+      "optional": "(optional, path on server)",
+      "warning": { "insecure": "⚠ insecure" }
+    },
+    "confirmDrop": {
+      "database": "Drop entire database \"{{db}}\"? This cannot be undone.",
+      "collection": "Drop collection \"{{col}}\"? All documents will be deleted.",
+      "index": "Drop index \"{{name}}\"?"
+    },
+    "editDocument": { "title": "Edit Document" },
+    "newDocument": { "title": "New Document" },
+    "createIndex": {
+      "title": "Create Index",
+      "subtitle": "Define the fields and options for the new index.",
+      "label": { "keys": "Index Keys", "name": "Index Name", "unique": "Unique", "sparse": "Sparse", "background": "Background", "ttl": "TTL" },
+      "optional": "(optional)",
+      "hint": { "background": "(non-blocking)", "ttl": "(seconds, optional)" },
+      "placeholder": { "fieldName": "field name", "name": "auto-generated if empty", "ttl": "e.g. 3600" },
+      "option": { "ascending": "1 (asc)", "descending": "-1 (desc)" },
+      "button": { "addField": "+ Add field", "submit": "Create Index" },
+      "validation": { "fieldRequired": "At least one field is required." }
+    },
+    "import": { "confirmReplace": "Import {{count}} documents? (replace existing?)" },
+    "confirmDelete": { "document": "Delete this document?" }
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "close": "Close",
+    "connect": "Connect",
+    "save": "Save",
+    "drop": "Drop",
+    "edit": "Edit",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "add": "Add",
+    "refresh": "↻ Refresh",
+    "form": "⊟ Form",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "Username", "password": "Password", "fieldName": "Field name" },
+    "button": { "removeField": { "title": "Remove field" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "true", "false": "false" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "24-character hex string", "jsonValue": "JSON value" },
+    "section": { "addField": "Add field" },
+    "validation": { "fieldExists": "Field \"{{key}}\" already exists.", "fieldNameRequired": "Field name is required." }
+  },
+  "editor": {
+    "form": { "noSchema": "No schema available. Use JSON mode to edit this document." },
+    "mode": {
+      "form": { "subtitle": "Edit fields using type-aware inputs. Switch to JSON for raw editing." },
+      "json": { "subtitle": "Edit the raw JSON document. Switch to Form for guided editing." }
+    },
+    "error": { "saveFailure": "Invalid JSON or save failed:" }
+  },
+  "query": {
+    "label": { "filter": "Filter", "sort": "Sort", "projection": "Projection", "limit": "Limit" },
+    "hint": { "ctrlEnter": "Ctrl+Enter to apply" },
+    "badge": { "active": "active", "invalidJson": "invalid JSON" },
+    "button": { "apply": "Apply", "clear": "Clear" }
+  },
+  "views": {
+    "table": { "title": "Table view" },
+    "tree": { "title": "Tree view" }
+  },
+  "selection": {
+    "count_one": "{{count}} document selected",
+    "count_other": "{{count}} documents selected",
+    "button": { "export": "Export Selected", "delete": "Delete Selected", "clear": "✕ Clear" },
+    "confirmDelete_one": "Delete {{count}} selected document? This cannot be undone.",
+    "confirmDelete_other": "Delete {{count}} selected documents? This cannot be undone."
+  },
+  "documents": {
+    "list": { "empty": "No documents found", "emptyWithFilter": "Try adjusting your filter or projection.", "emptyNoFilter": "This collection is empty." },
+    "button": { "create": "+ New Document" },
+    "fieldCount_one": "{{count}} field",
+    "fieldCount_other": "{{count}} fields"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "Preview", "actions": "Actions", "name": "Name", "keys": "Keys", "unique": "Unique", "sparse": "Sparse", "ttl": "TTL (s)", "index": "Index", "size": "Size", "fieldPath": "Field path", "types": "Types", "coverage": "Coverage", "nullable": "Nullable" }
+  },
+  "pagination": {
+    "label": "Showing {{start}}–{{end}} of {{total}} documents",
+    "label_page": "Page {{page}}",
+    "button": { "prev": "← Prev", "next": "Next →" }
+  },
+  "aggregate": {
+    "prompt": "Enter an aggregation pipeline (JSON array):",
+    "button": { "run": "▶ Run" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} document", "count_other": "{{count}} documents" },
+    "placeholder": { "result": "// Run a command to see results" }
+  },
+  "schema": {
+    "label": { "sampled": "Sampled", "document": "document", "field": "field" },
+    "plural": { "documents": "s", "fields": "s" },
+    "inferring": "Inferring schema…",
+    "unavailable": "No schema data available.",
+    "summary": "Sampled {{docCount}} document{{docPlural}} · {{fieldCount}} field{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "No indexes found." },
+    "button": { "create": "+ New Index" },
+    "label": { "count_one": "{{count}} index", "count_other": "{{count}} indexes", "loading": "Loading…" }
+  },
+  "stats": {
+    "loading": "Loading stats…",
+    "unavailable": "No stats available.",
+    "title": "Collection statistics",
+    "label": {
+      "collections": "Collections",
+      "documents": "Documents",
+      "avgDocSize": "Avg document size",
+      "dataSize": "Data size",
+      "storageSize": "Storage size",
+      "indexes": "Indexes",
+      "indexSize": "Index size",
+      "totalSize": "Total size"
+    },
+    "section": { "indexSizes": "Index sizes" }
+  },
+  "commands": {
+    "search": { "placeholder": "Search commands…" },
+    "category": { "server": "Server", "database": "Database", "collection": "Collection", "replication": "Replication", "administration": "Administration" },
+    "description": {
+      "ping": "Test server connectivity",
+      "buildInfo": "Server version and build info",
+      "hostInfo": "Host system information",
+      "serverStatus": "Runtime statistics",
+      "connectionStatus": "Current connection details",
+      "hello": "Server role / topology info",
+      "listDatabases": "List all databases",
+      "currentOp": "In-progress operations",
+      "killOp": "Kill a running operation by opId",
+      "getLog": "Recent log entries",
+      "getParameter": "Get a server parameter",
+      "setParameter": "Set a server parameter",
+      "dbStats": "Database storage statistics",
+      "listCollections": "List collections in this database",
+      "usersInfo": "List users",
+      "createUser": "Create a database user",
+      "dropUser": "Drop a user",
+      "grantRolesToUser": "Grant roles to a user",
+      "revokeRolesFromUser": "Revoke roles from a user",
+      "collStats": "Collection storage statistics",
+      "count": "Count matching documents",
+      "validate": "Validate collection integrity",
+      "compact": "Compact/defragment a collection",
+      "reIndex": "Rebuild all indexes",
+      "convertToCapped": "Convert to a capped collection",
+      "replSetGetStatus": "Replica set status",
+      "replSetGetConfig": "Replica set configuration",
+      "isMaster": "Server role check (legacy)",
+      "renameCollection": "Rename a collection",
+      "dropDatabase": "Drop a database",
+      "fsync": "Flush and optionally lock",
+      "rotateCertificates": "Rotate TLS certificates",
+      "listIndexes": "List indexes on a collection",
+      "profile": "Get/set database profiler level"
+    },
+    "context": { "runningOn": "Running on database:" },
+    "checkbox": { "useAdminDb": "Use admin database" },
+    "button": { "run": "▶ Run  (Ctrl+Enter)", "running": "⏳ Running…" },
+    "label": { "command": "Command", "result": "Result" },
+    "error": { "invalidJson": "Invalid JSON — fix the command before running." }
+  },
+  "badge": {
+    "admin": "● Admin",
+    "viewer": "● Viewer",
+    "error": "Error",
+    "success": "OK"
+  },
+  "tree": {
+    "button": { "expandAll": "Expand all", "collapseAll": "Collapse all" },
+    "checkbox": { "selectAllLabel": "Select all on page" }
+  },
+  "ui": {
+    "loading": "Loading…",
+    "connecting": "Connecting…",
+    "sidebar": { "resize": { "title": "Drag to resize sidebar" } }
+  },
+  "empty": {
+    "title": "Select a database and collection",
+    "subtitle": {
+      "collectionNeeded": "Choose a collection from the sidebar to browse documents.",
+      "databaseNeeded": "Choose a database from the sidebar to get started."
+    }
+  },
+  "language": { "label": "Language" }
+}

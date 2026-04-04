@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "Se connecter",
+      "subtitle": "Accédez à vos bases de données MongoDB",
+      "footer": "Sécurisé par Keycloak OAuth2",
+      "button": { "label": "Se connecter", "loading": "Connexion en cours…" },
+      "validation": { "fieldsRequired": "Le nom d'utilisateur et le mot de passe sont requis" },
+      "error": { "invalidCredentials": "Échec de la connexion. Vérifiez vos identifiants." }
+    }
+  },
+  "nav": {
+    "signOut": "Se déconnecter",
+    "section": { "databases": "BASES DE DONNÉES", "collections": "COLLECTIONS" }
+  },
+  "connection": {
+    "status": { "noInfo": "Aucune info de connexion" },
+    "button": {
+      "reconnect": { "label": "↻ Reconnecter", "title": "Reconnecter avec l'URI actuelle" },
+      "change": { "label": "⚙ Modifier", "title": "Changer la connexion MongoDB" }
+    },
+    "error": { "failed": "⚠ Échec de la connexion MongoDB :" }
+  },
+  "database": {
+    "search": { "placeholder": "Rechercher des bases de données…" },
+    "list": { "empty": "Aucune base de données trouvée" },
+    "button": { "create": { "title": "Créer une base de données" }, "stats": { "title": "Statistiques de la base \"{{db}}\"" }, "drop": { "title": "Supprimer la base \"{{db}}\"" } }
+  },
+  "collection": {
+    "search": { "placeholder": "Rechercher des collections…" },
+    "list": { "empty": { "noCollections": "Aucune collection.", "canCreate": "Cliquez sur ＋ pour en créer une." } },
+    "button": { "create": { "title": "Créer une collection" }, "drop": { "title": "Supprimer la collection \"{{col}}\"" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "Fermer l'onglet" }, "new": { "title": "Nouvel onglet" } },
+    "documents": "Documents",
+    "aggregate": "Agrégat",
+    "schema": "Schéma",
+    "indexes": "Index",
+    "stats": "Statistiques",
+    "commands": "Commandes"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "Créer une base de données",
+      "subtitle": "MongoDB crée une base de données lors de la création de sa première collection.",
+      "label": { "dbName": "Nom de la base de données", "collectionName": "Nom de la collection initiale" },
+      "placeholder": { "dbName": "ex. myapp", "collectionName": "ex. users" }
+    },
+    "createCollection": {
+      "title": "Créer une collection",
+      "subtitle": "Ajouter une nouvelle collection à",
+      "label": { "name": "Nom de la collection" },
+      "placeholder": { "name": "ex. products" }
+    },
+    "dbStats": {
+      "title": "Base de données :",
+      "subtitle": "Statistiques de stockage et de documents",
+      "unavailable": "Statistiques non disponibles."
+    },
+    "changeConnection": {
+      "title": "Changer la connexion MongoDB",
+      "subtitle": "Entrez un nouvel URI de connexion et une base de données par défaut. Les remplacements TLS sont facultatifs — ils complètent les paramètres déjà dans l'URI.",
+      "label": {
+        "uri": "URI de connexion",
+        "defaultDb": "Base de données par défaut",
+        "tlsCaFile": "Fichier CA TLS",
+        "tlsCertKeyFile": "Fichier de certificat + clé client TLS",
+        "allowInvalidTls": "Autoriser les certificats TLS invalides / auto-signés"
+      },
+      "placeholder": {
+        "uri": "ex. mongodb://user:pass@host:27017 ou mongodb+srv://cluster.mongodb.net/",
+        "defaultDb": "ex. mydb",
+        "tlsCaFile": "ex. /certs/ca.pem",
+        "tlsCertKeyFile": "ex. /certs/client.pem"
+      },
+      "optional": "(facultatif, chemin sur le serveur)",
+      "warning": { "insecure": "⚠ non sécurisé" }
+    },
+    "confirmDrop": {
+      "database": "Supprimer toute la base \"{{db}}\" ? Cette action est irréversible.",
+      "collection": "Supprimer la collection \"{{col}}\" ? Tous les documents seront supprimés.",
+      "index": "Supprimer l'index \"{{name}}\" ?"
+    },
+    "editDocument": { "title": "Modifier le document" },
+    "newDocument": { "title": "Nouveau document" },
+    "createIndex": {
+      "title": "Créer un index",
+      "subtitle": "Définissez les champs et les options pour le nouvel index.",
+      "label": { "keys": "Clés d'index", "name": "Nom de l'index", "unique": "Unique", "sparse": "Partiel", "background": "Arrière-plan", "ttl": "TTL" },
+      "optional": "(facultatif)",
+      "hint": { "background": "(non bloquant)", "ttl": "(secondes, facultatif)" },
+      "placeholder": { "fieldName": "nom du champ", "name": "auto-généré si vide", "ttl": "ex. 3600" },
+      "option": { "ascending": "1 (asc)", "descending": "-1 (desc)" },
+      "button": { "addField": "+ Ajouter un champ", "submit": "Créer l'index" },
+      "validation": { "fieldRequired": "Au moins un champ est requis." }
+    },
+    "import": { "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)" },
+    "confirmDelete": { "document": "Supprimer ce document ?" }
+  },
+  "buttons": {
+    "cancel": "Annuler",
+    "create": "Créer",
+    "close": "Fermer",
+    "connect": "Connecter",
+    "save": "Enregistrer",
+    "drop": "Supprimer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "export": "Exporter",
+    "import": "Importer",
+    "add": "Ajouter",
+    "refresh": "↻ Actualiser",
+    "form": "⊟ Formulaire",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "Nom d'utilisateur", "password": "Mot de passe", "fieldName": "Nom du champ" },
+    "button": { "removeField": { "title": "Supprimer le champ" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "vrai", "false": "faux" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "Chaîne hexadécimale de 24 caractères", "jsonValue": "Valeur JSON" },
+    "section": { "addField": "Ajouter un champ" },
+    "validation": { "fieldExists": "Le champ \"{{key}}\" existe déjà.", "fieldNameRequired": "Le nom du champ est requis." }
+  },
+  "editor": {
+    "form": { "noSchema": "Aucun schéma disponible. Utilisez le mode JSON pour modifier ce document." },
+    "mode": {
+      "form": { "subtitle": "Modifiez les champs avec des entrées sensibles au type. Passez en JSON pour l'édition brute." },
+      "json": { "subtitle": "Modifiez le document JSON brut. Passez en Formulaire pour l'édition guidée." }
+    },
+    "error": { "saveFailure": "JSON invalide ou échec de l'enregistrement :" }
+  },
+  "query": {
+    "label": { "filter": "Filtre", "sort": "Tri", "projection": "Projection", "limit": "Limite" },
+    "hint": { "ctrlEnter": "Ctrl+Entrée pour appliquer" },
+    "badge": { "active": "actif", "invalidJson": "JSON invalide" },
+    "button": { "apply": "Appliquer", "clear": "Effacer" }
+  },
+  "views": {
+    "table": { "title": "Vue tableau" },
+    "tree": { "title": "Vue arborescente" }
+  },
+  "selection": {
+    "count_one": "{{count}} document sélectionné",
+    "count_other": "{{count}} documents sélectionnés",
+    "button": { "export": "Exporter la sélection", "delete": "Supprimer la sélection", "clear": "✕ Effacer" },
+    "confirmDelete_one": "Supprimer {{count}} document sélectionné ? Cette action est irréversible.",
+    "confirmDelete_other": "Supprimer {{count}} documents sélectionnés ? Cette action est irréversible."
+  },
+  "documents": {
+    "list": { "empty": "Aucun document trouvé", "emptyWithFilter": "Essayez d'ajuster votre filtre ou votre projection.", "emptyNoFilter": "Cette collection est vide." },
+    "button": { "create": "+ Nouveau document" },
+    "fieldCount_one": "{{count}} champ",
+    "fieldCount_other": "{{count}} champs"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "Aperçu", "actions": "Actions", "name": "Nom", "keys": "Clés", "unique": "Unique", "sparse": "Partiel", "ttl": "TTL (s)", "index": "Index", "size": "Taille", "fieldPath": "Chemin du champ", "types": "Types", "coverage": "Couverture", "nullable": "Nullable" }
+  },
+  "pagination": {
+    "label": "Affichage {{start}}–{{end}} sur {{total}} documents",
+    "label_page": "Page {{page}}",
+    "button": { "prev": "← Préc.", "next": "Suiv. →" }
+  },
+  "aggregate": {
+    "prompt": "Entrez un pipeline d'agrégation (tableau JSON) :",
+    "button": { "run": "▶ Exécuter" },
+    "hint": { "ctrlEnter": "Ctrl+Entrée" },
+    "results": { "count_one": "{{count}} document", "count_other": "{{count}} documents" },
+    "placeholder": { "result": "// Exécutez une commande pour voir les résultats" }
+  },
+  "schema": {
+    "label": { "sampled": "Échantillonné", "document": "document", "field": "champ" },
+    "plural": { "documents": "s", "fields": "s" },
+    "inferring": "Inférence du schéma…",
+    "unavailable": "Aucune donnée de schéma disponible.",
+    "summary": "{{docCount}} document{{docPlural}} échantillonné{{docPlural}} · {{fieldCount}} champ{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "Aucun index trouvé." },
+    "button": { "create": "+ Nouvel index" },
+    "label": { "count_one": "{{count}} index", "count_other": "{{count}} index", "loading": "Chargement…" }
+  },
+  "stats": {
+    "loading": "Chargement des statistiques…",
+    "unavailable": "Aucune statistique disponible.",
+    "title": "Statistiques de la collection",
+    "label": {
+      "collections": "Collections",
+      "documents": "Documents",
+      "avgDocSize": "Taille moy. des documents",
+      "dataSize": "Taille des données",
+      "storageSize": "Taille de stockage",
+      "indexes": "Index",
+      "indexSize": "Taille des index",
+      "totalSize": "Taille totale"
+    },
+    "section": { "indexSizes": "Tailles des index" }
+  },
+  "commands": {
+    "search": { "placeholder": "Rechercher des commandes…" },
+    "category": { "server": "Serveur", "database": "Base de données", "collection": "Collection", "replication": "Réplication", "administration": "Administration" },
+    "description": {
+      "ping": "Tester la connectivité du serveur",
+      "buildInfo": "Version et informations de build du serveur",
+      "hostInfo": "Informations sur le système hôte",
+      "serverStatus": "Statistiques d'exécution",
+      "connectionStatus": "Détails de la connexion actuelle",
+      "hello": "Rôle du serveur / informations de topologie",
+      "listDatabases": "Lister toutes les bases de données",
+      "currentOp": "Opérations en cours",
+      "killOp": "Arrêter une opération par opId",
+      "getLog": "Entrées de journal récentes",
+      "getParameter": "Obtenir un paramètre serveur",
+      "setParameter": "Définir un paramètre serveur",
+      "dbStats": "Statistiques de stockage de la base de données",
+      "listCollections": "Lister les collections dans cette base",
+      "usersInfo": "Lister les utilisateurs",
+      "createUser": "Créer un utilisateur de base de données",
+      "dropUser": "Supprimer un utilisateur",
+      "grantRolesToUser": "Accorder des rôles à un utilisateur",
+      "revokeRolesFromUser": "Révoquer des rôles d'un utilisateur",
+      "collStats": "Statistiques de stockage de la collection",
+      "count": "Compter les documents correspondants",
+      "validate": "Valider l'intégrité de la collection",
+      "compact": "Compacter/défragmenter une collection",
+      "reIndex": "Reconstruire tous les index",
+      "convertToCapped": "Convertir en collection limitée",
+      "replSetGetStatus": "Statut du jeu de répliques",
+      "replSetGetConfig": "Configuration du jeu de répliques",
+      "isMaster": "Vérification du rôle serveur (héritage)",
+      "renameCollection": "Renommer une collection",
+      "dropDatabase": "Supprimer une base de données",
+      "fsync": "Vider et verrouiller optionnellement",
+      "rotateCertificates": "Faire tourner les certificats TLS",
+      "listIndexes": "Lister les index d'une collection",
+      "profile": "Obtenir/définir le niveau du profileur"
+    },
+    "context": { "runningOn": "Exécution sur la base de données :" },
+    "checkbox": { "useAdminDb": "Utiliser la base admin" },
+    "button": { "run": "▶ Exécuter  (Ctrl+Entrée)", "running": "⏳ En cours…" },
+    "label": { "command": "Commande", "result": "Résultat" },
+    "error": { "invalidJson": "JSON invalide — corrigez la commande avant d'exécuter." }
+  },
+  "badge": {
+    "admin": "● Admin",
+    "viewer": "● Lecteur",
+    "error": "Erreur",
+    "success": "OK"
+  },
+  "tree": {
+    "button": { "expandAll": "Tout développer", "collapseAll": "Tout réduire" },
+    "checkbox": { "selectAllLabel": "Tout sélectionner sur la page" }
+  },
+  "ui": {
+    "loading": "Chargement…",
+    "connecting": "Connexion…",
+    "sidebar": { "resize": { "title": "Glisser pour redimensionner la barre latérale" } }
+  },
+  "empty": {
+    "title": "Sélectionnez une base de données et une collection",
+    "subtitle": {
+      "collectionNeeded": "Choisissez une collection dans la barre latérale pour parcourir les documents.",
+      "databaseNeeded": "Choisissez une base de données dans la barre latérale pour commencer."
+    }
+  },
+  "language": { "label": "Langue" }
+}

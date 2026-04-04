@@ -1,0 +1,270 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "subtitle": "访问您的 MongoDB 数据库",
+      "footer": "由 Keycloak OAuth2 保护",
+      "button": { "label": "登录", "loading": "登录中…" },
+      "validation": { "fieldsRequired": "用户名和密码不能为空" },
+      "error": { "invalidCredentials": "登录失败，请检查您的凭据。" }
+    }
+  },
+  "nav": {
+    "signOut": "退出登录",
+    "section": { "databases": "数据库", "collections": "集合" }
+  },
+  "connection": {
+    "status": { "noInfo": "无连接信息" },
+    "button": {
+      "reconnect": { "label": "↻ 重新连接", "title": "使用当前 URI 重新连接" },
+      "change": { "label": "⚙ 更改", "title": "更改 MongoDB 连接" }
+    },
+    "error": { "failed": "⚠ MongoDB 连接失败：" }
+  },
+  "database": {
+    "search": { "placeholder": "搜索数据库…" },
+    "list": { "empty": "未找到数据库" },
+    "button": { "create": { "title": "创建数据库" }, "stats": { "title": "数据库 \"{{db}}\" 的统计信息" }, "drop": { "title": "删除数据库 \"{{db}}\"" } }
+  },
+  "collection": {
+    "search": { "placeholder": "搜索集合…" },
+    "list": { "empty": { "noCollections": "没有集合。", "canCreate": "点击 ＋ 创建一个。" } },
+    "button": { "create": { "title": "创建集合" }, "drop": { "title": "删除集合 \"{{col}}\"" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "关闭标签页" }, "new": { "title": "新标签页" } },
+    "documents": "文档",
+    "aggregate": "聚合",
+    "schema": "模式",
+    "indexes": "索引",
+    "stats": "统计",
+    "commands": "命令"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "创建数据库",
+      "subtitle": "MongoDB 在创建第一个集合时会创建数据库。",
+      "label": { "dbName": "数据库名称", "collectionName": "初始集合名称" },
+      "placeholder": { "dbName": "例如 myapp", "collectionName": "例如 users" }
+    },
+    "createCollection": {
+      "title": "创建集合",
+      "subtitle": "向以下数据库添加新集合：",
+      "label": { "name": "集合名称" },
+      "placeholder": { "name": "例如 products" }
+    },
+    "dbStats": {
+      "title": "数据库：",
+      "subtitle": "存储和文档统计信息",
+      "unavailable": "统计信息不可用。"
+    },
+    "changeConnection": {
+      "title": "更改 MongoDB 连接",
+      "subtitle": "输入新的连接 URI 和默认数据库。TLS 覆盖是可选的 — 它们补充 URI 中已有的参数。",
+      "label": {
+        "uri": "连接 URI",
+        "defaultDb": "默认数据库",
+        "tlsCaFile": "TLS CA 证书文件",
+        "tlsCertKeyFile": "TLS 客户端证书 + 密钥文件",
+        "allowInvalidTls": "允许无效/自签名的 TLS 证书"
+      },
+      "placeholder": {
+        "uri": "例如 mongodb://user:pass@host:27017 或 mongodb+srv://cluster.mongodb.net/",
+        "defaultDb": "例如 mydb",
+        "tlsCaFile": "例如 /certs/ca.pem",
+        "tlsCertKeyFile": "例如 /certs/client.pem"
+      },
+      "optional": "（可选，服务器上的路径）",
+      "warning": { "insecure": "⚠ 不安全" }
+    },
+    "confirmDrop": {
+      "database": "删除整个数据库 \"{{db}}\"？此操作无法撤销。",
+      "collection": "删除集合 \"{{col}}\"？所有文档将被删除。",
+      "index": "删除索引 \"{{name}}\"？"
+    },
+    "editDocument": { "title": "编辑文档" },
+    "newDocument": { "title": "新建文档" },
+    "createIndex": {
+      "title": "创建索引",
+      "subtitle": "为新索引定义字段和选项。",
+      "label": { "keys": "索引键", "name": "索引名称", "unique": "唯一", "sparse": "稀疏", "background": "后台", "ttl": "TTL" },
+      "optional": "（可选）",
+      "hint": { "background": "（非阻塞）", "ttl": "（秒，可选）" },
+      "placeholder": { "fieldName": "字段名", "name": "空时自动生成", "ttl": "例如 3600" },
+      "option": { "ascending": "1（升序）", "descending": "-1（降序）" },
+      "button": { "addField": "+ 添加字段", "submit": "创建索引" },
+      "validation": { "fieldRequired": "至少需要一个字段。" }
+    },
+    "import": { "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）" },
+    "confirmDelete": { "document": "删除此文档？" }
+  },
+  "buttons": {
+    "cancel": "取消",
+    "create": "创建",
+    "close": "关闭",
+    "connect": "连接",
+    "save": "保存",
+    "drop": "删除",
+    "edit": "编辑",
+    "delete": "删除",
+    "export": "导出",
+    "import": "导入",
+    "add": "添加",
+    "refresh": "↻ 刷新",
+    "form": "⊟ 表单",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "用户名", "password": "密码", "fieldName": "字段名" },
+    "button": { "removeField": { "title": "删除字段" }, "remove": "×" },
+    "value": { "null": "null" },
+    "option": { "true": "true", "false": "false" },
+    "label": { "utc": "UTC" },
+    "placeholder": { "objectId": "24位十六进制字符串", "jsonValue": "JSON 值" },
+    "section": { "addField": "添加字段" },
+    "validation": { "fieldExists": "字段 \"{{key}}\" 已存在。", "fieldNameRequired": "字段名不能为空。" }
+  },
+  "editor": {
+    "form": { "noSchema": "没有可用的模式。请使用 JSON 模式编辑此文档。" },
+    "mode": {
+      "form": { "subtitle": "使用类型感知输入编辑字段。切换到 JSON 进行原始编辑。" },
+      "json": { "subtitle": "编辑原始 JSON 文档。切换到表单进行引导编辑。" }
+    },
+    "error": { "saveFailure": "无效的 JSON 或保存失败：" }
+  },
+  "query": {
+    "label": { "filter": "过滤器", "sort": "排序", "projection": "投影", "limit": "限制" },
+    "hint": { "ctrlEnter": "Ctrl+Enter 应用" },
+    "badge": { "active": "已激活", "invalidJson": "无效 JSON" },
+    "button": { "apply": "应用", "clear": "清除" }
+  },
+  "views": {
+    "table": { "title": "表格视图" },
+    "tree": { "title": "树形视图" }
+  },
+  "selection": {
+    "count_one": "已选择 {{count}} 个文档",
+    "count_other": "已选择 {{count}} 个文档",
+    "button": { "export": "导出所选", "delete": "删除所选", "clear": "✕ 清除" },
+    "confirmDelete_one": "删除选定的 {{count}} 个文档？此操作无法撤销。",
+    "confirmDelete_other": "删除选定的 {{count}} 个文档？此操作无法撤销。"
+  },
+  "documents": {
+    "list": { "empty": "未找到文档", "emptyWithFilter": "请尝试调整过滤器或投影。", "emptyNoFilter": "此集合为空。" },
+    "button": { "create": "+ 新建文档" },
+    "fieldCount_one": "{{count}} 个字段",
+    "fieldCount_other": "{{count}} 个字段"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "预览", "actions": "操作", "name": "名称", "keys": "键", "unique": "唯一", "sparse": "稀疏", "ttl": "TTL (s)", "index": "索引", "size": "大小", "fieldPath": "字段路径", "types": "类型", "coverage": "覆盖率", "nullable": "可为空" }
+  },
+  "pagination": {
+    "label": "共 {{total}} 个文档，显示第 {{start}}–{{end}} 个",
+    "label_page": "第 {{page}} 页",
+    "button": { "prev": "← 上一页", "next": "下一页 →" }
+  },
+  "aggregate": {
+    "prompt": "输入聚合管道（JSON 数组）：",
+    "button": { "run": "▶ 运行" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} 个文档", "count_other": "{{count}} 个文档" },
+    "placeholder": { "result": "// 运行命令以查看结果" }
+  },
+  "schema": {
+    "label": { "sampled": "已采样", "document": "文档", "field": "字段" },
+    "plural": { "documents": "", "fields": "" },
+    "inferring": "正在推断模式…",
+    "unavailable": "没有可用的模式数据。",
+    "summary": "已采样 {{docCount}} 个{{docPlural}}文档 · {{fieldCount}} 个{{fieldPlural}}字段"
+  },
+  "indexes": {
+    "list": { "empty": "未找到索引。" },
+    "button": { "create": "+ 新建索引" },
+    "label": { "count_one": "{{count}} 个索引", "count_other": "{{count}} 个索引", "loading": "加载中…" }
+  },
+  "stats": {
+    "loading": "正在加载统计信息…",
+    "unavailable": "没有可用的统计信息。",
+    "title": "集合统计信息",
+    "label": {
+      "collections": "集合",
+      "documents": "文档",
+      "avgDocSize": "平均文档大小",
+      "dataSize": "数据大小",
+      "storageSize": "存储大小",
+      "indexes": "索引",
+      "indexSize": "索引大小",
+      "totalSize": "总大小"
+    },
+    "section": { "indexSizes": "索引大小" }
+  },
+  "commands": {
+    "search": { "placeholder": "搜索命令…" },
+    "category": { "server": "服务器", "database": "数据库", "collection": "集合", "replication": "复制", "administration": "管理" },
+    "description": {
+      "ping": "测试服务器连接",
+      "buildInfo": "服务器版本和构建信息",
+      "hostInfo": "主机系统信息",
+      "serverStatus": "运行时统计信息",
+      "connectionStatus": "当前连接详情",
+      "hello": "服务器角色/拓扑信息",
+      "listDatabases": "列出所有数据库",
+      "currentOp": "进行中的操作",
+      "killOp": "通过 opId 终止运行中的操作",
+      "getLog": "最近的日志条目",
+      "getParameter": "获取服务器参数",
+      "setParameter": "设置服务器参数",
+      "dbStats": "数据库存储统计信息",
+      "listCollections": "列出此数据库中的集合",
+      "usersInfo": "列出用户",
+      "createUser": "创建数据库用户",
+      "dropUser": "删除用户",
+      "grantRolesToUser": "向用户授予角色",
+      "revokeRolesFromUser": "撤销用户的角色",
+      "collStats": "集合存储统计信息",
+      "count": "统计匹配的文档",
+      "validate": "验证集合完整性",
+      "compact": "压缩/碎片整理集合",
+      "reIndex": "重建所有索引",
+      "convertToCapped": "转换为固定大小集合",
+      "replSetGetStatus": "副本集状态",
+      "replSetGetConfig": "副本集配置",
+      "isMaster": "服务器角色检查（旧版）",
+      "renameCollection": "重命名集合",
+      "dropDatabase": "删除数据库",
+      "fsync": "刷新并可选锁定",
+      "rotateCertificates": "轮换 TLS 证书",
+      "listIndexes": "列出集合上的索引",
+      "profile": "获取/设置数据库分析器级别"
+    },
+    "context": { "runningOn": "运行在数据库：" },
+    "checkbox": { "useAdminDb": "使用 admin 数据库" },
+    "button": { "run": "▶ 运行  (Ctrl+Enter)", "running": "⏳ 运行中…" },
+    "label": { "command": "命令", "result": "结果" },
+    "error": { "invalidJson": "无效的 JSON — 请在运行前修复命令。" }
+  },
+  "badge": {
+    "admin": "● 管理员",
+    "viewer": "● 查看者",
+    "error": "错误",
+    "success": "OK"
+  },
+  "tree": {
+    "button": { "expandAll": "全部展开", "collapseAll": "全部收起" },
+    "checkbox": { "selectAllLabel": "选择本页全部" }
+  },
+  "ui": {
+    "loading": "加载中…",
+    "connecting": "连接中…",
+    "sidebar": { "resize": { "title": "拖动以调整侧边栏大小" } }
+  },
+  "empty": {
+    "title": "请选择数据库和集合",
+    "subtitle": {
+      "collectionNeeded": "从侧边栏选择一个集合以浏览文档。",
+      "databaseNeeded": "从侧边栏选择一个数据库以开始使用。"
+    }
+  },
+  "language": { "label": "语言" }
+}

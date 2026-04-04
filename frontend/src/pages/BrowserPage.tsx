@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   getDatabases,
   getCollections,
@@ -15,6 +16,7 @@ import {
 } from "../api/mongo";
 import { useAuth } from "../context/useAuth";
 import CollectionView from "../components/CollectionView";
+import { LanguageSelector } from "../components/LanguageSelector";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -153,6 +155,7 @@ interface Tab {
 export default function BrowserPage() {
   const { logout, canWrite } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // ── Sidebar resize ──
   const [sidebarWidth, setSidebarWidth] = useState(260);
@@ -267,7 +270,7 @@ export default function BrowserPage() {
 
   const handleDropDb = async () => {
     if (!selectedDb) return;
-    if (!confirm(`Drop entire database "${selectedDb}"? This cannot be undone.`)) return;
+    if (!confirm(t("modals.confirmDrop.database", { db: selectedDb }))) return;
     const dbToRemove = selectedDb;
     try {
       await dropDatabase(dbToRemove);
@@ -300,7 +303,7 @@ export default function BrowserPage() {
   };
 
   const handleDropCollection = async (col: string) => {
-    if (!confirm(`Drop collection "${col}"? All documents will be deleted.`)) return;
+    if (!confirm(t("modals.confirmDrop.collection", { col }))) return;
     const dbToUpdate = selectedDb;
     try {
       await dropCollection(dbToUpdate, col);
@@ -447,25 +450,28 @@ export default function BrowserPage() {
               fontFamily: FONT,
             }}
           >
-            dbv
+            {t("brand.name")}
           </span>
-          <button
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#64748b",
-              fontSize: "12px",
-              fontFamily: FONT,
-              padding: "2px 6px",
-            }}
-          >
-            Sign out
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <LanguageSelector />
+            <button
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#64748b",
+                fontSize: "12px",
+                fontFamily: FONT,
+                padding: "2px 6px",
+              }}
+            >
+              {t("nav.signOut")}
+            </button>
+          </div>
         </div>
 
         {/* Connection status indicator */}
@@ -509,7 +515,7 @@ export default function BrowserPage() {
                 ? connInfo.uri.length > 32
                   ? connInfo.uri.slice(0, 32) + "…"
                   : connInfo.uri
-                : "No connection info"}
+                : t("connection.status.noInfo")}
             </span>
           </div>
           <div style={{ display: "flex", gap: "6px" }}>
@@ -526,9 +532,9 @@ export default function BrowserPage() {
                 fontSize: "11px",
                 fontFamily: FONT,
               }}
-              title="Reconnect using current URI"
+              title={t("connection.button.reconnect.title")}
             >
-              ↻ Reconnect
+              {t("connection.button.reconnect.label")}
             </button>
             <button
               onClick={() => {
@@ -550,9 +556,9 @@ export default function BrowserPage() {
                 fontSize: "11px",
                 fontFamily: FONT,
               }}
-              title="Change MongoDB connection"
+              title={t("connection.button.change.title")}
             >
-              ⚙ Change
+              {t("connection.button.change.label")}
             </button>
           </div>
         </div>
@@ -567,7 +573,7 @@ export default function BrowserPage() {
               marginBottom: "8px",
             }}
           >
-            <span style={sectionLabelStyle}>DATABASES</span>
+            <span style={sectionLabelStyle}>{t("nav.section.databases")}</span>
             {canWrite && (
               <button
                 onClick={() => setNewDbOpen(true)}
@@ -580,7 +586,7 @@ export default function BrowserPage() {
                   lineHeight: 1,
                   padding: "0 2px",
                 }}
-                title="Create database"
+                title={t("database.button.create.title")}
               >
                 ＋
               </button>
@@ -589,7 +595,7 @@ export default function BrowserPage() {
           <input
             value={dbSearch}
             onChange={(e) => setDbSearch(e.target.value)}
-            placeholder="Search databases…"
+            placeholder={t("database.search.placeholder")}
             style={sidebarSearchStyle}
           />
           {filteredDatabases.length === 0 ? (
@@ -603,7 +609,7 @@ export default function BrowserPage() {
                 fontFamily: FONT,
               }}
             >
-              No databases found
+              {t("database.list.empty")}
             </p>
           ) : (
             <div>
@@ -667,7 +673,7 @@ export default function BrowserPage() {
                           padding: "0 2px",
                           lineHeight: 1,
                         }}
-                        title={`Database stats for "${db}"`}
+                        title={t("database.button.stats.title", { db })}
                       >
                         ℹ
                       </button>
@@ -688,7 +694,7 @@ export default function BrowserPage() {
                           opacity: 0.8,
                           lineHeight: 1,
                         }}
-                        title={`Drop database "${db}"`}
+                        title={t("database.button.drop.title", { db })}
                       >
                         🗑
                       </button>
@@ -716,7 +722,7 @@ export default function BrowserPage() {
                 marginBottom: "8px",
               }}
             >
-              <span style={sectionLabelStyle}>COLLECTIONS</span>
+              <span style={sectionLabelStyle}>{t("nav.section.collections")}</span>
               {canWrite && (
                 <button
                   onClick={() => setNewColOpen(true)}
@@ -729,7 +735,7 @@ export default function BrowserPage() {
                     lineHeight: 1,
                     padding: "0 2px",
                   }}
-                  title="Create collection"
+                  title={t("collection.button.create.title")}
                 >
                   ＋
                 </button>
@@ -738,7 +744,7 @@ export default function BrowserPage() {
             <input
               value={colSearch}
               onChange={(e) => setColSearch(e.target.value)}
-              placeholder="Search collections…"
+              placeholder={t("collection.search.placeholder")}
               style={sidebarSearchStyle}
             />
             {filteredCollections.length === 0 ? (
@@ -752,7 +758,7 @@ export default function BrowserPage() {
                   fontFamily: FONT,
                 }}
               >
-                No collections.{canWrite ? " Click ＋ to create one." : ""}
+                {t("collection.list.empty.noCollections")}{canWrite ? ` ${t("collection.list.empty.canCreate")}` : ""}
               </p>
             ) : (
               <div>
@@ -809,7 +815,7 @@ export default function BrowserPage() {
                             padding: "0 2px",
                             lineHeight: 1,
                           }}
-                          title={`Drop collection "${col}"`}
+                          title={t("collection.button.drop.title", { col })}
                         >
                           ✕
                         </button>
@@ -836,7 +842,7 @@ export default function BrowserPage() {
         }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "#3b82f6"; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
-        title="Drag to resize sidebar"
+        title={t("ui.sidebar.resize.title")}
       />
 
       {/* ── Main area ── */}
@@ -863,7 +869,7 @@ export default function BrowserPage() {
             }}
           >
             <span style={{ fontSize: "13px", color: "#dc2626", flex: 1, fontFamily: FONT }}>
-              ⚠ MongoDB connection failed: {connInfo.error ?? "unknown error"}
+              {t("connection.error.failed")} {connInfo.error ?? "unknown error"}
             </span>
             <button
               onClick={() => void handleReconnect()}
@@ -938,7 +944,7 @@ export default function BrowserPage() {
                       padding: "0 2px",
                       cursor: "pointer",
                     }}
-                    title="Close tab"
+                    title={t("tabs.button.close.title")}
                   >
                     ×
                   </span>
@@ -964,7 +970,7 @@ export default function BrowserPage() {
               userSelect: "none",
               flexShrink: 0,
             }}
-            title="New tab"
+            title={t("tabs.button.new.title")}
           >
             +
           </div>
@@ -987,21 +993,21 @@ export default function BrowserPage() {
       {newDbOpen && (
         <div style={overlayStyle}>
           <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>Create Database</h3>
+            <h3 style={modalTitleStyle}>{t("modals.createDatabase.title")}</h3>
             <p style={modalSubtitleStyle}>
-              MongoDB creates a database when its first collection is created.
+              {t("modals.createDatabase.subtitle")}
             </p>
-            <label style={modalLabelStyle}>Database name</label>
+            <label style={modalLabelStyle}>{t("modals.createDatabase.label.dbName")}</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. myapp"
+              placeholder={t("modals.createDatabase.placeholder.dbName")}
               value={newDbName}
               onChange={(e) => setNewDbName(e.target.value)}
             />
-            <label style={modalLabelStyle}>Initial collection name</label>
+            <label style={modalLabelStyle}>{t("modals.createDatabase.label.collectionName")}</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. users"
+              placeholder={t("modals.createDatabase.placeholder.collectionName")}
               value={newDbCollection}
               onChange={(e) => setNewDbCollection(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && void handleCreateDb()}
@@ -1011,13 +1017,13 @@ export default function BrowserPage() {
                 onClick={() => setNewDbOpen(false)}
                 style={cancelBtnStyle}
               >
-                Cancel
+                {t("buttons.cancel")}
               </button>
               <button
                 onClick={() => void handleCreateDb()}
                 style={primaryBtnStyle}
               >
-                Create
+                {t("buttons.create")}
               </button>
             </div>
           </div>
@@ -1028,14 +1034,14 @@ export default function BrowserPage() {
       {newColOpen && (
         <div style={overlayStyle}>
           <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>Create Collection</h3>
+            <h3 style={modalTitleStyle}>{t("modals.createCollection.title")}</h3>
             <p style={modalSubtitleStyle}>
-              Add a new collection to <strong>{selectedDb}</strong>.
+              {t("modals.createCollection.subtitle")} <strong>{selectedDb}</strong>.
             </p>
-            <label style={modalLabelStyle}>Collection name</label>
+            <label style={modalLabelStyle}>{t("modals.createCollection.label.name")}</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. products"
+              placeholder={t("modals.createCollection.placeholder.name")}
               value={newColName}
               onChange={(e) => setNewColName(e.target.value)}
               autoFocus
@@ -1048,13 +1054,13 @@ export default function BrowserPage() {
                 onClick={() => setNewColOpen(false)}
                 style={cancelBtnStyle}
               >
-                Cancel
+                {t("buttons.cancel")}
               </button>
               <button
                 onClick={() => void handleCreateCollection()}
                 style={primaryBtnStyle}
               >
-                Create
+                {t("buttons.create")}
               </button>
             </div>
           </div>
@@ -1065,24 +1071,24 @@ export default function BrowserPage() {
       {dbStatsOpen && (
         <div style={overlayStyle}>
           <div style={{ ...modalBaseStyle, width: "520px" }}>
-            <h3 style={modalTitleStyle}>Database: {selectedDb}</h3>
-            <p style={modalSubtitleStyle}>Storage and document statistics</p>
+            <h3 style={modalTitleStyle}>{t("modals.dbStats.title")} {selectedDb}</h3>
+            <p style={modalSubtitleStyle}>{t("modals.dbStats.subtitle")}</p>
 
             {dbStatsLoading ? (
-              <p style={{ color: "#64748b", fontSize: "13px", margin: "8px 0 20px" }}>Loading…</p>
+              <p style={{ color: "#64748b", fontSize: "13px", margin: "8px 0 20px" }}>{t("ui.loading")}</p>
             ) : !dbStats ? (
-              <p style={{ color: "#94a3b8", fontSize: "13px", margin: "8px 0 20px" }}>Stats unavailable.</p>
+              <p style={{ color: "#94a3b8", fontSize: "13px", margin: "8px 0 20px" }}>{t("modals.dbStats.unavailable")}</p>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
                 {([
-                  { label: "Collections",   value: numVal(dbStats["collections"]).toLocaleString() },
-                  { label: "Documents",     value: numVal(dbStats["objects"]).toLocaleString() },
-                  { label: "Avg doc size",  value: formatBytes(numVal(dbStats["avgObjSize"])) },
-                  { label: "Data size",     value: formatBytes(numVal(dbStats["dataSize"])) },
-                  { label: "Storage size",  value: formatBytes(numVal(dbStats["storageSize"])) },
-                  { label: "Indexes",       value: numVal(dbStats["indexes"]).toLocaleString() },
-                  { label: "Index size",    value: formatBytes(numVal(dbStats["indexSize"])) },
-                  { label: "Total size",    value: formatBytes(numVal(dbStats["totalSize"])) },
+                  { label: t("stats.label.collections"),  value: numVal(dbStats["collections"]).toLocaleString() },
+                  { label: t("stats.label.documents"),    value: numVal(dbStats["objects"]).toLocaleString() },
+                  { label: t("stats.label.avgDocSize"),   value: formatBytes(numVal(dbStats["avgObjSize"])) },
+                  { label: t("stats.label.dataSize"),     value: formatBytes(numVal(dbStats["dataSize"])) },
+                  { label: t("stats.label.storageSize"),  value: formatBytes(numVal(dbStats["storageSize"])) },
+                  { label: t("stats.label.indexes"),      value: numVal(dbStats["indexes"]).toLocaleString() },
+                  { label: t("stats.label.indexSize"),    value: formatBytes(numVal(dbStats["indexSize"])) },
+                  { label: t("stats.label.totalSize"),    value: formatBytes(numVal(dbStats["totalSize"])) },
                 ] as { label: string; value: string }[]).map((c) => (
                   <div key={c.label} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "12px 14px" }}>
                     <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>{c.label}</div>
@@ -1093,7 +1099,7 @@ export default function BrowserPage() {
             )}
 
             <div style={modalFooterStyle}>
-              <button onClick={() => setDbStatsOpen(false)} style={primaryBtnStyle}>Close</button>
+              <button onClick={() => setDbStatsOpen(false)} style={primaryBtnStyle}>{t("buttons.close")}</button>
             </div>
           </div>
         </div>
@@ -1103,36 +1109,36 @@ export default function BrowserPage() {
       {changeConnOpen && (
         <div style={overlayStyle}>
           <div style={modalBaseStyle}>
-            <h3 style={modalTitleStyle}>Change MongoDB Connection</h3>
+            <h3 style={modalTitleStyle}>{t("modals.changeConnection.title")}</h3>
             <p style={modalSubtitleStyle}>
-              Enter a new connection URI and default database. TLS overrides are optional — they supplement parameters already in the URI.
+              {t("modals.changeConnection.subtitle")}
             </p>
-            <label style={modalLabelStyle}>Connection URI</label>
+            <label style={modalLabelStyle}>{t("modals.changeConnection.label.uri")}</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. mongodb://user:pass@host:27017 or mongodb+srv://cluster.mongodb.net/"
+              placeholder={t("modals.changeConnection.placeholder.uri")}
               value={newUri}
               onChange={(e) => setNewUri(e.target.value)}
               autoFocus
             />
-            <label style={modalLabelStyle}>Default Database</label>
+            <label style={modalLabelStyle}>{t("modals.changeConnection.label.defaultDb")}</label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. mydb"
+              placeholder={t("modals.changeConnection.placeholder.defaultDb")}
               value={newDefaultDb}
               onChange={(e) => setNewDefaultDb(e.target.value)}
             />
-            <label style={{ ...modalLabelStyle, marginTop: 8 }}>TLS CA Certificate File <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional, path on server)</span></label>
+            <label style={{ ...modalLabelStyle, marginTop: 8 }}>{t("modals.changeConnection.label.tlsCaFile")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.changeConnection.optional")}</span></label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. /certs/ca.pem"
+              placeholder={t("modals.changeConnection.placeholder.tlsCaFile")}
               value={newTlsCaFile}
               onChange={(e) => setNewTlsCaFile(e.target.value)}
             />
-            <label style={modalLabelStyle}>TLS Client Certificate + Key File <span style={{ fontWeight: 400, color: "#94a3b8" }}>(optional, path on server)</span></label>
+            <label style={modalLabelStyle}>{t("modals.changeConnection.label.tlsCertKeyFile")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.changeConnection.optional")}</span></label>
             <input
               style={modalInputStyle}
-              placeholder="e.g. /certs/client.pem"
+              placeholder={t("modals.changeConnection.placeholder.tlsCertKeyFile")}
               value={newTlsCertKeyFile}
               onChange={(e) => setNewTlsCertKeyFile(e.target.value)}
             />
@@ -1143,8 +1149,8 @@ export default function BrowserPage() {
                 onChange={(e) => setNewTlsAllowInvalid(e.target.checked)}
                 style={{ accentColor: "#ef4444", width: 14, height: 14 }}
               />
-              Allow invalid / self-signed TLS certificates
-              <span style={{ color: "#ef4444", fontSize: 11, fontWeight: 600 }}>⚠ insecure</span>
+              {t("modals.changeConnection.label.allowInvalidTls")}
+              <span style={{ color: "#ef4444", fontSize: 11, fontWeight: 600 }}>{t("modals.changeConnection.warning.insecure")}</span>
             </label>
             {connError && (
               <p style={{ color: "#dc2626", fontSize: "13px", margin: "-8px 0 12px", fontFamily: FONT }}>
@@ -1156,14 +1162,14 @@ export default function BrowserPage() {
                 onClick={() => { setChangeConnOpen(false); setConnError(""); }}
                 style={cancelBtnStyle}
               >
-                Cancel
+                {t("buttons.cancel")}
               </button>
               <button
                 onClick={() => void handleSetConnection()}
                 disabled={connLoading || !newUri.trim()}
                 style={{ ...primaryBtnStyle, opacity: connLoading || !newUri.trim() ? 0.6 : 1 }}
               >
-                {connLoading ? "Connecting…" : "Connect"}
+                {connLoading ? t("ui.connecting") : t("buttons.connect")}
               </button>
             </div>
           </div>

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "../api/client";
+import { LanguageSelector } from "../components/LanguageSelector";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -13,6 +15,7 @@ interface TokenResponse {
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +24,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
-      setError("Username and password are required");
+      setError(t("auth.login.validation.fieldsRequired"));
       return;
     }
     setLoading(true);
@@ -36,7 +39,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? "Login failed. Check your credentials.";
+          ?.error ?? t("auth.login.error.invalidCredentials");
       setError(msg);
     } finally {
       setLoading(false);
@@ -90,7 +93,7 @@ export default function LoginPage() {
               fontFamily: FONT,
             }}
           >
-            dbv
+            {t("brand.name")}
           </span>
         </div>
 
@@ -103,7 +106,7 @@ export default function LoginPage() {
             fontFamily: FONT,
           }}
         >
-          Sign in
+          {t("auth.login.title")}
         </h1>
         <p
           style={{
@@ -113,7 +116,7 @@ export default function LoginPage() {
             fontFamily: FONT,
           }}
         >
-          Access your MongoDB databases
+          {t("auth.login.subtitle")}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -128,7 +131,7 @@ export default function LoginPage() {
                 fontFamily: FONT,
               }}
             >
-              Username
+              {t("form.labels.username")}
             </label>
             <input
               type="text"
@@ -161,7 +164,7 @@ export default function LoginPage() {
                 fontFamily: FONT,
               }}
             >
-              Password
+              {t("form.labels.password")}
             </label>
             <input
               type="password"
@@ -214,7 +217,7 @@ export default function LoginPage() {
               opacity: loading ? 0.6 : 1,
             }}
           >
-            {loading ? "Signing in…" : "Sign In"}
+            {loading ? t("auth.login.button.loading") : t("auth.login.button.label")}
           </button>
         </form>
 
@@ -227,8 +230,11 @@ export default function LoginPage() {
             fontFamily: FONT,
           }}
         >
-          Secured by Keycloak OAuth2
+          {t("auth.login.footer")}
         </p>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+          <LanguageSelector />
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { SchemaField } from "../api/mongo";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -24,20 +25,24 @@ interface Props {
 }
 
 export default function SchemaViewer({ fields, sampledDocs }: Props) {
+  const { t } = useTranslation();
   return (
     <div style={styles.container}>
       <p style={styles.meta}>
-        Sampled <strong>{sampledDocs}</strong> document
-        {sampledDocs !== 1 ? "s" : ""} · {fields.length} field
-        {fields.length !== 1 ? "s" : ""}
+        {t("schema.summary", {
+          docCount: sampledDocs,
+          docPlural: sampledDocs !== 1 ? t("schema.plural.documents") : "",
+          fieldCount: fields.length,
+          fieldPlural: fields.length !== 1 ? t("schema.plural.fields") : "",
+        })}
       </p>
       <table style={styles.table}>
         <thead>
           <tr>
-            <th style={styles.th}>Field path</th>
-            <th style={styles.th}>Types</th>
-            <th style={{ ...styles.th, textAlign: "right" }}>Coverage</th>
-            <th style={{ ...styles.th, textAlign: "center" }}>Nullable</th>
+            <th style={styles.th}>{t("table.header.fieldPath")}</th>
+            <th style={styles.th}>{t("table.header.types")}</th>
+            <th style={{ ...styles.th, textAlign: "right" }}>{t("table.header.coverage")}</th>
+            <th style={{ ...styles.th, textAlign: "center" }}>{t("table.header.nullable")}</th>
           </tr>
         </thead>
         <tbody>

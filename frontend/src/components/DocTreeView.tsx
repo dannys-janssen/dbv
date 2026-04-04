@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel } from "../utils/bsonFormat";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -96,6 +97,7 @@ interface DocCardProps {
 }
 
 function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocCardProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   // treeKey changes whenever expand-all / collapse-all is clicked, forcing
   // TreeNode remount so they reinitialise with the correct defaultExpanded.
@@ -149,7 +151,7 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
         </span>
 
         <span style={{ fontSize: "11px", color: "#94a3b8", background: "#f1f5f9", borderRadius: "10px", padding: "1px 7px", whiteSpace: "nowrap" }}>
-          {fields.length + 1} fields
+          {t("documents.fieldCount", { count: fields.length + 1 })}
         </span>
 
         <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
@@ -157,14 +159,14 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
             onClick={onEdit}
             style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
           >
-            Edit
+            {t("buttons.edit")}
           </button>
           {canWrite && (
             <button
               onClick={onDelete}
               style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
             >
-              Delete
+              {t("buttons.delete")}
             </button>
           )}
         </div>
@@ -179,13 +181,13 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
               onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: true, key: s.key + 1 })); }}
               style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
-              Expand all
+              {t("tree.button.expandAll")}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: false, key: s.key + 1 })); }}
               style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
-              Collapse all
+              {t("tree.button.collapseAll")}
             </button>
           </div>
 
@@ -241,10 +243,11 @@ export default function DocTreeView({
   loading,
   filterText,
 }: DocTreeViewProps) {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <p style={{ color: "#64748b", fontSize: "13px", padding: "20px 0", fontFamily: FONT }}>
-        Loading…
+        {t("ui.loading")}
       </p>
     );
   }
@@ -254,10 +257,10 @@ export default function DocTreeView({
       <div style={{ textAlign: "center", padding: "40px 20px" }}>
         <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
         <p style={{ color: "#374151", margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
-          No documents found
+          {t("documents.list.empty")}
         </p>
         <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0, fontFamily: FONT }}>
-          {filterText ? "Try adjusting your filter." : "This collection is empty."}
+          {filterText ? t("documents.list.emptyWithFilter") : t("documents.list.emptyNoFilter")}
         </p>
       </div>
     );
@@ -278,7 +281,7 @@ export default function DocTreeView({
           style={{ cursor: "pointer" }}
         />
         <span style={{ fontSize: "12px", color: "#64748b", fontFamily: FONT }}>
-          Select all on page
+          {t("tree.checkbox.selectAllLabel")}
         </span>
       </div>
 
