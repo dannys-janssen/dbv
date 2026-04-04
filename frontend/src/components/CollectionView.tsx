@@ -957,6 +957,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   maxWidth: "180px",
+                                  textAlign: "left",
                                 }}
                               >
                                 {id}
@@ -969,6 +970,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
+                                  textAlign: "left",
                                 }}
                               >
                                 {previewDoc(doc)}
@@ -1222,29 +1224,29 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     <thead>
                       <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
                         {["Name", "Keys", "Unique", "Sparse", "TTL (s)", ""].map((h) => (
-                          <th key={h} style={{ padding: "8px 12px", textAlign: "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                          <th key={h} style={{ padding: "8px 12px", textAlign: ["Unique", "Sparse", "TTL (s)"].includes(h) ? "center" : "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {indexes.map((idx) => (
                         <tr key={idx.name} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                          <td style={{ padding: "8px 12px", color: "#1e293b", fontWeight: 500 }}>{idx.name}</td>
-                          <td style={{ padding: "8px 12px" }}>
+                          <td style={{ padding: "8px 12px", color: "#1e293b", fontWeight: 500, textAlign: "left" }}>{idx.name}</td>
+                          <td style={{ padding: "8px 12px", textAlign: "left" }}>
                             <code style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", fontSize: "12px", color: "#334155" }}>
                               {Object.entries(idx.keys).map(([f, d]) => `${f}: ${d}`).join(", ")}
                             </code>
                           </td>
-                          <td style={{ padding: "8px 12px", color: idx.unique ? "#16a34a" : "#94a3b8" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.unique ? "#16a34a" : "#94a3b8" }}>
                             {idx.unique ? "✓" : "—"}
                           </td>
-                          <td style={{ padding: "8px 12px", color: idx.sparse ? "#16a34a" : "#94a3b8" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.sparse ? "#16a34a" : "#94a3b8" }}>
                             {idx.sparse ? "✓" : "—"}
                           </td>
-                          <td style={{ padding: "8px 12px", color: "#64748b" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: "#64748b" }}>
                             {idx.ttl !== undefined ? idx.ttl : "—"}
                           </td>
-                          <td style={{ padding: "8px 12px" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center" }}>
                             {idx.name !== "_id_" && (
                               <button
                                 onClick={() => {
@@ -1317,7 +1319,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         <tbody>
                           {Object.entries(colStats["indexSizes"] as Record<string, unknown>).map(([name, size]) => (
                             <tr key={name} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                              <td style={{ padding: "6px 12px", color: "#1e293b" }}>
+                              <td style={{ padding: "6px 12px", color: "#1e293b", textAlign: "left" }}>
                                 <code style={{ background: "#f1f5f9", color: "#334155", padding: "1px 5px", borderRadius: "3px", fontSize: "12px" }}>{name}</code>
                               </td>
                               <td style={{ padding: "6px 12px", textAlign: "right", color: "#64748b" }}>{formatBytes(numVal(size))}</td>
