@@ -133,8 +133,11 @@ async fn main() -> anyhow::Result<()> {
     let frontend_dist = config.frontend_dist.clone();
     let index_html = format!("{}/index.html", frontend_dist);
     // Serve the entire frontend dist, falling back to index.html for SPA client-side routing.
+    // SPA fallback: serve dist files, fall back to index.html for client-side routes.
+    // Must use .fallback() not .not_found_service() — the latter forces status 404
+    // which breaks client-side routing behind proxies like Traefik.
     let spa_service = ServeDir::new(&frontend_dist)
-        .not_found_service(ServeFile::new(&index_html));
+        .fallback(ServeFile::new(&index_html));
     let app = Router::new()
         .nest("/api", api)
         .fallback_service(spa_service)
