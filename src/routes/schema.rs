@@ -23,7 +23,7 @@ pub async fn collection_schema(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
 
     let options = FindOptions::builder().limit(100).build();
     let mut cursor = coll.find(bson::doc! {}, options).await?;

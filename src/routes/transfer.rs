@@ -18,7 +18,7 @@ pub async fn export_collection(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Response, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let mut cursor = coll.find(bson::doc! {}, None).await?;
     let mut docs: Vec<Value> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
@@ -54,7 +54,7 @@ pub async fn import_collection(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<ImportBody>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection::<Document>(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection::<Document>(&db, &collection);
 
     if body.replace {
         coll.drop(None).await?;

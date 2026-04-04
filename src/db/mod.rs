@@ -14,19 +14,33 @@ use crate::errors::AppError;
 pub struct DbClient {
     client: Client,
     pub default_db: String,
+    pub uri: String,
 }
 
 impl DbClient {
+    pub async fn from_uri(uri: &str, default_db: &str) -> Result<Self, AppError> {
+        let options = ClientOptions::parse(uri).await?;
+        let client = Client::with_options(options)?;
+        client
+            .database("admin")
+            .run_command(bson::doc! { "ping": 1 }, None)
+            .await?;
+        tracing::info!("Connected to MongoDB at {}", uri);
+        Ok(Self {
+            client,
+            default_db: default_db.to_string(),
+            uri: uri.to_string(),
+        })
+    }
+
     pub async fn new(config: &Config) -> Result<Self, AppError> {
         let mut options = ClientOptions::parse(&config.mongodb_uri).await?;
 
-        // Apply TLS overrides that cannot be expressed in a URI string.
         let needs_tls_override = config.mongodb_tls_ca_file.is_some()
             || config.mongodb_tls_cert_key_file.is_some()
             || config.mongodb_tls_allow_invalid_certs;
 
         if needs_tls_override {
-            // Preserve any TlsOptions already parsed from the URI.
             let mut tls_opts = match options.tls.take() {
                 Some(Tls::Enabled(existing)) => existing,
                 _ => TlsOptions::default(),
@@ -44,7 +58,6 @@ impl DbClient {
         }
 
         let client = Client::with_options(options)?;
-        // Ping to verify connection
         client
             .database("admin")
             .run_command(bson::doc! { "ping": 1 }, None)
@@ -53,7 +66,26 @@ impl DbClient {
         Ok(Self {
             client,
             default_db: config.mongodb_db.clone(),
+            uri: config.mongodb_uri.clone(),
         })
+    }
+
+    /// Returns the URI with any password replaced by `***`.
+    /// e.g. `mongodb://user:pass@host:27017` → `mongodb://user:***@host:27017`
+    pub fn masked_uri(&self) -> String {
+        if let Some(proto_end) = self.uri.find("://") {
+            let after_proto = &self.uri[proto_end + 3..];
+            if let Some(at_pos) = after_proto.find('@') {
+                let user_info = &after_proto[..at_pos];
+                if let Some(colon_pos) = user_info.find(':') {
+                    let proto = &self.uri[..proto_end + 3];
+                    let user = &user_info[..colon_pos];
+                    let rest = &self.uri[proto_end + 3 + at_pos..];
+                    return format!("{}{}:***{}", proto, user, rest);
+                }
+            }
+        }
+        self.uri.clone()
     }
 
     pub fn database(&self, name: &str) -> Database {
@@ -148,7 +180,6 @@ impl DbClient {
         Ok(())
     }
 
-    /// Run an arbitrary MongoDB command on `db_name` (or "admin" when `admin` is true).
     pub async fn run_command(&self, db_name: &str, command: bson::Document, admin: bool) -> Result<Value, AppError> {
         let db = if admin { self.client.database("admin") } else { self.client.database(db_name) };
         let result = db.run_command(command, None).await?;

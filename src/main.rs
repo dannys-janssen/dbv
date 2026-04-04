@@ -5,7 +5,9 @@ use axum::{
     Router,
 };
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::fs;
+use tokio::sync::RwLock;
 use tower_http::{
     cors::{Any, CorsLayer},
     services::ServeDir,
@@ -51,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
 
     let state = AppState {
         config: config.clone(),
-        db,
+        db: Arc::new(RwLock::new(db)),
         jwks,
     };
 
@@ -127,7 +129,9 @@ async fn main() -> anyhow::Result<()> {
         .route(
             "/databases/:db/run_command",
             post(routes::data::run_command),
-        );
+        )
+        .route("/connection", get(routes::connection::get_connection).post(routes::connection::set_connection))
+        .route("/connection/reconnect", post(routes::connection::reconnect));
 
     let frontend_dist = config.frontend_dist.clone();
     let index_html = format!("{}/index.html", frontend_dist);

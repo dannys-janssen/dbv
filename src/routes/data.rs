@@ -13,11 +13,6 @@ use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppS
 
 const SYSTEM_DATABASES: &[&str] = &["admin", "config", "local"];
 
-/// Convert a `serde_json::Value` to a BSON `Document` while correctly
-/// interpreting MongoDB Extended JSON types such as `{"$date": "..."}`,
-/// `{"$oid": "..."}`, `{"$binary": {...}}`, etc.
-/// Unlike `bson::to_document`, this goes through `bson::Bson::try_from` which
-/// calls the Extended JSON deserialiser on every JSON object.
 fn json_to_doc(val: Value) -> Result<Document, AppError> {
     use std::convert::TryFrom;
     match bson::Bson::try_from(val)
@@ -41,18 +36,14 @@ pub struct PaginationParams {
     pub projection: Option<String>,
 }
 
-fn default_page() -> u64 {
-    1
-}
-fn default_limit() -> i64 {
-    20
-}
+fn default_page() -> u64 { 1 }
+fn default_limit() -> i64 { 20 }
 
 pub async fn list_databases(
     _claims: ReadAccess,
     State(state): State<AppState>,
 ) -> Result<Json<Value>, AppError> {
-    let dbs = state.db.list_databases().await?;
+    let dbs = state.db.read().await.list_databases().await?;
     Ok(Json(json!({ "databases": dbs })))
 }
 
@@ -70,7 +61,7 @@ pub async fn create_database(
     if SYSTEM_DATABASES.contains(&db.as_str()) {
         return Err(AppError::BadRequest(format!("Cannot create system database '{db}'")));
     }
-    state.db.create_collection(&db, &body.collection).await?;
+    state.db.read().await.create_collection(&db, &body.collection).await?;
     Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.collection }))))
 }
 
@@ -82,7 +73,7 @@ pub async fn drop_database(
     if SYSTEM_DATABASES.contains(&db.as_str()) {
         return Err(AppError::BadRequest(format!("Cannot drop system database '{db}'")));
     }
-    state.db.drop_database(&db).await?;
+    state.db.read().await.drop_database(&db).await?;
     Ok(Json(json!({ "dropped": db })))
 }
 
@@ -91,7 +82,7 @@ pub async fn list_collections(
     State(state): State<AppState>,
     Path(db): Path<String>,
 ) -> Result<Json<Value>, AppError> {
-    let collections = state.db.list_collections(&db).await?;
+    let collections = state.db.read().await.list_collections(&db).await?;
     Ok(Json(json!({ "collections": collections })))
 }
 
@@ -106,7 +97,7 @@ pub async fn create_collection(
     Path(db): Path<String>,
     Json(body): Json<CreateCollectionBody>,
 ) -> Result<(StatusCode, Json<Value>), AppError> {
-    state.db.create_collection(&db, &body.name).await?;
+    state.db.read().await.create_collection(&db, &body.name).await?;
     Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.name }))))
 }
 
@@ -115,7 +106,7 @@ pub async fn drop_collection(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    state.db.drop_collection(&db, &collection).await?;
+    state.db.read().await.drop_collection(&db, &collection).await?;
     Ok(Json(json!({ "dropped": collection })))
 }
 
@@ -154,7 +145,7 @@ pub async fn list_documents(
         .projection(projection)
         .build();
 
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let total = coll.count_documents(filter.clone(), None).await?;
     let mut cursor = coll.find(filter, options).await?;
     let mut docs = Vec::new();
@@ -170,10 +161,6 @@ pub async fn list_documents(
     })))
 }
 
-/// Parse a document `_id` from a URL path segment.
-/// Tries ObjectId first (24 hex chars); falls back to a BSON string so that
-/// collections with string, integer-encoded-as-string, or other non-ObjectId
-/// `_id` fields are handled correctly.
 fn parse_id_bson(id: &str) -> bson::Bson {
     bson::oid::ObjectId::parse_str(id)
         .map(bson::Bson::ObjectId)
@@ -185,7 +172,7 @@ pub async fn get_document(
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let doc = coll
@@ -202,7 +189,7 @@ pub async fn create_document(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let document = json_to_doc(body)?;
     let result = coll.insert_one(document, None).await?;
     let inserted_id = serde_json::to_value(result.inserted_id)?;
@@ -215,7 +202,7 @@ pub async fn update_document(
     Path((db, collection, id)): Path<(String, String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let replacement = json_to_doc(body)?;
@@ -234,7 +221,7 @@ pub async fn delete_document(
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let result = coll.delete_one(doc! { "_id": doc_id }, None).await?;
@@ -260,7 +247,7 @@ pub async fn bulk_delete_documents(
         return Err(AppError::BadRequest("No IDs provided".into()));
     }
     let ids: Vec<bson::Bson> = body.ids.iter().map(|id| parse_id_bson(id)).collect();
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let result = coll.delete_many(doc! { "_id": { "$in": &ids } }, None).await?;
     Ok(Json(json!({ "deleted": result.deleted_count })))
 }
@@ -276,7 +263,7 @@ pub async fn aggregate(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<AggregateBody>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
     let pipeline: Vec<Document> = body
         .pipeline
         .iter()
@@ -293,14 +280,12 @@ pub async fn aggregate(
     Ok(Json(json!({ "results": results })))
 }
 
-// ── Index management ─────────────────────────────────────────────────────────
-
 pub async fn list_indexes(
     _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let indexes = state.db.list_indexes(&db, &collection).await?;
+    let indexes = state.db.read().await.list_indexes(&db, &collection).await?;
     Ok(Json(json!({ "indexes": indexes })))
 }
 
@@ -325,7 +310,7 @@ pub async fn create_index(
     if keys.is_empty() {
         return Err(AppError::BadRequest("Index keys cannot be empty".into()));
     }
-    let index_name = state.db
+    let index_name = state.db.read().await
         .create_index(&db, &collection, keys, body.name, body.unique, body.sparse, body.ttl, body.background)
         .await?;
     Ok((StatusCode::CREATED, Json(json!({ "name": index_name }))))
@@ -339,18 +324,17 @@ pub async fn drop_index(
     if name == "_id_" {
         return Err(AppError::BadRequest("Cannot drop the _id index".into()));
     }
-    state.db.drop_index(&db, &collection, &name).await?;
+    state.db.read().await.drop_index(&db, &collection, &name).await?;
     Ok(Json(json!({ "dropped": name })))
 }
-
-// ── Stats ─────────────────────────────────────────────────────────────────────
 
 pub async fn database_stats(
     _claims: ReadAccess,
     State(state): State<AppState>,
     Path(db): Path<String>,
 ) -> Result<Json<Value>, AppError> {
-    let doc = state.db.database(&db)
+    let database = state.db.read().await.database(&db);
+    let doc = database
         .run_command(bson::doc! { "dbStats": 1, "scale": 1 }, None)
         .await?;
     Ok(Json(serde_json::to_value(doc)?))
@@ -361,13 +345,12 @@ pub async fn collection_stats(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let doc = state.db.database(&db)
+    let database = state.db.read().await.database(&db);
+    let doc = database
         .run_command(bson::doc! { "collStats": &collection, "scale": 1 }, None)
         .await?;
     Ok(Json(serde_json::to_value(doc)?))
 }
-
-// ── Run command ───────────────────────────────────────────────────────────────
 
 #[derive(Debug, Deserialize)]
 pub struct RunCommandBody {
@@ -384,6 +367,6 @@ pub async fn run_command(
 ) -> Result<Json<Value>, AppError> {
     let cmd_doc: bson::Document = serde_json::from_value(body.command)
         .map_err(|e| AppError::BadRequest(format!("Invalid command document: {e}")))?;
-    let result = state.db.run_command(&db, cmd_doc, body.admin).await?;
+    let result = state.db.read().await.run_command(&db, cmd_doc, body.admin).await?;
     Ok(Json(json!({ "result": result })))
 }

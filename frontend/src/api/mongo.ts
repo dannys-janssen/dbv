@@ -201,6 +201,24 @@ export const getCollectionStats = (db: string, collection: string) =>
     .get<Record<string, unknown>>(`/databases/${db}/collections/${collection}/stats`)
     .then((r) => r.data);
 
+// ── Connection management ─────────────────────────────────────────────────────
+
+export interface ConnectionInfo {
+  uri: string;
+  default_db: string;
+  status: "ok" | "error";
+  error?: string;
+}
+
+export const getConnection = (): Promise<ConnectionInfo> =>
+  api.get<ConnectionInfo>("/connection").then((r) => r.data);
+
+export const setConnection = (uri: string, default_db?: string): Promise<ConnectionInfo> =>
+  api.post<ConnectionInfo>("/connection", { uri, default_db }).then((r) => r.data);
+
+export const reconnectMongo = (): Promise<ConnectionInfo> =>
+  api.post<ConnectionInfo>("/connection/reconnect").then((r) => r.data);
+
 // ── Run command ────────────────────────────────────────────────────────────────
 
 export const runDbCommand = (

@@ -8,6 +8,10 @@ import {
   createCollection,
   dropCollection,
   getDatabaseStats,
+  getConnection,
+  setConnection,
+  reconnectMongo,
+  type ConnectionInfo,
 } from "../api/mongo";
 import { useAuth } from "../context/AuthContext";
 import CollectionView from "../components/CollectionView";
@@ -193,6 +197,14 @@ export default function BrowserPage() {
   const [dbStats, setDbStats] = useState<Record<string, unknown> | null>(null);
   const [dbStatsLoading, setDbStatsLoading] = useState(false);
 
+  // ── Connection management ──
+  const [connInfo, setConnInfo] = useState<ConnectionInfo | null>(null);
+  const [connLoading, setConnLoading] = useState(false);
+  const [changeConnOpen, setChangeConnOpen] = useState(false);
+  const [newUri, setNewUri] = useState("");
+  const [newDefaultDb, setNewDefaultDb] = useState("");
+  const [connError, setConnError] = useState("");
+
   // ── Tab management ──
   const openCollection = useCallback((db: string, col: string) => {
     const existing = tabs.find((t) => t.db === db && t.col === col);
@@ -224,9 +236,13 @@ export default function BrowserPage() {
   const reloadDatabases = useCallback(() => {
     getDatabases()
       .then((d) => setDatabases(d.databases))
-      .catch(() => {
-        logout();
-        navigate("/login");
+      .catch((err) => {
+        const status = (err as { response?: { status?: number } }).response?.status;
+        if (status === 401) {
+          logout();
+          navigate("/login");
+        }
+        // otherwise leave databases empty (connection error shown in banner)
       });
   }, [logout, navigate]);
 
@@ -306,6 +322,7 @@ export default function BrowserPage() {
 
   useEffect(() => {
     reloadDatabases();
+    getConnection().then(setConnInfo).catch(() => {});
   }, [reloadDatabases]);
 
   useEffect(() => {
@@ -322,14 +339,48 @@ export default function BrowserPage() {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (newDbOpen)   { setNewDbOpen(false);   return; }
-        if (newColOpen)  { setNewColOpen(false);   return; }
-        if (dbStatsOpen) { setDbStatsOpen(false);  return; }
+        if (newDbOpen)      { setNewDbOpen(false);      return; }
+        if (newColOpen)     { setNewColOpen(false);      return; }
+        if (dbStatsOpen)    { setDbStatsOpen(false);     return; }
+        if (changeConnOpen) { setChangeConnOpen(false);  return; }
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [newDbOpen, newColOpen, dbStatsOpen]);
+  }, [newDbOpen, newColOpen, dbStatsOpen, changeConnOpen]);
+
+  const handleReconnect = async () => {
+    setConnLoading(true);
+    try {
+      const info = await reconnectMongo();
+      setConnInfo(info);
+      if (info.status === "ok") reloadDatabases();
+    } catch {
+      const info = await getConnection().catch(() => null);
+      if (info) setConnInfo(info);
+    } finally {
+      setConnLoading(false);
+    }
+  };
+
+  const handleSetConnection = async () => {
+    setConnError("");
+    setConnLoading(true);
+    try {
+      const info = await setConnection(newUri, newDefaultDb || undefined);
+      setConnInfo(info);
+      setChangeConnOpen(false);
+      reloadDatabases();
+    } catch (e: unknown) {
+      const msg =
+        (e as { response?: { data?: { error?: string } } }).response?.data?.error ??
+        (e as Error).message ??
+        "Connection failed";
+      setConnError(msg);
+    } finally {
+      setConnLoading(false);
+    }
+  };
 
   const filteredDatabases = databases.filter((db) =>
     db.toLowerCase().includes(dbSearch.toLowerCase())
@@ -406,6 +457,92 @@ export default function BrowserPage() {
           >
             Sign out
           </button>
+        </div>
+
+        {/* Connection status indicator */}
+        <div
+          style={{
+            padding: "8px 16px",
+            borderBottom: "1px solid #243044",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                flexShrink: 0,
+                background:
+                  connInfo === null
+                    ? "#64748b"
+                    : connInfo.status === "ok"
+                    ? "#22c55e"
+                    : "#ef4444",
+              }}
+            />
+            <span
+              title={connInfo?.uri ?? ""}
+              style={{
+                flex: 1,
+                fontSize: "11px",
+                color: "#94a3b8",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: FONT,
+              }}
+            >
+              {connInfo?.uri
+                ? connInfo.uri.length > 32
+                  ? connInfo.uri.slice(0, 32) + "…"
+                  : connInfo.uri
+                : "No connection info"}
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "6px" }}>
+            <button
+              onClick={() => void handleReconnect()}
+              disabled={connLoading}
+              style={{
+                background: "none",
+                border: "1px solid #2d3f5e",
+                color: "#94a3b8",
+                padding: "3px 8px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "11px",
+                fontFamily: FONT,
+              }}
+              title="Reconnect using current URI"
+            >
+              ↻ Reconnect
+            </button>
+            <button
+              onClick={() => {
+                setNewUri(connInfo?.uri ?? "");
+                setNewDefaultDb(connInfo?.default_db ?? "");
+                setConnError("");
+                setChangeConnOpen(true);
+              }}
+              style={{
+                background: "none",
+                border: "1px solid #2d3f5e",
+                color: "#94a3b8",
+                padding: "3px 8px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "11px",
+                fontFamily: FONT,
+              }}
+              title="Change MongoDB connection"
+            >
+              ⚙ Change
+            </button>
+          </div>
         </div>
 
         {/* Database section */}
@@ -698,6 +835,40 @@ export default function BrowserPage() {
           overflow: "hidden",
         }}
       >
+        {/* ── Connection error banner ── */}
+        {connInfo?.status === "error" && (
+          <div
+            style={{
+              background: "#fef2f2",
+              borderBottom: "1px solid #fecaca",
+              padding: "8px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "#dc2626", flex: 1, fontFamily: FONT }}>
+              ⚠ MongoDB connection failed: {connInfo.error ?? "unknown error"}
+            </span>
+            <button
+              onClick={() => void handleReconnect()}
+              disabled={connLoading}
+              style={{
+                background: "#dc2626",
+                color: "#fff",
+                border: "none",
+                padding: "4px 12px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontFamily: FONT,
+              }}
+            >
+              Reconnect
+            </button>
+          </div>
+        )}
         {/* ── Tab bar ── */}
         <div
           style={{
@@ -909,6 +1080,54 @@ export default function BrowserPage() {
 
             <div style={modalFooterStyle}>
               <button onClick={() => setDbStatsOpen(false)} style={primaryBtnStyle}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Change Connection modal ── */}
+      {changeConnOpen && (
+        <div style={overlayStyle}>
+          <div style={modalBaseStyle}>
+            <h3 style={modalTitleStyle}>Change MongoDB Connection</h3>
+            <p style={modalSubtitleStyle}>
+              Enter a new connection URI and default database.
+            </p>
+            <label style={modalLabelStyle}>Connection URI</label>
+            <input
+              style={modalInputStyle}
+              placeholder="e.g. mongodb://user:pass@host:27017"
+              value={newUri}
+              onChange={(e) => setNewUri(e.target.value)}
+              autoFocus
+            />
+            <label style={modalLabelStyle}>Default Database</label>
+            <input
+              style={modalInputStyle}
+              placeholder="e.g. mydb"
+              value={newDefaultDb}
+              onChange={(e) => setNewDefaultDb(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void handleSetConnection()}
+            />
+            {connError && (
+              <p style={{ color: "#dc2626", fontSize: "13px", margin: "-8px 0 12px", fontFamily: FONT }}>
+                {connError}
+              </p>
+            )}
+            <div style={modalFooterStyle}>
+              <button
+                onClick={() => { setChangeConnOpen(false); setConnError(""); }}
+                style={cancelBtnStyle}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleSetConnection()}
+                disabled={connLoading || !newUri.trim()}
+                style={{ ...primaryBtnStyle, opacity: connLoading || !newUri.trim() ? 0.6 : 1 }}
+              >
+                {connLoading ? "Connecting…" : "Connect"}
+              </button>
             </div>
           </div>
         </div>
