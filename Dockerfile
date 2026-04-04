@@ -1,5 +1,5 @@
 # ── Stage 1: compute recipe for dependency caching ──────────────────────────
-FROM rust:1-slim AS chef
+FROM rust:1-bookworm-slim AS chef
 RUN cargo install cargo-chef --locked
 WORKDIR /app
 
