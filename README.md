@@ -107,7 +107,7 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 
 **Managing databases**
 
-- The left sidebar shows a **Database** dropdown listing all available databases.
+- The left sidebar shows all available databases. Click a database to expand its collections.
 - *(admin only)* Click **＋** next to "Database" to create a new database. MongoDB requires an initial collection name — the database is created along with it.
 - *(admin only)* Click **🗑** next to the selected database to drop it permanently. System databases (`admin`, `config`, `local`) are protected and cannot be dropped.
 
@@ -117,6 +117,16 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 - *(admin only)* Click **＋** next to "Collection" to create a new collection.
 - *(admin only)* Click **✕** on any collection to drop it and all its documents.
 
+**Tabs**
+
+Each collection opens in its own **tab** so you can work with multiple collections simultaneously without losing your query state:
+
+- **Clicking a collection** in the sidebar always opens it in a new tab. If a tab for that collection is already open, it is focused instead of duplicated.
+- **`+` button** (right side of the tab bar) opens a new empty tab.
+- **`×` button** on each tab closes it. At least one tab is always kept open.
+- Each tab independently preserves its filter, projection, sort, pagination, view mode (table/tree), aggregate pipeline, and all other per-collection state.
+- Dropping a database or collection automatically closes any tabs that reference it.
+
 **Document view**
 
 - Browse documents with configurable **pagination** (10 / 20 / 50 / 100 per page)
@@ -125,9 +135,12 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
   - Comparison: `{"price": {"$gt": 20.00}}`
   - Array operator: `{"tags": {"$in": ["sale", "new"]}}`
   - Combined: `{"age": {"$gte": 18}, "country": "DE"}`
-- **Sort** by any field — also Monaco-powered with schema autocomplete: `{"price": -1}` (descending) or `{"name": 1}` (ascending)
-- Filter and Sort fields validate JSON in real time — blue border when active, red on invalid; Apply is disabled when JSON is invalid
-- Press **Ctrl+Enter** or **Apply** to run; **Clear** resets both Filter and Sort
+- **Sort** by any field — Monaco-powered with schema autocomplete: `{"price": -1}` (descending) or `{"name": 1}` (ascending)
+- **Projection** — control which fields are returned, Monaco-powered with schema autocomplete (values are `1` = include, `0` = exclude):
+  - Include only specific fields: `{"name": 1, "price": 1, "_id": 0}`
+  - Exclude a field: `{"password": 0}`
+- Filter, Sort, and Projection fields validate JSON in real time — blue border + `active` badge when set and valid, red on invalid JSON; Apply is disabled when any field contains invalid JSON
+- Press **Ctrl+Enter** (inside any editor) or **Apply** to run; **Clear** resets all three fields
 - The Documents tab badge shows the total matching count
 - Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
 - BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in both views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`
@@ -341,11 +354,12 @@ frontend/src/
 ├── components/
 │   ├── ProtectedRoute.tsx
 │   ├── SchemaViewer.tsx
-│   ├── DocTreeView.tsx   # Recursive tree view for documents
-│   └── CommandsView.tsx  # Command palette + Monaco editor + results panel
+│   ├── DocTreeView.tsx      # Recursive tree view for documents
+│   ├── CollectionView.tsx   # Full per-collection UI (all tabs, query bar, editors)
+│   └── CommandsView.tsx     # Command palette + Monaco editor + results panel
 └── pages/
-    ├── LoginPage.tsx    # Username/password login form
-    └── BrowserPage.tsx  # Main UI: sidebar, documents, aggregate, schema, indexes, stats, commands
+    ├── LoginPage.tsx        # Username/password login form
+    └── BrowserPage.tsx      # App shell: sidebar, tab bar, CollectionView instances
 ```
 
 ### Environment Variables
@@ -424,7 +438,7 @@ All endpoints are under `/api`.
 
 | Method | Path | Role | Description |
 |---|---|---|---|
-| GET | `/api/databases/:db/collections/:col/documents` | viewer+ | List documents. Query params: `page`, `limit`, `filter` (JSON), `sort` (JSON) |
+| GET | `/api/databases/:db/collections/:col/documents` | viewer+ | List documents. Query params: `page`, `limit`, `filter` (JSON), `sort` (JSON), `projection` (JSON) |
 | POST | `/api/databases/:db/collections/:col/documents` | admin | Insert a document |
 | DELETE | `/api/databases/:db/collections/:col/documents` | admin | Bulk delete documents. Body: `{ "ids": ["<id>", ...] }` — IDs can be ObjectId hex strings or plain strings |
 | GET | `/api/databases/:db/collections/:col/documents/:id` | viewer+ | Get document by `_id` (ObjectId or string) |

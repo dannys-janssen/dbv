@@ -48,8 +48,8 @@ browser (HTTPS)
 │   │   ├── utils/
 │   │   │   ├── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
 │   │   │   └── bsonFormat.ts   # Shared BSON Extended JSON display utilities
-│   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView, CommandsView
-│   │   └── pages/        # LoginPage, BrowserPage (all tabs)
+│   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView, CollectionView, CommandsView
+│   │   └── pages/        # LoginPage, BrowserPage (sidebar + tab management)
 │   ├── vite.config.ts    # Proxy /api → http://localhost:8080 for dev
 │   └── dist/             # Production build (served by Axum)
 ├── Dockerfile            # Multi-stage: cargo-chef + Node builder + debian runtime
@@ -155,13 +155,14 @@ All runtime configuration is read from environment variables. No secrets in sour
 
 ### Monaco Editor and Autocomplete
 
-- The app uses `@monaco-editor/react ^4.7` for all JSON editors (filter, sort, document, aggregate, command).
+- The app uses `@monaco-editor/react ^4.7` for all JSON editors (filter, sort, projection, document, aggregate, command).
 - Each editor is given a unique `path` prop that matches a JSON Schema registered via `loader.init().then(monaco => monaco.languages.json.jsonDefaults.setDiagnosticsOptions({...}))`.
-- Schemas are rebuilt and re-registered whenever the active collection's schema changes (keyed on the `schema` state via `useEffect`).
+- Schemas are rebuilt and re-registered whenever the active collection's schema changes (keyed on the `schema` state via `useEffect` inside `CollectionView.tsx`).
 - Schema builders live in `frontend/src/utils/mongoSchema.ts`:
   - `buildDocumentSchema(schema)` → properties from sampled fields
   - `buildFilterSchema(schema)` → fields + MongoDB query operators (`$eq`, `$gt`, `$in`, `$regex`, `$elemMatch`, …) + logical operators
   - `buildSortSchema(schema)` → fields with `enum: [1, -1]`
+  - `buildProjectionSchema(schema)` → fields with `enum: [0, 1]`, plus explicit `_id` entry
   - `PIPELINE_SCHEMA` → static schema for all aggregation stage names
 - Editor paths and their matching schema URIs:
 
@@ -169,11 +170,22 @@ All runtime configuration is read from environment variables. No secrets in sour
   |---|---|---|
   | Filter | `dbv://filter` | `http://dbv/filter-schema.json` |
   | Sort | `dbv://sort` | `http://dbv/sort-schema.json` |
+  | Projection | `dbv://projection` | `http://dbv/projection-schema.json` |
   | Document create/edit | `dbv://document` | `http://dbv/document-schema.json` |
   | Aggregate pipeline | `dbv://pipeline` | `http://dbv/pipeline-schema.json` |
   | Command runner | `dbv://command` | *(no schema registered — free-form)* |
 
-- To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `BrowserPage.tsx`.
+- To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `CollectionView.tsx`.
+
+### Multi-Tab Architecture
+
+- `BrowserPage` manages a `tabs: Tab[]` array (`{ id, db, col }`) and `activeTabId`.
+- Clicking a collection in the sidebar calls `openCollection(db, col)` which either focuses an existing tab for that db+col or creates a new one.
+- Each `CollectionView` instance is always mounted (never unmounted on tab switch); `display: none` is used to hide inactive tabs, preserving all their React state.
+- `CollectionView` receives `db`, `col`, and `visible` props. Since `db`/`col` are fixed at tab creation time (new collection always = new tab), no state-reset-on-prop-change logic is needed.
+- Dropping a database or collection from the sidebar closes any open tabs referencing it.
+- `BrowserPage` owns only: sidebar state, tab array, DB/collection management modals, DB stats modal.
+- All per-collection state (filter, sort, projection, pagination, view mode, documents, schema, indexes, stats, pipeline, editor modals) lives inside `CollectionView`.
 
 ### BSON Extended JSON
 
@@ -196,7 +208,7 @@ All runtime configuration is read from environment variables. No secrets in sour
 - Requires `WriteAccess` (dbv-admin only).
 - When `admin: true` the command is routed to the `admin` database regardless of `:db`.
 - Frontend: `CommandsView.tsx` — left palette selects a template; right side has Monaco editor, admin toggle, Run button, and read-only result viewer.
-- `loadDocumentsRef` pattern: use `useRef` to keep `onMount` callbacks stable when calling parent state-modifying functions from Monaco event handlers.
+- `loadDocumentsRef` pattern: use `useRef` to keep `onMount` callbacks stable when calling parent state-modifying functions from Monaco event handlers. The ref lives in `CollectionView.tsx`.
 
 ### Static File Serving
 
