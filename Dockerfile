@@ -20,7 +20,7 @@ COPY src ./src
 RUN cargo build --release --bin dbv
 
 # ── Stage 4: build the React frontend ────────────────────────────────────────
-FROM node:22-slim AS frontend-builder
+FROM node:24-slim AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
