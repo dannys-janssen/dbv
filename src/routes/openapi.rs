@@ -1,5 +1,5 @@
-use axum::response::{Html, IntoResponse};
 use axum::http::header;
+use axum::response::{Html, IntoResponse};
 
 const SPEC: &str = include_str!("../openapi.yaml");
 
@@ -40,8 +40,5 @@ pub async fn swagger_ui() -> Html<&'static str> {
 }
 
 pub async fn openapi_spec() -> impl IntoResponse {
-    (
-        [(header::CONTENT_TYPE, "application/yaml")],
-        SPEC,
-    )
+    ([(header::CONTENT_TYPE, "application/yaml")], SPEC)
 }

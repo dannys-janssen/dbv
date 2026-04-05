@@ -1,7 +1,6 @@
 use futures::TryStreamExt;
 use mongodb::{
-    Client, Collection, Database,
-    IndexModel,
+    Client, Collection, Database, IndexModel,
     options::{ClientOptions, IndexOptions, Tls, TlsOptions},
 };
 use serde_json::Value;
@@ -32,9 +31,8 @@ impl DbClient {
     ) -> Result<Self, AppError> {
         let mut options = ClientOptions::parse(uri).await?;
 
-        let needs_tls_override = tls_ca_file.is_some()
-            || tls_cert_key_file.is_some()
-            || tls_allow_invalid_certs;
+        let needs_tls_override =
+            tls_ca_file.is_some() || tls_cert_key_file.is_some() || tls_allow_invalid_certs;
 
         if needs_tls_override {
             let mut tls_opts = match options.tls.take() {
@@ -126,7 +124,10 @@ impl DbClient {
     }
 
     pub async fn create_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).create_collection(collection).await?;
+        self.client
+            .database(db)
+            .create_collection(collection)
+            .await?;
         Ok(())
     }
 
@@ -136,7 +137,11 @@ impl DbClient {
     }
 
     pub async fn drop_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).collection::<bson::Document>(collection).drop().await?;
+        self.client
+            .database(db)
+            .collection::<bson::Document>(collection)
+            .drop()
+            .await?;
         Ok(())
     }
 
@@ -147,13 +152,21 @@ impl DbClient {
         while let Some(model) = cursor.try_next().await? {
             let mut map = serde_json::Map::new();
             map.insert("keys".to_string(), serde_json::to_value(&model.keys)?);
-            let name = model.options.as_ref()
+            let name = model
+                .options
+                .as_ref()
                 .and_then(|o| o.name.clone())
                 .unwrap_or_else(|| "_unknown".to_string());
             map.insert("name".to_string(), Value::String(name));
             if let Some(opts) = &model.options {
-                map.insert("unique".to_string(), Value::Bool(opts.unique.unwrap_or(false)));
-                map.insert("sparse".to_string(), Value::Bool(opts.sparse.unwrap_or(false)));
+                map.insert(
+                    "unique".to_string(),
+                    Value::Bool(opts.unique.unwrap_or(false)),
+                );
+                map.insert(
+                    "sparse".to_string(),
+                    Value::Bool(opts.sparse.unwrap_or(false)),
+                );
                 if let Some(expire) = opts.expire_after {
                     map.insert("ttl".to_string(), serde_json::json!(expire.as_secs()));
                 }
@@ -181,10 +194,7 @@ impl DbClient {
         opts.sparse = sparse;
         opts.expire_after = ttl.map(std::time::Duration::from_secs);
         opts.background = background;
-        let model = IndexModel::builder()
-            .keys(keys)
-            .options(opts)
-            .build();
+        let model = IndexModel::builder().keys(keys).options(opts).build();
         let res = coll.create_index(model).await?;
         Ok(res.index_name)
     }
@@ -195,8 +205,17 @@ impl DbClient {
         Ok(())
     }
 
-    pub async fn run_command(&self, db_name: &str, command: bson::Document, admin: bool) -> Result<Value, AppError> {
-        let db = if admin { self.client.database("admin") } else { self.client.database(db_name) };
+    pub async fn run_command(
+        &self,
+        db_name: &str,
+        command: bson::Document,
+        admin: bool,
+    ) -> Result<Value, AppError> {
+        let db = if admin {
+            self.client.database("admin")
+        } else {
+            self.client.database(db_name)
+        };
         let result = db.run_command(command).await?;
         Ok(serde_json::to_value(result)?)
     }

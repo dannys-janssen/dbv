@@ -1,11 +1,11 @@
 pub mod rbac;
 
 use axum::{
-    extract::{FromRef, FromRequestParts, State},
-    http::{request::Parts, HeaderMap},
     RequestPartsExt,
+    extract::{FromRef, FromRequestParts, State},
+    http::{HeaderMap, request::Parts},
 };
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use reqwest::Client as HttpClient;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -109,8 +109,9 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let token = extract_bearer_token(&parts.headers)
-            .ok_or_else(|| AppError::Unauthorized("Missing or invalid Authorization header".into()))?;
+        let token = extract_bearer_token(&parts.headers).ok_or_else(|| {
+            AppError::Unauthorized("Missing or invalid Authorization header".into())
+        })?;
 
         let config = Config::from_ref(state);
         let jwks_cache = JwksCache::from_ref(state);
@@ -129,8 +130,8 @@ async fn validate_token(
     config: &Config,
     jwks_cache: &JwksCache,
 ) -> Result<Claims, AppError> {
-    let header = decode_header(token)
-        .map_err(|_| AppError::Unauthorized("Invalid token header".into()))?;
+    let header =
+        decode_header(token).map_err(|_| AppError::Unauthorized("Invalid token header".into()))?;
 
     let kid = header
         .kid

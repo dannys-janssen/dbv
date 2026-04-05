@@ -1,6 +1,6 @@
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use crate::{auth::rbac::ReadAccess, db::DbClient, errors::AppError, state::AppState};
 
@@ -14,9 +14,7 @@ pub struct SetConnectionRequest {
     pub tls_allow_invalid_certs: bool,
 }
 
-pub async fn get_connection(
-    State(state): State<AppState>,
-) -> Result<Json<Value>, AppError> {
+pub async fn get_connection(State(state): State<AppState>) -> Result<Json<Value>, AppError> {
     let dbc = state.db.read().await;
     let (status, error) = match dbc
         .run_command("admin", bson::doc! { "ping": 1 }, true)
@@ -43,7 +41,9 @@ pub async fn set_connection(
 ) -> Result<Json<Value>, AppError> {
     let default_db = {
         let dbc = state.db.read().await;
-        body.default_db.clone().unwrap_or_else(|| dbc.default_db.clone())
+        body.default_db
+            .clone()
+            .unwrap_or_else(|| dbc.default_db.clone())
     };
 
     let new_client = DbClient::from_uri_with_tls(
