@@ -155,6 +155,9 @@ Each collection opens in its own **tab** so you can work with multiple collectio
 **Document view**
 
 - Browse documents with configurable **pagination** (10 / 20 / 50 / 100 per page)
+The query bar supports two modes, toggled with the **MQL / SQL** button group:
+
+**MQL mode** (default) — write MongoDB Query Language directly:
 - **Filter** documents using a full MongoDB query expression — powered by Monaco with **schema-aware autocomplete** (field names, BSON types, and query operators such as `$gt`, `$in`, `$regex`, `$elemMatch` are suggested automatically based on the inferred schema):
   - Simple match: `{"status": "active"}`
   - Comparison: `{"price": {"$gt": 20.00}}`
@@ -166,6 +169,28 @@ Each collection opens in its own **tab** so you can work with multiple collectio
   - Exclude a field: `{"password": 0}`
 - Filter, Sort, and Projection fields validate JSON in real time — blue border + `active` badge when set and valid, red on invalid JSON; Apply is disabled when any field contains invalid JSON
 - Press **Ctrl+Enter** (inside any editor) or **Apply** to run; **Clear** resets all three fields
+
+**SQL mode** — query with familiar SQL SELECT syntax:
+- Write a standard SQL `SELECT` statement; the translator converts it to the equivalent MQL filter, sort, projection, and limit automatically
+- A live **MQL preview** is shown below the editor so you can inspect the translation before applying
+- Press **Ctrl+Enter** or **Apply** to run; **Clear** resets the SQL and all MQL fields
+- Supported SQL clauses:
+
+  | SQL | MongoDB equivalent |
+  |---|---|
+  | `WHERE field = 'val'` | `$eq` |
+  | `WHERE field != 'val'` | `$ne` |
+  | `WHERE field > / >= / < / <= val` | `$gt / $gte / $lt / $lte` |
+  | `AND / OR / NOT` | `$and / $or / $nor` |
+  | `LIKE '%x%'` | `$regex` |
+  | `IN (...) / NOT IN (...)` | `$in / $nin` |
+  | `BETWEEN a AND b` | range filter |
+  | `IS NULL / IS NOT NULL` | `$eq: null / $ne: null` |
+  | `ORDER BY field DESC` | sort |
+  | `SELECT col1, col2` | projection |
+  | `LIMIT n` | limit |
+
+- Example: `SELECT name, age FROM users WHERE status = 'active' ORDER BY age DESC LIMIT 20`
 - The Documents tab badge shows the total matching count
 - Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
 - BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in both views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`

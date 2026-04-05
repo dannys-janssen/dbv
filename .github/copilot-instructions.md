@@ -52,7 +52,8 @@ browser (HTTPS)
 │   │   ├── context/      # AuthContext (token + roles + canWrite)
 │   │   ├── utils/
 │   │   │   ├── mongoSchema.ts  # JSON Schema builders for Monaco autocomplete
-│   │   │   └── bsonFormat.ts   # Shared BSON Extended JSON display utilities
+│   │   │   ├── bsonFormat.ts   # Shared BSON Extended JSON display utilities
+│   │   │   └── sqlToMql.ts     # SQL SELECT → MongoDB filter/sort/projection/limit translator
 │   │   ├── components/   # ProtectedRoute, SchemaViewer, DocTreeView,
 │   │   │                 #   DocFormEditor, CollectionView, CommandsView
 │   │   └── pages/        # LoginPage, BrowserPage (sidebar + tab management)
@@ -188,7 +189,25 @@ All runtime configuration is read from environment variables. No secrets in sour
 
 - To add autocomplete to a new Monaco editor: assign it a unique `path`, create a JSON Schema, and add it to the `schemas` array in the `useEffect` inside `CollectionView.tsx`.
 
-### Document Form Editor (`DocFormEditor.tsx`)
+### SQL Query Mode
+
+The collection view query bar has two modes toggled by the user: **MQL** (default) and **SQL**.
+
+- **MQL mode**: the existing Filter / Sort / Projection / Limit editors (Monaco + JSON Schema autocomplete).
+- **SQL mode**: single Monaco editor with `language="sql"`. The user types a `SELECT` statement and clicks Apply (or Ctrl+Enter). The SQL is translated to MQL by `parseSqlToMql()` in `frontend/src/utils/sqlToMql.ts`, which populates the filter/sort/projection/limit state used by the existing document loader.
+
+**`sqlToMql.ts` — SQL→MQL translator**
+
+- Uses `node-sql-parser@^5` with `database: "MySQL"` dialect (most permissive).
+- `parseSqlToMql(sql: string)` returns `{ mql: MqlResult | null, preview: string, error: string | null }`.
+- `MqlResult` has `filter`, `sort`, `projection`, `limit` fields consumed directly by the query bar state.
+- WHERE clause conversion: `=`→`$eq`, `!=`/`<>`→`$ne`, `>`→`$gt`, `>=`→`$gte`, `<`→`$lt`, `<=`→`$lte`, `AND`→`$and`, `OR`→`$or`, `NOT`→`$nor`, `LIKE` (with `%`→`.*`, `_`→`.`)→`$regex`, `IN`/`NOT IN`→`$in`/`$nin`, `BETWEEN`/`NOT BETWEEN`→range, `IS NULL`/`IS NOT NULL`→`$eq: null`/`$ne: null`.
+- `SELECT *` → empty projection `{}`. Named columns → `{col: 1, ...}`.
+- `ORDER BY` → sort object.
+- `LIMIT n` → numeric limit.
+- The `preview` field is a formatted JSON string shown in the UI below the SQL editor so users can inspect the translation before applying.
+
+
 
 A schema-driven form component used alongside the Monaco JSON editor in the document edit/create modal.
 
