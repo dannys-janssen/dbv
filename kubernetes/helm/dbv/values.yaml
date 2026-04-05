@@ -3,8 +3,7 @@
 replicaCount: 1
 
 image:
-  # Set to your registry/image, e.g. ghcr.io/your-org/dbv
-  repository: dbv
+  repository: ghcr.io/dannys-janssen/dbv
   pullPolicy: IfNotPresent
   # Overrides the image tag; defaults to the chart appVersion
   tag: ""
