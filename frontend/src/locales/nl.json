@@ -1,39 +1,96 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "Inloggen",
       "subtitle": "Toegang tot uw MongoDB-databases",
       "footer": "Beveiligd door Keycloak OAuth2",
-      "button": { "label": "Inloggen", "loading": "Bezig met inloggen…" },
-      "validation": { "fieldsRequired": "Gebruikersnaam en wachtwoord zijn verplicht" },
-      "error": { "invalidCredentials": "Inloggen mislukt. Controleer uw gegevens." }
+      "button": {
+        "label": "Inloggen",
+        "loading": "Bezig met inloggen…"
+      },
+      "validation": {
+        "fieldsRequired": "Gebruikersnaam en wachtwoord zijn verplicht"
+      },
+      "error": {
+        "invalidCredentials": "Inloggen mislukt. Controleer uw gegevens."
+      }
     }
   },
   "nav": {
     "signOut": "Uitloggen",
-    "section": { "databases": "DATABASES", "collections": "COLLECTIES" }
+    "section": {
+      "databases": "DATABASES",
+      "collections": "COLLECTIES"
+    }
   },
   "connection": {
-    "status": { "noInfo": "Geen verbindingsinformatie" },
-    "button": {
-      "reconnect": { "label": "↻ Opnieuw verbinden", "title": "Opnieuw verbinden met huidige URI" },
-      "change": { "label": "⚙ Wijzigen", "title": "MongoDB-verbinding wijzigen" }
+    "status": {
+      "noInfo": "Geen verbindingsinformatie"
     },
-    "error": { "failed": "⚠ MongoDB-verbinding mislukt:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ Opnieuw verbinden",
+        "title": "Opnieuw verbinden met huidige URI"
+      },
+      "change": {
+        "label": "⚙ Wijzigen",
+        "title": "MongoDB-verbinding wijzigen"
+      }
+    },
+    "error": {
+      "failed": "⚠ MongoDB-verbinding mislukt:"
+    }
   },
   "database": {
-    "search": { "placeholder": "Databases zoeken…" },
-    "list": { "empty": "Geen databases gevonden" },
-    "button": { "create": { "title": "Database aanmaken" }, "stats": { "title": "Databasestatistieken voor \"{{db}}\"" }, "drop": { "title": "Database \"{{db}}\" verwijderen" } }
+    "search": {
+      "placeholder": "Databases zoeken…"
+    },
+    "list": {
+      "empty": "Geen databases gevonden"
+    },
+    "button": {
+      "create": {
+        "title": "Database aanmaken"
+      },
+      "stats": {
+        "title": "Databasestatistieken voor \"{{db}}\""
+      },
+      "drop": {
+        "title": "Database \"{{db}}\" verwijderen"
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "Collecties zoeken…" },
-    "list": { "empty": { "noCollections": "Geen collecties.", "canCreate": "Klik op ＋ om er een aan te maken." } },
-    "button": { "create": { "title": "Collectie aanmaken" }, "drop": { "title": "Collectie \"{{col}}\" verwijderen" } }
+    "search": {
+      "placeholder": "Collecties zoeken…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "Geen collecties.",
+        "canCreate": "Klik op ＋ om er een aan te maken."
+      }
+    },
+    "button": {
+      "create": {
+        "title": "Collectie aanmaken"
+      },
+      "drop": {
+        "title": "Collectie \"{{col}}\" verwijderen"
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "Tabblad sluiten" }, "new": { "title": "Nieuw tabblad" } },
+    "button": {
+      "close": {
+        "title": "Tabblad sluiten"
+      },
+      "new": {
+        "title": "Nieuw tabblad"
+      }
+    },
     "documents": "Documenten",
     "aggregate": "Aggregatie",
     "schema": "Schema",
@@ -45,14 +102,24 @@
     "createDatabase": {
       "title": "Database aanmaken",
       "subtitle": "MongoDB maakt een database aan bij het aanmaken van de eerste collectie.",
-      "label": { "dbName": "Databasenaam", "collectionName": "Naam eerste collectie" },
-      "placeholder": { "dbName": "bijv. mijnapp", "collectionName": "bijv. gebruikers" }
+      "label": {
+        "dbName": "Databasenaam",
+        "collectionName": "Naam eerste collectie"
+      },
+      "placeholder": {
+        "dbName": "bijv. mijnapp",
+        "collectionName": "bijv. gebruikers"
+      }
     },
     "createCollection": {
       "title": "Collectie aanmaken",
       "subtitle": "Nieuwe collectie toevoegen aan",
-      "label": { "name": "Collectienaam" },
-      "placeholder": { "name": "bijv. producten" }
+      "label": {
+        "name": "Collectienaam"
+      },
+      "placeholder": {
+        "name": "bijv. producten"
+      }
     },
     "dbStats": {
       "title": "Database:",
@@ -76,28 +143,60 @@
         "tlsCertKeyFile": "bijv. /certs/client.pem"
       },
       "optional": "(optioneel, pad op server)",
-      "warning": { "insecure": "⚠ onveilig" }
+      "warning": {
+        "insecure": "⚠ onveilig"
+      }
     },
     "confirmDrop": {
       "database": "Volledige database \"{{db}}\" verwijderen? Dit kan niet ongedaan worden gemaakt.",
       "collection": "Collectie \"{{col}}\" verwijderen? Alle documenten worden gewist.",
       "index": "Index \"{{name}}\" verwijderen?"
     },
-    "editDocument": { "title": "Document bewerken" },
-    "newDocument": { "title": "Nieuw document" },
+    "editDocument": {
+      "title": "Document bewerken"
+    },
+    "newDocument": {
+      "title": "Nieuw document"
+    },
     "createIndex": {
       "title": "Index aanmaken",
       "subtitle": "Definieer de velden en opties voor de nieuwe index.",
-      "label": { "keys": "Indexsleutels", "name": "Indexnaam", "unique": "Uniek", "sparse": "Spaarzaam", "background": "Achtergrond", "ttl": "TTL" },
+      "label": {
+        "keys": "Indexsleutels",
+        "name": "Indexnaam",
+        "unique": "Uniek",
+        "sparse": "Spaarzaam",
+        "background": "Achtergrond",
+        "ttl": "TTL"
+      },
       "optional": "(optioneel)",
-      "hint": { "background": "(niet-blokkerend)", "ttl": "(seconden, optioneel)" },
-      "placeholder": { "fieldName": "veldnaam", "name": "automatisch gegenereerd als leeg", "ttl": "bijv. 3600" },
-      "option": { "ascending": "1 (oplopend)", "descending": "-1 (aflopend)" },
-      "button": { "addField": "+ Veld toevoegen", "submit": "Index aanmaken" },
-      "validation": { "fieldRequired": "Minimaal één veld is vereist." }
+      "hint": {
+        "background": "(niet-blokkerend)",
+        "ttl": "(seconden, optioneel)"
+      },
+      "placeholder": {
+        "fieldName": "veldnaam",
+        "name": "automatisch gegenereerd als leeg",
+        "ttl": "bijv. 3600"
+      },
+      "option": {
+        "ascending": "1 (oplopend)",
+        "descending": "-1 (aflopend)"
+      },
+      "button": {
+        "addField": "+ Veld toevoegen",
+        "submit": "Index aanmaken"
+      },
+      "validation": {
+        "fieldRequired": "Minimaal één veld is vereist."
+      }
     },
-    "import": { "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)" },
-    "confirmDelete": { "document": "Dit document verwijderen?" }
+    "import": {
+      "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)"
+    },
+    "confirmDelete": {
+      "document": "Dit document verwijderen?"
+    }
   },
   "buttons": {
     "cancel": "Annuleren",
@@ -116,72 +215,184 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "Gebruikersnaam", "password": "Wachtwoord", "fieldName": "Veldnaam" },
-    "button": { "removeField": { "title": "Veld verwijderen" }, "remove": "×" },
-    "value": { "null": "null" },
-    "option": { "true": "waar", "false": "onwaar" },
-    "label": { "utc": "UTC" },
-    "placeholder": { "objectId": "24-teken hexadecimale tekenreeks", "jsonValue": "JSON-waarde" },
-    "section": { "addField": "Veld toevoegen" },
-    "validation": { "fieldExists": "Veld \"{{key}}\" bestaat al.", "fieldNameRequired": "Veldnaam is verplicht." }
+    "labels": {
+      "username": "Gebruikersnaam",
+      "password": "Wachtwoord",
+      "fieldName": "Veldnaam"
+    },
+    "button": {
+      "removeField": {
+        "title": "Veld verwijderen"
+      },
+      "remove": "×"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "waar",
+      "false": "onwaar"
+    },
+    "label": {
+      "utc": "UTC"
+    },
+    "placeholder": {
+      "objectId": "24-teken hexadecimale tekenreeks",
+      "jsonValue": "JSON-waarde"
+    },
+    "section": {
+      "addField": "Veld toevoegen"
+    },
+    "validation": {
+      "fieldExists": "Veld \"{{key}}\" bestaat al.",
+      "fieldNameRequired": "Veldnaam is verplicht."
+    }
   },
   "editor": {
-    "form": { "noSchema": "Geen schema beschikbaar. Gebruik JSON-modus om dit document te bewerken." },
-    "mode": {
-      "form": { "subtitle": "Bewerk velden met type-bewuste invoer. Schakel over naar JSON voor onbewerkte bewerking." },
-      "json": { "subtitle": "Bewerk het onbewerkte JSON-document. Schakel over naar Formulier voor begeleide bewerking." }
+    "form": {
+      "noSchema": "Geen schema beschikbaar. Gebruik JSON-modus om dit document te bewerken."
     },
-    "error": { "saveFailure": "Ongeldige JSON of opslaan mislukt:" }
+    "mode": {
+      "form": {
+        "subtitle": "Bewerk velden met type-bewuste invoer. Schakel over naar JSON voor onbewerkte bewerking."
+      },
+      "json": {
+        "subtitle": "Bewerk het onbewerkte JSON-document. Schakel over naar Formulier voor begeleide bewerking."
+      }
+    },
+    "error": {
+      "saveFailure": "Ongeldige JSON of opslaan mislukt:"
+    }
   },
   "query": {
-    "label": { "filter": "Filter", "sort": "Sorteren", "projection": "Projectie", "limit": "Limiet" },
-    "hint": { "ctrlEnter": "Ctrl+Enter om toe te passen" },
-    "badge": { "active": "actief", "invalidJson": "ongeldige JSON" },
-    "button": { "apply": "Toepassen", "clear": "Wissen" }
+    "label": {
+      "filter": "Filter",
+      "sort": "Sorteren",
+      "projection": "Projectie",
+      "limit": "Limiet"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter om toe te passen"
+    },
+    "badge": {
+      "active": "actief",
+      "invalidJson": "ongeldige JSON"
+    },
+    "button": {
+      "apply": "Toepassen",
+      "clear": "Wissen"
+    },
+    "mode": {
+      "label": "Querymodus",
+      "sqlHint": "Typ een SQL SELECT — Ctrl+Enter om toe te passen"
+    },
+    "sql": {
+      "label": "SQL-query",
+      "parseError": "syntaxisfout",
+      "mqlPreview": "Equivalent MQL",
+      "noConstraints": "Geen filter, sortering of projectie — geeft alle documenten terug",
+      "example": "bijv. SELECT name, age FROM {{col}} WHERE status = 'actief' ORDER BY age DESC LIMIT 20"
+    }
   },
   "views": {
-    "table": { "title": "Tabelweergave" },
-    "tree": { "title": "Boomweergave" }
+    "table": {
+      "title": "Tabelweergave"
+    },
+    "tree": {
+      "title": "Boomweergave"
+    }
   },
   "selection": {
     "count_one": "{{count}} document geselecteerd",
     "count_other": "{{count}} documenten geselecteerd",
-    "button": { "export": "Selectie exporteren", "delete": "Selectie verwijderen", "clear": "✕ Wissen" },
+    "button": {
+      "export": "Selectie exporteren",
+      "delete": "Selectie verwijderen",
+      "clear": "✕ Wissen"
+    },
     "confirmDelete_one": "{{count}} geselecteerd document verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "confirmDelete_other": "{{count}} geselecteerde documenten verwijderen? Dit kan niet ongedaan worden gemaakt."
   },
   "documents": {
-    "list": { "empty": "Geen documenten gevonden", "emptyWithFilter": "Pas uw filter of projectie aan.", "emptyNoFilter": "Deze collectie is leeg." },
-    "button": { "create": "+ Nieuw document" },
+    "list": {
+      "empty": "Geen documenten gevonden",
+      "emptyWithFilter": "Pas uw filter of projectie aan.",
+      "emptyNoFilter": "Deze collectie is leeg."
+    },
+    "button": {
+      "create": "+ Nieuw document"
+    },
     "fieldCount_one": "{{count}} veld",
     "fieldCount_other": "{{count}} velden"
   },
   "table": {
-    "header": { "id": "_id", "preview": "Voorbeeld", "actions": "Acties", "name": "Naam", "keys": "Sleutels", "unique": "Uniek", "sparse": "Spaarzaam", "ttl": "TTL (s)", "index": "Index", "size": "Grootte", "fieldPath": "Veldpad", "types": "Typen", "coverage": "Dekking", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "Voorbeeld",
+      "actions": "Acties",
+      "name": "Naam",
+      "keys": "Sleutels",
+      "unique": "Uniek",
+      "sparse": "Spaarzaam",
+      "ttl": "TTL (s)",
+      "index": "Index",
+      "size": "Grootte",
+      "fieldPath": "Veldpad",
+      "types": "Typen",
+      "coverage": "Dekking",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "{{start}}–{{end}} van {{total}} documenten weergegeven",
     "label_page": "Pagina {{page}}",
-    "button": { "prev": "← Vorige", "next": "Volgende →" }
+    "button": {
+      "prev": "← Vorige",
+      "next": "Volgende →"
+    }
   },
   "aggregate": {
     "prompt": "Voer een aggregatiepipeline in (JSON-array):",
-    "button": { "run": "▶ Uitvoeren" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}} document", "count_other": "{{count}} documenten" },
-    "placeholder": { "result": "// Voer een opdracht uit om resultaten te zien" }
+    "button": {
+      "run": "▶ Uitvoeren"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}} document",
+      "count_other": "{{count}} documenten"
+    },
+    "placeholder": {
+      "result": "// Voer een opdracht uit om resultaten te zien"
+    }
   },
   "schema": {
-    "label": { "sampled": "Gesampled", "document": "document", "field": "veld" },
-    "plural": { "documents": "en", "fields": "en" },
+    "label": {
+      "sampled": "Gesampled",
+      "document": "document",
+      "field": "veld"
+    },
+    "plural": {
+      "documents": "en",
+      "fields": "en"
+    },
     "inferring": "Schema afleiden…",
     "unavailable": "Geen schemagegevens beschikbaar.",
     "summary": "{{docCount}} document{{docPlural}} gesampled · {{fieldCount}} veld{{fieldPlural}}"
   },
   "indexes": {
-    "list": { "empty": "Geen indexen gevonden." },
-    "button": { "create": "+ Nieuwe index" },
-    "label": { "count_one": "{{count}} index", "count_other": "{{count}} indexen", "loading": "Laden…" }
+    "list": {
+      "empty": "Geen indexen gevonden."
+    },
+    "button": {
+      "create": "+ Nieuwe index"
+    },
+    "label": {
+      "count_one": "{{count}} index",
+      "count_other": "{{count}} indexen",
+      "loading": "Laden…"
+    }
   },
   "stats": {
     "loading": "Statistieken laden…",
@@ -197,11 +408,21 @@
       "indexSize": "Indexgrootte",
       "totalSize": "Totale grootte"
     },
-    "section": { "indexSizes": "Indexgroottes" }
+    "section": {
+      "indexSizes": "Indexgroottes"
+    }
   },
   "commands": {
-    "search": { "placeholder": "Opdrachten zoeken…" },
-    "category": { "server": "Server", "database": "Database", "collection": "Collectie", "replication": "Replicatie", "administration": "Beheer" },
+    "search": {
+      "placeholder": "Opdrachten zoeken…"
+    },
+    "category": {
+      "server": "Server",
+      "database": "Database",
+      "collection": "Collectie",
+      "replication": "Replicatie",
+      "administration": "Beheer"
+    },
     "description": {
       "ping": "Serververbinding testen",
       "buildInfo": "Serverversie en build-informatie",
@@ -238,11 +459,23 @@
       "listIndexes": "Indexen op een collectie weergeven",
       "profile": "Databaseprofilerniveau opvragen/instellen"
     },
-    "context": { "runningOn": "Uitvoeren op database:" },
-    "checkbox": { "useAdminDb": "Admin-database gebruiken" },
-    "button": { "run": "▶ Uitvoeren  (Ctrl+Enter)", "running": "⏳ Bezig…" },
-    "label": { "command": "Opdracht", "result": "Resultaat" },
-    "error": { "invalidJson": "Ongeldige JSON — corrigeer de opdracht voor het uitvoeren." }
+    "context": {
+      "runningOn": "Uitvoeren op database:"
+    },
+    "checkbox": {
+      "useAdminDb": "Admin-database gebruiken"
+    },
+    "button": {
+      "run": "▶ Uitvoeren  (Ctrl+Enter)",
+      "running": "⏳ Bezig…"
+    },
+    "label": {
+      "command": "Opdracht",
+      "result": "Resultaat"
+    },
+    "error": {
+      "invalidJson": "Ongeldige JSON — corrigeer de opdracht voor het uitvoeren."
+    }
   },
   "badge": {
     "admin": "● Admin",
@@ -251,13 +484,22 @@
     "success": "OK"
   },
   "tree": {
-    "button": { "expandAll": "Alles uitvouwen", "collapseAll": "Alles invouwen" },
-    "checkbox": { "selectAllLabel": "Alles op pagina selecteren" }
+    "button": {
+      "expandAll": "Alles uitvouwen",
+      "collapseAll": "Alles invouwen"
+    },
+    "checkbox": {
+      "selectAllLabel": "Alles op pagina selecteren"
+    }
   },
   "ui": {
     "loading": "Laden…",
     "connecting": "Verbinden…",
-    "sidebar": { "resize": { "title": "Slepen om zijbalk te vergroten of verkleinen" } }
+    "sidebar": {
+      "resize": {
+        "title": "Slepen om zijbalk te vergroten of verkleinen"
+      }
+    }
   },
   "empty": {
     "title": "Selecteer een database en collectie",
@@ -266,5 +508,7 @@
       "databaseNeeded": "Kies een database in de zijbalk om te beginnen."
     }
   },
-  "language": { "label": "Taal" }
+  "language": {
+    "label": "Taal"
+  }
 }

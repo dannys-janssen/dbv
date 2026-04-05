@@ -1,39 +1,96 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "ログイン",
       "subtitle": "MongoDBデータベースにアクセス",
       "footer": "Keycloak OAuth2で保護",
-      "button": { "label": "ログイン", "loading": "ログイン中…" },
-      "validation": { "fieldsRequired": "ユーザー名とパスワードは必須です" },
-      "error": { "invalidCredentials": "ログインに失敗しました。認証情報を確認してください。" }
+      "button": {
+        "label": "ログイン",
+        "loading": "ログイン中…"
+      },
+      "validation": {
+        "fieldsRequired": "ユーザー名とパスワードは必須です"
+      },
+      "error": {
+        "invalidCredentials": "ログインに失敗しました。認証情報を確認してください。"
+      }
     }
   },
   "nav": {
     "signOut": "ログアウト",
-    "section": { "databases": "データベース", "collections": "コレクション" }
+    "section": {
+      "databases": "データベース",
+      "collections": "コレクション"
+    }
   },
   "connection": {
-    "status": { "noInfo": "接続情報なし" },
-    "button": {
-      "reconnect": { "label": "↻ 再接続", "title": "現在のURIで再接続" },
-      "change": { "label": "⚙ 変更", "title": "MongoDB接続を変更" }
+    "status": {
+      "noInfo": "接続情報なし"
     },
-    "error": { "failed": "⚠ MongoDB接続に失敗しました:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ 再接続",
+        "title": "現在のURIで再接続"
+      },
+      "change": {
+        "label": "⚙ 変更",
+        "title": "MongoDB接続を変更"
+      }
+    },
+    "error": {
+      "failed": "⚠ MongoDB接続に失敗しました:"
+    }
   },
   "database": {
-    "search": { "placeholder": "データベースを検索…" },
-    "list": { "empty": "データベースが見つかりません" },
-    "button": { "create": { "title": "データベースを作成" }, "stats": { "title": "\"{{db}}\" のデータベース統計" }, "drop": { "title": "データベース \"{{db}}\" を削除" } }
+    "search": {
+      "placeholder": "データベースを検索…"
+    },
+    "list": {
+      "empty": "データベースが見つかりません"
+    },
+    "button": {
+      "create": {
+        "title": "データベースを作成"
+      },
+      "stats": {
+        "title": "\"{{db}}\" のデータベース統計"
+      },
+      "drop": {
+        "title": "データベース \"{{db}}\" を削除"
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "コレクションを検索…" },
-    "list": { "empty": { "noCollections": "コレクションがありません。", "canCreate": "＋をクリックして作成してください。" } },
-    "button": { "create": { "title": "コレクションを作成" }, "drop": { "title": "コレクション \"{{col}}\" を削除" } }
+    "search": {
+      "placeholder": "コレクションを検索…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "コレクションがありません。",
+        "canCreate": "＋をクリックして作成してください。"
+      }
+    },
+    "button": {
+      "create": {
+        "title": "コレクションを作成"
+      },
+      "drop": {
+        "title": "コレクション \"{{col}}\" を削除"
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "タブを閉じる" }, "new": { "title": "新しいタブ" } },
+    "button": {
+      "close": {
+        "title": "タブを閉じる"
+      },
+      "new": {
+        "title": "新しいタブ"
+      }
+    },
     "documents": "ドキュメント",
     "aggregate": "集約",
     "schema": "スキーマ",
@@ -45,14 +102,24 @@
     "createDatabase": {
       "title": "データベースを作成",
       "subtitle": "MongoDBは最初のコレクションが作成されたときにデータベースを作成します。",
-      "label": { "dbName": "データベース名", "collectionName": "初期コレクション名" },
-      "placeholder": { "dbName": "例: myapp", "collectionName": "例: users" }
+      "label": {
+        "dbName": "データベース名",
+        "collectionName": "初期コレクション名"
+      },
+      "placeholder": {
+        "dbName": "例: myapp",
+        "collectionName": "例: users"
+      }
     },
     "createCollection": {
       "title": "コレクションを作成",
       "subtitle": "新しいコレクションを追加:",
-      "label": { "name": "コレクション名" },
-      "placeholder": { "name": "例: products" }
+      "label": {
+        "name": "コレクション名"
+      },
+      "placeholder": {
+        "name": "例: products"
+      }
     },
     "dbStats": {
       "title": "データベース:",
@@ -76,28 +143,60 @@
         "tlsCertKeyFile": "例: /certs/client.pem"
       },
       "optional": "(オプション、サーバー上のパス)",
-      "warning": { "insecure": "⚠ 安全でない" }
+      "warning": {
+        "insecure": "⚠ 安全でない"
+      }
     },
     "confirmDrop": {
       "database": "データベース \"{{db}}\" 全体を削除しますか？この操作は元に戻せません。",
       "collection": "コレクション \"{{col}}\" を削除しますか？すべてのドキュメントが削除されます。",
       "index": "インデックス \"{{name}}\" を削除しますか？"
     },
-    "editDocument": { "title": "ドキュメントを編集" },
-    "newDocument": { "title": "新しいドキュメント" },
+    "editDocument": {
+      "title": "ドキュメントを編集"
+    },
+    "newDocument": {
+      "title": "新しいドキュメント"
+    },
     "createIndex": {
       "title": "インデックスを作成",
       "subtitle": "新しいインデックスのフィールドとオプションを定義してください。",
-      "label": { "keys": "インデックスキー", "name": "インデックス名", "unique": "ユニーク", "sparse": "スパース", "background": "バックグラウンド", "ttl": "TTL" },
+      "label": {
+        "keys": "インデックスキー",
+        "name": "インデックス名",
+        "unique": "ユニーク",
+        "sparse": "スパース",
+        "background": "バックグラウンド",
+        "ttl": "TTL"
+      },
       "optional": "(オプション)",
-      "hint": { "background": "(非ブロッキング)", "ttl": "(秒、オプション)" },
-      "placeholder": { "fieldName": "フィールド名", "name": "空の場合は自動生成", "ttl": "例: 3600" },
-      "option": { "ascending": "1 (昇順)", "descending": "-1 (降順)" },
-      "button": { "addField": "+ フィールドを追加", "submit": "インデックスを作成" },
-      "validation": { "fieldRequired": "少なくとも1つのフィールドが必要です。" }
+      "hint": {
+        "background": "(非ブロッキング)",
+        "ttl": "(秒、オプション)"
+      },
+      "placeholder": {
+        "fieldName": "フィールド名",
+        "name": "空の場合は自動生成",
+        "ttl": "例: 3600"
+      },
+      "option": {
+        "ascending": "1 (昇順)",
+        "descending": "-1 (降順)"
+      },
+      "button": {
+        "addField": "+ フィールドを追加",
+        "submit": "インデックスを作成"
+      },
+      "validation": {
+        "fieldRequired": "少なくとも1つのフィールドが必要です。"
+      }
     },
-    "import": { "confirmReplace": "{{count}}件のドキュメントをインポートしますか？(既存を置き換え?)" },
-    "confirmDelete": { "document": "このドキュメントを削除しますか？" }
+    "import": {
+      "confirmReplace": "{{count}}件のドキュメントをインポートしますか？(既存を置き換え?)"
+    },
+    "confirmDelete": {
+      "document": "このドキュメントを削除しますか？"
+    }
   },
   "buttons": {
     "cancel": "キャンセル",
@@ -116,72 +215,184 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "ユーザー名", "password": "パスワード", "fieldName": "フィールド名" },
-    "button": { "removeField": { "title": "フィールドを削除" }, "remove": "×" },
-    "value": { "null": "null" },
-    "option": { "true": "true", "false": "false" },
-    "label": { "utc": "UTC" },
-    "placeholder": { "objectId": "24文字の16進数文字列", "jsonValue": "JSON値" },
-    "section": { "addField": "フィールドを追加" },
-    "validation": { "fieldExists": "フィールド \"{{key}}\" はすでに存在します。", "fieldNameRequired": "フィールド名は必須です。" }
+    "labels": {
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "fieldName": "フィールド名"
+    },
+    "button": {
+      "removeField": {
+        "title": "フィールドを削除"
+      },
+      "remove": "×"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "true",
+      "false": "false"
+    },
+    "label": {
+      "utc": "UTC"
+    },
+    "placeholder": {
+      "objectId": "24文字の16進数文字列",
+      "jsonValue": "JSON値"
+    },
+    "section": {
+      "addField": "フィールドを追加"
+    },
+    "validation": {
+      "fieldExists": "フィールド \"{{key}}\" はすでに存在します。",
+      "fieldNameRequired": "フィールド名は必須です。"
+    }
   },
   "editor": {
-    "form": { "noSchema": "スキーマがありません。JSONモードでこのドキュメントを編集してください。" },
-    "mode": {
-      "form": { "subtitle": "型対応の入力でフィールドを編集します。生の編集はJSONに切り替えてください。" },
-      "json": { "subtitle": "生のJSONドキュメントを編集します。ガイド付き編集はフォームに切り替えてください。" }
+    "form": {
+      "noSchema": "スキーマがありません。JSONモードでこのドキュメントを編集してください。"
     },
-    "error": { "saveFailure": "無効なJSONまたは保存に失敗しました:" }
+    "mode": {
+      "form": {
+        "subtitle": "型対応の入力でフィールドを編集します。生の編集はJSONに切り替えてください。"
+      },
+      "json": {
+        "subtitle": "生のJSONドキュメントを編集します。ガイド付き編集はフォームに切り替えてください。"
+      }
+    },
+    "error": {
+      "saveFailure": "無効なJSONまたは保存に失敗しました:"
+    }
   },
   "query": {
-    "label": { "filter": "フィルター", "sort": "ソート", "projection": "プロジェクション", "limit": "制限" },
-    "hint": { "ctrlEnter": "Ctrl+Enterで適用" },
-    "badge": { "active": "有効", "invalidJson": "無効なJSON" },
-    "button": { "apply": "適用", "clear": "クリア" }
+    "label": {
+      "filter": "フィルター",
+      "sort": "ソート",
+      "projection": "プロジェクション",
+      "limit": "制限"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enterで適用"
+    },
+    "badge": {
+      "active": "有効",
+      "invalidJson": "無効なJSON"
+    },
+    "button": {
+      "apply": "適用",
+      "clear": "クリア"
+    },
+    "mode": {
+      "label": "クエリモード",
+      "sqlHint": "SQL SELECT を入力 — Ctrl+Enter で適用"
+    },
+    "sql": {
+      "label": "SQLクエリ",
+      "parseError": "構文エラー",
+      "mqlPreview": "同等のMQL",
+      "noConstraints": "フィルター・ソート・プロジェクションなし — すべてのドキュメントを返します",
+      "example": "例: SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
+    }
   },
   "views": {
-    "table": { "title": "テーブルビュー" },
-    "tree": { "title": "ツリービュー" }
+    "table": {
+      "title": "テーブルビュー"
+    },
+    "tree": {
+      "title": "ツリービュー"
+    }
   },
   "selection": {
     "count_one": "{{count}}件のドキュメントを選択",
     "count_other": "{{count}}件のドキュメントを選択",
-    "button": { "export": "選択をエクスポート", "delete": "選択を削除", "clear": "✕ クリア" },
+    "button": {
+      "export": "選択をエクスポート",
+      "delete": "選択を削除",
+      "clear": "✕ クリア"
+    },
     "confirmDelete_one": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。",
     "confirmDelete_other": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。"
   },
   "documents": {
-    "list": { "empty": "ドキュメントが見つかりません", "emptyWithFilter": "フィルターまたはプロジェクションを調整してみてください。", "emptyNoFilter": "このコレクションは空です。" },
-    "button": { "create": "+ 新しいドキュメント" },
+    "list": {
+      "empty": "ドキュメントが見つかりません",
+      "emptyWithFilter": "フィルターまたはプロジェクションを調整してみてください。",
+      "emptyNoFilter": "このコレクションは空です。"
+    },
+    "button": {
+      "create": "+ 新しいドキュメント"
+    },
     "fieldCount_one": "{{count}}フィールド",
     "fieldCount_other": "{{count}}フィールド"
   },
   "table": {
-    "header": { "id": "_id", "preview": "プレビュー", "actions": "アクション", "name": "名前", "keys": "キー", "unique": "ユニーク", "sparse": "スパース", "ttl": "TTL (s)", "index": "インデックス", "size": "サイズ", "fieldPath": "フィールドパス", "types": "タイプ", "coverage": "カバレッジ", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "プレビュー",
+      "actions": "アクション",
+      "name": "名前",
+      "keys": "キー",
+      "unique": "ユニーク",
+      "sparse": "スパース",
+      "ttl": "TTL (s)",
+      "index": "インデックス",
+      "size": "サイズ",
+      "fieldPath": "フィールドパス",
+      "types": "タイプ",
+      "coverage": "カバレッジ",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "{{total}}件中 {{start}}–{{end}}件を表示",
     "label_page": "ページ {{page}}",
-    "button": { "prev": "← 前へ", "next": "次へ →" }
+    "button": {
+      "prev": "← 前へ",
+      "next": "次へ →"
+    }
   },
   "aggregate": {
     "prompt": "集約パイプラインを入力してください (JSON配列):",
-    "button": { "run": "▶ 実行" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}}件のドキュメント", "count_other": "{{count}}件のドキュメント" },
-    "placeholder": { "result": "// コマンドを実行して結果を表示" }
+    "button": {
+      "run": "▶ 実行"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}}件のドキュメント",
+      "count_other": "{{count}}件のドキュメント"
+    },
+    "placeholder": {
+      "result": "// コマンドを実行して結果を表示"
+    }
   },
   "schema": {
-    "label": { "sampled": "サンプル済み", "document": "ドキュメント", "field": "フィールド" },
-    "plural": { "documents": "", "fields": "" },
+    "label": {
+      "sampled": "サンプル済み",
+      "document": "ドキュメント",
+      "field": "フィールド"
+    },
+    "plural": {
+      "documents": "",
+      "fields": ""
+    },
     "inferring": "スキーマを推定中…",
     "unavailable": "スキーマデータがありません。",
     "summary": "{{docCount}}{{docPlural}}ドキュメントをサンプリング · {{fieldCount}}{{fieldPlural}}フィールド"
   },
   "indexes": {
-    "list": { "empty": "インデックスが見つかりません。" },
-    "button": { "create": "+ 新しいインデックス" },
-    "label": { "count_one": "{{count}}件のインデックス", "count_other": "{{count}}件のインデックス", "loading": "読み込み中…" }
+    "list": {
+      "empty": "インデックスが見つかりません。"
+    },
+    "button": {
+      "create": "+ 新しいインデックス"
+    },
+    "label": {
+      "count_one": "{{count}}件のインデックス",
+      "count_other": "{{count}}件のインデックス",
+      "loading": "読み込み中…"
+    }
   },
   "stats": {
     "loading": "統計を読み込み中…",
@@ -197,11 +408,21 @@
       "indexSize": "インデックスサイズ",
       "totalSize": "合計サイズ"
     },
-    "section": { "indexSizes": "インデックスサイズ" }
+    "section": {
+      "indexSizes": "インデックスサイズ"
+    }
   },
   "commands": {
-    "search": { "placeholder": "コマンドを検索…" },
-    "category": { "server": "サーバー", "database": "データベース", "collection": "コレクション", "replication": "レプリケーション", "administration": "管理" },
+    "search": {
+      "placeholder": "コマンドを検索…"
+    },
+    "category": {
+      "server": "サーバー",
+      "database": "データベース",
+      "collection": "コレクション",
+      "replication": "レプリケーション",
+      "administration": "管理"
+    },
     "description": {
       "ping": "サーバー接続をテスト",
       "buildInfo": "サーバーバージョンとビルド情報",
@@ -238,11 +459,23 @@
       "listIndexes": "コレクションのインデックスを一覧表示",
       "profile": "データベースプロファイラーレベルの取得/設定"
     },
-    "context": { "runningOn": "実行中のデータベース:" },
-    "checkbox": { "useAdminDb": "adminデータベースを使用" },
-    "button": { "run": "▶ 実行  (Ctrl+Enter)", "running": "⏳ 実行中…" },
-    "label": { "command": "コマンド", "result": "結果" },
-    "error": { "invalidJson": "無効なJSON — 実行前にコマンドを修正してください。" }
+    "context": {
+      "runningOn": "実行中のデータベース:"
+    },
+    "checkbox": {
+      "useAdminDb": "adminデータベースを使用"
+    },
+    "button": {
+      "run": "▶ 実行  (Ctrl+Enter)",
+      "running": "⏳ 実行中…"
+    },
+    "label": {
+      "command": "コマンド",
+      "result": "結果"
+    },
+    "error": {
+      "invalidJson": "無効なJSON — 実行前にコマンドを修正してください。"
+    }
   },
   "badge": {
     "admin": "● 管理者",
@@ -251,13 +484,22 @@
     "success": "OK"
   },
   "tree": {
-    "button": { "expandAll": "すべて展開", "collapseAll": "すべて折りたたむ" },
-    "checkbox": { "selectAllLabel": "ページ上のすべてを選択" }
+    "button": {
+      "expandAll": "すべて展開",
+      "collapseAll": "すべて折りたたむ"
+    },
+    "checkbox": {
+      "selectAllLabel": "ページ上のすべてを選択"
+    }
   },
   "ui": {
     "loading": "読み込み中…",
     "connecting": "接続中…",
-    "sidebar": { "resize": { "title": "ドラッグしてサイドバーをリサイズ" } }
+    "sidebar": {
+      "resize": {
+        "title": "ドラッグしてサイドバーをリサイズ"
+      }
+    }
   },
   "empty": {
     "title": "データベースとコレクションを選択してください",
@@ -266,5 +508,7 @@
       "databaseNeeded": "サイドバーからデータベースを選択して開始してください。"
     }
   },
-  "language": { "label": "言語" }
+  "language": {
+    "label": "言語"
+  }
 }
