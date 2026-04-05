@@ -1,5 +1,8 @@
 # dbv — MongoDB Browser
 
+[![CI](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/ci.yml)
+[![Docker](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/docker.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/docker.yml)
+
 A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authentication. Runs entirely in Docker.
 
 ## Table of Contents
@@ -20,6 +23,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Accessibility (a11y)](#accessibility-a11y)
   - [OpenAPI / Swagger UI](#openapi--swagger-ui)
   - [Kubernetes / Helm](#kubernetes--helm)
+  - [GitHub & CI/CD](#github--cicd)
 
 ---
 
@@ -689,3 +693,55 @@ Key values — see `kubernetes/helm/dbv/values.yaml` for the full reference:
 | `ingress.enabled` | `true` | Create an Ingress resource |
 | `autoscaling.enabled` | `false` | Enable HPA |
 
+### GitHub & CI/CD
+
+#### Pushing to GitHub
+
+```bash
+# Create a new repo on GitHub (via web or gh CLI), then:
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/dbv.git
+git push -u origin main
+```
+
+Replace the two badge URLs at the top of this file with your actual GitHub username.
+
+#### Workflows
+
+| Workflow | File | Trigger | What it does |
+|---|---|---|---|
+| **CI** | `.github/workflows/ci.yml` | Push / PR → `main` | `cargo fmt`, `cargo clippy`, `cargo test`, `npm ci && npm run build` |
+| **Docker** | `.github/workflows/docker.yml` | Push → `main`, tags `v*.*.*`, manual | Builds multi-arch image (`linux/amd64` + `linux/arm64`) and pushes to `ghcr.io` |
+
+The Docker workflow uses the built-in `GITHUB_TOKEN` — **no extra secrets are needed** for `ghcr.io` publishing.
+
+#### Published Docker image
+
+After the first push to `main` the image is available at:
+
+```
+ghcr.io/YOUR_GITHUB_USERNAME/dbv:latest
+```
+
+To use it in `docker-compose.yml` instead of building locally:
+
+```yaml
+dbv:
+  image: ghcr.io/YOUR_GITHUB_USERNAME/dbv:latest
+  # remove the "build: ." line
+```
+
+#### Releasing a new version
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This triggers the Docker workflow which publishes `ghcr.io/…/dbv:1.0.0`, `:1.0`, `:1`, and `:latest`.
+
+#### Dependabot
+
+`.github/dependabot.yml` automatically opens weekly PRs for:
+- Rust crate updates (`Cargo.toml`)
+- npm package updates (`frontend/package.json`)
+- GitHub Actions version updates

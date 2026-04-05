@@ -1,4 +1,30 @@
+# Rust
 /target
+Cargo.lock.bak
+
+# Environment / secrets
 .env
+.env.local
+.env.*.local
+*.env
+
+# Frontend
 frontend/node_modules/
 frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Session state (Copilot CLI)
+.copilot/

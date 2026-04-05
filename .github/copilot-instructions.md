@@ -327,3 +327,21 @@ The UI targets WCAG 2.1 Level AA. Key patterns:
 - The `Ingress` resource supports any ingress class and cert-manager TLS annotations.
 - `HorizontalPodAutoscaler` is included but disabled by default (`autoscaling.enabled: false`).
 - Lint with: `helm lint ./kubernetes/helm/dbv --set config.mongodbUri=x --set config.keycloakUrl=x --set config.keycloakRealm=x --set config.keycloakClientId=x`
+
+### GitHub Workflows & CI/CD
+
+- **`.github/workflows/ci.yml`** — runs on every push and PR to `main`:
+  - `cargo fmt --all -- --check` (fail on unformatted code)
+  - `cargo clippy --all-targets --all-features -- -D warnings`
+  - `cargo test --all-features`
+  - Frontend: `npm ci && npm run build`
+  - Uses `dtolnay/rust-toolchain@stable` and `actions/cache` for Cargo + npm caching.
+- **`.github/workflows/docker.yml`** — runs on push to `main` and on `v*.*.*` tags:
+  - Multi-arch build: `linux/amd64` + `linux/arm64` via QEMU + Buildx.
+  - Pushes to `ghcr.io/<owner>/dbv`.
+  - Tags: `:latest` (main), `:1.2.3` / `:1.2` / `:1` (semver tags), `:sha-<short>`.
+  - Uses `GITHUB_TOKEN` — no extra secrets required.
+  - Uses GitHub Actions cache (`type=gha`) for Docker layer caching.
+- **`.github/dependabot.yml`** — weekly PRs for Cargo, npm, and GitHub Actions dependencies.
+- When adding a new workflow action, always pin to a specific major version tag (e.g. `@v4`).
+- Do not add secrets to workflows beyond `GITHUB_TOKEN` unless absolutely necessary. Document any required repo secrets in README.
