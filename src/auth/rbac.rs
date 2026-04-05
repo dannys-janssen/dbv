@@ -9,7 +9,7 @@ use crate::errors::AppError;
 pub struct ReadAccess(pub Claims);
 
 /// Accepted only by users with `dbv-admin`.
-pub struct WriteAccess(pub Claims);
+pub struct WriteAccess(#[allow(dead_code)] pub Claims);
 
 impl<S> FromRequestParts<S> for ReadAccess
 where

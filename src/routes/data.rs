@@ -11,6 +11,7 @@ use serde_json::{Value, json};
 
 use crate::{
     auth::rbac::{ReadAccess, WriteAccess},
+    db::CreateIndexParams,
     errors::AppError,
     state::AppState,
 };
@@ -350,12 +351,14 @@ pub async fn create_index(
         .create_index(
             &db,
             &collection,
-            keys,
-            body.name,
-            body.unique,
-            body.sparse,
-            body.ttl,
-            body.background,
+            CreateIndexParams {
+                keys,
+                name: body.name,
+                unique: body.unique,
+                sparse: body.sparse,
+                ttl: body.ttl,
+                background: body.background,
+            },
         )
         .await?;
     Ok((StatusCode::CREATED, Json(json!({ "name": index_name }))))

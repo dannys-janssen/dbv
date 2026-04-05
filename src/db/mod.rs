@@ -20,6 +20,16 @@ pub struct DbClient {
     pub tls_allow_invalid_certs: bool,
 }
 
+/// Parameters for creating an index; used to avoid a clippy::too_many_arguments violation.
+pub struct CreateIndexParams {
+    pub keys: bson::Document,
+    pub name: Option<String>,
+    pub unique: Option<bool>,
+    pub sparse: Option<bool>,
+    pub ttl: Option<u64>,
+    pub background: Option<bool>,
+}
+
 impl DbClient {
     /// Connect with explicit TLS override fields (mirrors the env-var config path).
     pub async fn from_uri_with_tls(
@@ -68,6 +78,7 @@ impl DbClient {
     }
 
     /// Convenience constructor: connect with no extra TLS overrides.
+    #[allow(dead_code)]
     pub async fn from_uri(uri: &str, default_db: &str) -> Result<Self, AppError> {
         Self::from_uri_with_tls(uri, default_db, None, None, false).await
     }
@@ -105,6 +116,7 @@ impl DbClient {
         self.client.database(name)
     }
 
+    #[allow(dead_code)]
     pub fn default_database(&self) -> Database {
         self.client.database(&self.default_db)
     }
@@ -180,21 +192,19 @@ impl DbClient {
         &self,
         db: &str,
         collection: &str,
-        keys: bson::Document,
-        name: Option<String>,
-        unique: Option<bool>,
-        sparse: Option<bool>,
-        ttl: Option<u64>,
-        background: Option<bool>,
+        params: CreateIndexParams,
     ) -> Result<String, AppError> {
         let coll: Collection<bson::Document> = self.client.database(db).collection(collection);
         let mut opts = IndexOptions::default();
-        opts.name = name;
-        opts.unique = unique;
-        opts.sparse = sparse;
-        opts.expire_after = ttl.map(std::time::Duration::from_secs);
-        opts.background = background;
-        let model = IndexModel::builder().keys(keys).options(opts).build();
+        opts.name = params.name;
+        opts.unique = params.unique;
+        opts.sparse = params.sparse;
+        opts.expire_after = params.ttl.map(std::time::Duration::from_secs);
+        opts.background = params.background;
+        let model = IndexModel::builder()
+            .keys(params.keys)
+            .options(opts)
+            .build();
         let res = coll.create_index(model).await?;
         Ok(res.index_name)
     }

@@ -1,10 +1,7 @@
 pub mod rbac;
 
-use axum::{
-    RequestPartsExt,
-    extract::{FromRef, FromRequestParts, State},
-    http::{HeaderMap, request::Parts},
-};
+use axum::extract::{FromRef, FromRequestParts};
+use axum::http::{HeaderMap, request::Parts};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use reqwest::Client as HttpClient;
 use serde::{Deserialize, Serialize};
@@ -24,7 +21,9 @@ pub struct JwksCache {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Jwk {
     pub kid: String,
+    #[allow(dead_code)]
     pub kty: String,
+    #[allow(dead_code)]
     pub alg: Option<String>,
     pub n: Option<String>,
     pub e: Option<String>,
@@ -159,13 +158,13 @@ async fn validate_token(
         .map_err(|e| AppError::Unauthorized(format!("Token validation failed: {e}")))?;
 
     // Verify the token was actually issued for our client.
-    if let Some(azp) = &data.claims.azp {
-        if azp != &config.keycloak_client_id {
-            return Err(AppError::Unauthorized(format!(
-                "Token azp '{azp}' does not match expected client '{}'",
-                config.keycloak_client_id
-            )));
-        }
+    if let Some(azp) = &data.claims.azp
+        && azp != &config.keycloak_client_id
+    {
+        return Err(AppError::Unauthorized(format!(
+            "Token azp '{azp}' does not match expected client '{}'",
+            config.keycloak_client_id
+        )));
     }
 
     Ok(data.claims)
