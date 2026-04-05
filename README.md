@@ -1,7 +1,7 @@
 # dbv — MongoDB Browser
 
-[![CI](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/ci.yml)
-[![Docker](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/docker.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/dbv/actions/workflows/docker.yml)
+[![CI](https://github.com/dannys-janssen/dbv/actions/workflows/ci.yml/badge.svg)](https://github.com/dannys-janssen/dbv/actions/workflows/ci.yml)
+[![Docker](https://github.com/dannys-janssen/dbv/actions/workflows/docker.yml/badge.svg)](https://github.com/dannys-janssen/dbv/actions/workflows/docker.yml)
 
 A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authentication. Runs entirely in Docker.
 
@@ -699,7 +699,7 @@ Key values — see `kubernetes/helm/dbv/values.yaml` for the full reference:
 
 ```bash
 # Create a new repo on GitHub (via web or gh CLI), then:
-git remote add origin https://github.com/YOUR_GITHUB_USERNAME/dbv.git
+git remote add origin https://github.com/dannys-janssen/dbv.git
 git push -u origin main
 ```
 
@@ -719,14 +719,14 @@ The Docker workflow uses the built-in `GITHUB_TOKEN` — **no extra secrets are 
 After the first push to `main` the image is available at:
 
 ```
-ghcr.io/YOUR_GITHUB_USERNAME/dbv:latest
+ghcr.io/dannys-janssen/dbv:latest
 ```
 
 To use it in `docker-compose.yml` instead of building locally:
 
 ```yaml
 dbv:
-  image: ghcr.io/YOUR_GITHUB_USERNAME/dbv:latest
+  image: ghcr.io/dannys-janssen/dbv:latest
   # remove the "build: ." line
 ```
 
