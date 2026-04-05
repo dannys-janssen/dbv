@@ -137,7 +137,15 @@
     "label": { "filter": "Filter", "sort": "Sort", "projection": "Projection", "limit": "Limit" },
     "hint": { "ctrlEnter": "Ctrl+Enter to apply" },
     "badge": { "active": "active", "invalidJson": "invalid JSON" },
-    "button": { "apply": "Apply", "clear": "Clear" }
+    "button": { "apply": "Apply", "clear": "Clear" },
+    "mode": { "label": "Query mode", "sqlHint": "Type a SQL SELECT — Ctrl+Enter to apply" },
+    "sql": {
+      "label": "SQL Query",
+      "parseError": "parse error",
+      "mqlPreview": "Equivalent MQL",
+      "noConstraints": "No filter, sort or projection — returns all documents",
+      "example": "e.g. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
+    }
   },
   "views": {
     "table": { "title": "Table view" },

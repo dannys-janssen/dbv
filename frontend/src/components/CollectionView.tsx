@@ -32,6 +32,7 @@ import {
   PIPELINE_SCHEMA,
 } from "../utils/mongoSchema";
 import { formatBsonValue } from "../utils/bsonFormat";
+import { parseSqlToMql } from "../utils/sqlToMql";
 
 type View = "documents" | "aggregate" | "schema" | "indexes" | "stats" | "commands";
 
@@ -178,6 +179,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [sortText, setSortText] = useState("");
   const [projectionText, setProjectionText] = useState("");
   const [limitVal, setLimitVal] = useState(20);
+  const [queryMode, setQueryMode] = useState<"mql" | "sql">("mql");
+  const [sqlText, setSqlText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -527,6 +530,12 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 const hasFilter   = !!filterText.trim();
                 const hasSort     = !!sortText.trim();
                 const hasProj     = !!projectionText.trim();
+
+                // SQL mode parse
+                const sqlResult = queryMode === "sql" ? parseSqlToMql(sqlText) : null;
+                const sqlError = sqlResult && sqlResult.error ? sqlResult.error : null;
+                const sqlValid = queryMode === "sql" ? (!sqlText.trim() || (!sqlError && sqlResult?.mql !== null)) : true;
+
                 const monoOpts = {
                   minimap: { enabled: false },
                   lineNumbers: "off" as const,
@@ -542,134 +551,196 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   suggest: { showSnippets: true, showWords: false },
                   quickSuggestions: { other: true, comments: false, strings: true },
                 };
+
+                const applySql = () => {
+                  if (!sqlResult || sqlResult.error !== null || !sqlResult.mql) return;
+                  const { filter, sort, projection, limit } = sqlResult.mql;
+                  setFilterText(Object.keys(filter).length ? JSON.stringify(filter) : "");
+                  setSortText(Object.keys(sort).length ? JSON.stringify(sort) : "");
+                  setProjectionText(Object.keys(projection).length ? JSON.stringify(projection) : "");
+                  if (limit !== null) setLimitVal(Math.min(100, Math.max(1, limit)));
+                  setPage(1);
+                  loadDocumentsRef.current();
+                };
+
                 return (
                   <div style={{ padding: "10px 20px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                    {/* Row 1: filter + sort inputs */}
-                    <div style={{ display: "flex", gap: "8px", alignItems: "flex-end", marginBottom: "8px" }}>
-                      {/* Filter */}
-                      <div style={{ flex: 2 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.filter")}</span>
-                          <span style={{ fontSize: "10px", color: "#94a3b8", fontFamily: FONT }}>{t("query.hint.ctrlEnter")}</span>
-                          {hasFilter && filterValid && (
-                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
-                          )}
-                          {hasFilter && !filterValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
-                          )}
-                        </div>
-                        <div style={{
-                          border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-                          borderRadius: "6px", overflow: "hidden", background: "#ffffff",
-                        }}>
-                          <Editor
-                            height="68px"
-                            language="json"
-                            path="dbv://filter"
-                            value={filterText}
-                            onChange={(v) => { setFilterText(v ?? ""); setPage(1); }}
-                            options={monoOpts}
-                            onMount={(editor, monaco) => {
-                              editor.addCommand(
-                                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                                () => loadDocumentsRef.current()
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Sort */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.sort")}</span>
-                          {hasSort && !sortValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
-                          )}
-                        </div>
-                        <div style={{
-                          border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-                          borderRadius: "6px", overflow: "hidden", background: "#ffffff",
-                        }}>
-                          <Editor
-                            height="68px"
-                            language="json"
-                            path="dbv://sort"
-                            value={sortText}
-                            onChange={(v) => { setSortText(v ?? ""); setPage(1); }}
-                            options={monoOpts}
-                            onMount={(editor, monaco) => {
-                              editor.addCommand(
-                                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                                () => loadDocumentsRef.current()
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Projection */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.projection")}</span>
-                          {hasProj && projValid && (
-                            <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
-                          )}
-                          {hasProj && !projValid && (
-                            <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
-                          )}
-                        </div>
-                        <div style={{
-                          border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-                          borderRadius: "6px", overflow: "hidden", background: "#ffffff",
-                        }}>
-                          <Editor
-                            height="68px"
-                            language="json"
-                            path="dbv://projection"
-                            value={projectionText}
-                            onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }}
-                            options={monoOpts}
-                            onMount={(editor, monaco) => {
-                              editor.addCommand(
-                                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                                () => loadDocumentsRef.current()
-                              );
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Limit */}
-                      <div style={{ flexShrink: 0 }}>
-                        <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>{t("query.label.limit")}</div>
-                        <select
-                          value={limitVal}
-                          onChange={(e) => { setLimitVal(Number(e.target.value)); setPage(1); }}
-                          style={{ padding: "8px 10px", border: "1px solid #e2e8f0", borderRadius: "6px", fontSize: "13px", fontFamily: FONT, background: "#fff", color: "#374151" }}
+                    {/* Mode toggle row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                      <div
+                        role="group"
+                        aria-label={t("query.mode.label")}
+                        style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}
+                      >
+                        <button
+                          role="radio"
+                          aria-checked={queryMode === "mql"}
+                          onClick={() => setQueryMode("mql")}
+                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", cursor: "pointer", background: queryMode === "mql" ? "#2563eb" : "#fff", color: queryMode === "mql" ? "#fff" : "#64748b" }}
                         >
-                          {[10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
-                        </select>
+                          MQL
+                        </button>
+                        <button
+                          role="radio"
+                          aria-checked={queryMode === "sql"}
+                          onClick={() => setQueryMode("sql")}
+                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", borderLeft: "1px solid #e2e8f0", cursor: "pointer", background: queryMode === "sql" ? "#2563eb" : "#fff", color: queryMode === "sql" ? "#fff" : "#64748b" }}
+                        >
+                          SQL
+                        </button>
                       </div>
+                      <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>
+                        {queryMode === "sql" ? t("query.mode.sqlHint") : t("query.hint.ctrlEnter")}
+                      </span>
                     </div>
 
-                    {/* Row 2: action buttons */}
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <button
-                        onClick={loadDocuments}
-                        disabled={!filterValid || !sortValid || !projValid}
-                        style={{ background: filterValid && sortValid && projValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid && projValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}
-                      >
-                        {t("query.button.apply")}
-                      </button>
-                      {(hasFilter || hasSort || hasProj) && (
-                        <button
-                          onClick={() => { setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
-                          style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
-                        >
-                          {t("query.button.clear")}
-                        </button>
-                      )}
+                    {queryMode === "mql" ? (
+                      <>
+                        {/* MQL Row 1: filter + sort + projection + limit */}
+                        <div style={{ display: "flex", gap: "8px", alignItems: "flex-end", marginBottom: "8px" }}>
+                          {/* Filter */}
+                          <div style={{ flex: 2 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.filter")}</span>
+                              {hasFilter && filterValid && (
+                                <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
+                              )}
+                              {hasFilter && !filterValid && (
+                                <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
+                              )}
+                            </div>
+                            <div style={{ border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                              <Editor height="68px" language="json" path="dbv://filter" value={filterText}
+                                onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
+                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                            </div>
+                          </div>
+
+                          {/* Sort */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.sort")}</span>
+                              {hasSort && !sortValid && (
+                                <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
+                              )}
+                            </div>
+                            <div style={{ border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                              <Editor height="68px" language="json" path="dbv://sort" value={sortText}
+                                onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
+                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                            </div>
+                          </div>
+
+                          {/* Projection */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>{t("query.label.projection")}</span>
+                              {hasProj && projValid && (
+                                <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
+                              )}
+                              {hasProj && !projValid && (
+                                <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
+                              )}
+                            </div>
+                            <div style={{ border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                              <Editor height="68px" language="json" path="dbv://projection" value={projectionText}
+                                onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
+                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                            </div>
+                          </div>
+
+                          {/* Limit */}
+                          <div style={{ flexShrink: 0 }}>
+                            <div style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT, marginBottom: "4px" }}>{t("query.label.limit")}</div>
+                            <select value={limitVal} onChange={(e) => { setLimitVal(Number(e.target.value)); setPage(1); }}
+                              style={{ padding: "8px 10px", border: "1px solid #e2e8f0", borderRadius: "6px", fontSize: "13px", fontFamily: FONT, background: "#fff", color: "#374151" }}>
+                              {[10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* MQL Row 2: action buttons */}
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <button onClick={loadDocuments} disabled={!filterValid || !sortValid || !projValid}
+                            style={{ background: filterValid && sortValid && projValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid && projValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}>
+                            {t("query.button.apply")}
+                          </button>
+                          {(hasFilter || hasSort || hasProj) && (
+                            <button onClick={() => { setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
+                              style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
+                              {t("query.button.clear")}
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* SQL editor */}
+                        <div style={{ marginBottom: "8px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+                            <label htmlFor="sql-editor" style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
+                              {t("query.sql.label")}
+                            </label>
+                            {sqlText.trim() && sqlValid && sqlResult?.mql && (
+                              <span style={{ fontSize: "10px", background: "#dbeafe", color: "#1d4ed8", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.active")}</span>
+                            )}
+                            {sqlText.trim() && sqlError && (
+                              <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.sql.parseError")}</span>
+                            )}
+                          </div>
+                          <div style={{ border: sqlError && sqlText.trim() ? "1px solid #fca5a5" : sqlText.trim() && sqlValid ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                            <Editor
+                              height="68px"
+                              language="sql"
+                              path="dbv://sql"
+                              value={sqlText}
+                              onChange={(v) => { setSqlText(v ?? ""); setPage(1); }}
+                              options={{ ...monoOpts, suggest: { showSnippets: true, showWords: true } }}
+                              onMount={(editor, monaco) => {
+                                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, applySql);
+                              }}
+                            />
+                          </div>
+                          {sqlError && sqlText.trim() && (
+                            <div style={{ marginTop: "4px", fontSize: "12px", color: "#dc2626", fontFamily: FONT }}>{sqlError}</div>
+                          )}
+                        </div>
+
+                        {/* SQL → MQL preview */}
+                        {sqlResult?.mql && sqlText.trim() && (
+                          <div style={{ marginBottom: "8px", padding: "8px 12px", background: "#f0f9ff", border: "1px solid #bae6fd", borderRadius: "6px", fontSize: "12px", fontFamily: "monospace", color: "#0369a1" }}>
+                            <div style={{ fontWeight: 600, marginBottom: "4px", fontFamily: FONT, color: "#0284c7", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{t("query.sql.mqlPreview")}</div>
+                            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                              {sqlResult.preview.filter && <span><strong>filter:</strong> {sqlResult.preview.filter}</span>}
+                              {sqlResult.preview.sort && <span><strong>sort:</strong> {sqlResult.preview.sort}</span>}
+                              {sqlResult.preview.projection && <span><strong>projection:</strong> {sqlResult.preview.projection}</span>}
+                              {sqlResult.preview.limit && <span><strong>limit:</strong> {sqlResult.preview.limit}</span>}
+                              {!sqlResult.preview.filter && !sqlResult.preview.sort && !sqlResult.preview.projection && !sqlResult.preview.limit && (
+                                <span style={{ color: "#64748b" }}>{t("query.sql.noConstraints")}</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SQL action buttons */}
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <button onClick={applySql} disabled={!sqlValid || !sqlText.trim() || !sqlResult?.mql}
+                            style={{ background: sqlValid && sqlText.trim() && sqlResult?.mql ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: sqlValid && sqlText.trim() && sqlResult?.mql ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}>
+                            {t("query.button.apply")}
+                          </button>
+                          {sqlText.trim() && (
+                            <button onClick={() => { setSqlText(""); setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
+                              style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
+                              {t("query.button.clear")}
+                            </button>
+                          )}
+                          <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("query.sql.example", { col })}</span>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Row: layout toggle + export/import/create */}
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px" }}>
                       <div style={{ flex: 1 }} />
                       {/* Layout toggle */}
                       <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
