@@ -1,16 +1,20 @@
 use axum::{
+    Json,
     body::Body,
     extract::{Path, State},
     http::header,
     response::Response,
-    Json,
 };
 use bson::Document;
 use futures::TryStreamExt;
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppState};
+use crate::{
+    auth::rbac::{ReadAccess, WriteAccess},
+    errors::AppError,
+    state::AppState,
+};
 
 /// Export all documents in a collection as a JSON array (newline-delimited).
 pub async fn export_collection(
@@ -25,8 +29,8 @@ pub async fn export_collection(
         docs.push(serde_json::to_value(doc).unwrap_or(Value::Null));
     }
 
-    let body = serde_json::to_string_pretty(&docs)
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+    let body =
+        serde_json::to_string_pretty(&docs).map_err(|e| AppError::Internal(e.to_string()))?;
 
     let filename = format!("{collection}.json");
     Ok(Response::builder()
@@ -54,7 +58,11 @@ pub async fn import_collection(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<ImportBody>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection::<Document>(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .collection::<Document>(&db, &collection);
 
     if body.replace {
         coll.drop().await?;

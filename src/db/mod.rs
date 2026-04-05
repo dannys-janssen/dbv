@@ -1,7 +1,6 @@
 use futures::TryStreamExt;
 use mongodb::{
-    Client, Collection, Database,
-    IndexModel,
+    Client, Collection, Database, IndexModel,
     options::{ClientOptions, IndexOptions, Tls, TlsOptions},
 };
 use serde_json::Value;
@@ -21,6 +20,16 @@ pub struct DbClient {
     pub tls_allow_invalid_certs: bool,
 }
 
+/// Parameters for creating an index; used to avoid a clippy::too_many_arguments violation.
+pub struct CreateIndexParams {
+    pub keys: bson::Document,
+    pub name: Option<String>,
+    pub unique: Option<bool>,
+    pub sparse: Option<bool>,
+    pub ttl: Option<u64>,
+    pub background: Option<bool>,
+}
+
 impl DbClient {
     /// Connect with explicit TLS override fields (mirrors the env-var config path).
     pub async fn from_uri_with_tls(
@@ -32,9 +41,8 @@ impl DbClient {
     ) -> Result<Self, AppError> {
         let mut options = ClientOptions::parse(uri).await?;
 
-        let needs_tls_override = tls_ca_file.is_some()
-            || tls_cert_key_file.is_some()
-            || tls_allow_invalid_certs;
+        let needs_tls_override =
+            tls_ca_file.is_some() || tls_cert_key_file.is_some() || tls_allow_invalid_certs;
 
         if needs_tls_override {
             let mut tls_opts = match options.tls.take() {
@@ -70,6 +78,7 @@ impl DbClient {
     }
 
     /// Convenience constructor: connect with no extra TLS overrides.
+    #[allow(dead_code)]
     pub async fn from_uri(uri: &str, default_db: &str) -> Result<Self, AppError> {
         Self::from_uri_with_tls(uri, default_db, None, None, false).await
     }
@@ -107,6 +116,7 @@ impl DbClient {
         self.client.database(name)
     }
 
+    #[allow(dead_code)]
     pub fn default_database(&self) -> Database {
         self.client.database(&self.default_db)
     }
@@ -126,7 +136,10 @@ impl DbClient {
     }
 
     pub async fn create_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).create_collection(collection).await?;
+        self.client
+            .database(db)
+            .create_collection(collection)
+            .await?;
         Ok(())
     }
 
@@ -136,7 +149,11 @@ impl DbClient {
     }
 
     pub async fn drop_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
-        self.client.database(db).collection::<bson::Document>(collection).drop().await?;
+        self.client
+            .database(db)
+            .collection::<bson::Document>(collection)
+            .drop()
+            .await?;
         Ok(())
     }
 
@@ -147,13 +164,21 @@ impl DbClient {
         while let Some(model) = cursor.try_next().await? {
             let mut map = serde_json::Map::new();
             map.insert("keys".to_string(), serde_json::to_value(&model.keys)?);
-            let name = model.options.as_ref()
+            let name = model
+                .options
+                .as_ref()
                 .and_then(|o| o.name.clone())
                 .unwrap_or_else(|| "_unknown".to_string());
             map.insert("name".to_string(), Value::String(name));
             if let Some(opts) = &model.options {
-                map.insert("unique".to_string(), Value::Bool(opts.unique.unwrap_or(false)));
-                map.insert("sparse".to_string(), Value::Bool(opts.sparse.unwrap_or(false)));
+                map.insert(
+                    "unique".to_string(),
+                    Value::Bool(opts.unique.unwrap_or(false)),
+                );
+                map.insert(
+                    "sparse".to_string(),
+                    Value::Bool(opts.sparse.unwrap_or(false)),
+                );
                 if let Some(expire) = opts.expire_after {
                     map.insert("ttl".to_string(), serde_json::json!(expire.as_secs()));
                 }
@@ -167,22 +192,17 @@ impl DbClient {
         &self,
         db: &str,
         collection: &str,
-        keys: bson::Document,
-        name: Option<String>,
-        unique: Option<bool>,
-        sparse: Option<bool>,
-        ttl: Option<u64>,
-        background: Option<bool>,
+        params: CreateIndexParams,
     ) -> Result<String, AppError> {
         let coll: Collection<bson::Document> = self.client.database(db).collection(collection);
         let mut opts = IndexOptions::default();
-        opts.name = name;
-        opts.unique = unique;
-        opts.sparse = sparse;
-        opts.expire_after = ttl.map(std::time::Duration::from_secs);
-        opts.background = background;
+        opts.name = params.name;
+        opts.unique = params.unique;
+        opts.sparse = params.sparse;
+        opts.expire_after = params.ttl.map(std::time::Duration::from_secs);
+        opts.background = params.background;
         let model = IndexModel::builder()
-            .keys(keys)
+            .keys(params.keys)
             .options(opts)
             .build();
         let res = coll.create_index(model).await?;
@@ -195,8 +215,17 @@ impl DbClient {
         Ok(())
     }
 
-    pub async fn run_command(&self, db_name: &str, command: bson::Document, admin: bool) -> Result<Value, AppError> {
-        let db = if admin { self.client.database("admin") } else { self.client.database(db_name) };
+    pub async fn run_command(
+        &self,
+        db_name: &str,
+        command: bson::Document,
+        admin: bool,
+    ) -> Result<Value, AppError> {
+        let db = if admin {
+            self.client.database("admin")
+        } else {
+            self.client.database(db_name)
+        };
         let result = db.run_command(command).await?;
         Ok(serde_json::to_value(result)?)
     }

@@ -1,11 +1,8 @@
 pub mod rbac;
 
-use axum::{
-    extract::{FromRef, FromRequestParts, State},
-    http::{request::Parts, HeaderMap},
-    RequestPartsExt,
-};
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use axum::extract::{FromRef, FromRequestParts};
+use axum::http::{HeaderMap, request::Parts};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use reqwest::Client as HttpClient;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -24,7 +21,9 @@ pub struct JwksCache {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Jwk {
     pub kid: String,
+    #[allow(dead_code)]
     pub kty: String,
+    #[allow(dead_code)]
     pub alg: Option<String>,
     pub n: Option<String>,
     pub e: Option<String>,
@@ -109,8 +108,9 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let token = extract_bearer_token(&parts.headers)
-            .ok_or_else(|| AppError::Unauthorized("Missing or invalid Authorization header".into()))?;
+        let token = extract_bearer_token(&parts.headers).ok_or_else(|| {
+            AppError::Unauthorized("Missing or invalid Authorization header".into())
+        })?;
 
         let config = Config::from_ref(state);
         let jwks_cache = JwksCache::from_ref(state);
@@ -129,8 +129,8 @@ async fn validate_token(
     config: &Config,
     jwks_cache: &JwksCache,
 ) -> Result<Claims, AppError> {
-    let header = decode_header(token)
-        .map_err(|_| AppError::Unauthorized("Invalid token header".into()))?;
+    let header =
+        decode_header(token).map_err(|_| AppError::Unauthorized("Invalid token header".into()))?;
 
     let kid = header
         .kid
@@ -158,13 +158,13 @@ async fn validate_token(
         .map_err(|e| AppError::Unauthorized(format!("Token validation failed: {e}")))?;
 
     // Verify the token was actually issued for our client.
-    if let Some(azp) = &data.claims.azp {
-        if azp != &config.keycloak_client_id {
-            return Err(AppError::Unauthorized(format!(
-                "Token azp '{azp}' does not match expected client '{}'",
-                config.keycloak_client_id
-            )));
-        }
+    if let Some(azp) = &data.claims.azp
+        && azp != &config.keycloak_client_id
+    {
+        return Err(AppError::Unauthorized(format!(
+            "Token azp '{azp}' does not match expected client '{}'",
+            config.keycloak_client_id
+        )));
     }
 
     Ok(data.claims)

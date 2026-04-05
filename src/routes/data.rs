@@ -1,15 +1,20 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
-    Json,
 };
-use bson::{doc, Document};
+use bson::{Document, doc};
 use futures::TryStreamExt;
 use mongodb::options::FindOptions;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
-use crate::{auth::rbac::{ReadAccess, WriteAccess}, errors::AppError, state::AppState};
+use crate::{
+    auth::rbac::{ReadAccess, WriteAccess},
+    db::CreateIndexParams,
+    errors::AppError,
+    state::AppState,
+};
 
 const SYSTEM_DATABASES: &[&str] = &["admin", "config", "local"];
 
@@ -36,8 +41,12 @@ pub struct PaginationParams {
     pub projection: Option<String>,
 }
 
-fn default_page() -> u64 { 1 }
-fn default_limit() -> i64 { 20 }
+fn default_page() -> u64 {
+    1
+}
+fn default_limit() -> i64 {
+    20
+}
 
 pub async fn list_databases(
     _claims: ReadAccess,
@@ -59,10 +68,20 @@ pub async fn create_database(
     Json(body): Json<CreateDatabaseBody>,
 ) -> Result<(StatusCode, Json<Value>), AppError> {
     if SYSTEM_DATABASES.contains(&db.as_str()) {
-        return Err(AppError::BadRequest(format!("Cannot create system database '{db}'")));
+        return Err(AppError::BadRequest(format!(
+            "Cannot create system database '{db}'"
+        )));
     }
-    state.db.read().await.create_collection(&db, &body.collection).await?;
-    Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.collection }))))
+    state
+        .db
+        .read()
+        .await
+        .create_collection(&db, &body.collection)
+        .await?;
+    Ok((
+        StatusCode::CREATED,
+        Json(json!({ "db": db, "collection": body.collection })),
+    ))
 }
 
 pub async fn drop_database(
@@ -71,7 +90,9 @@ pub async fn drop_database(
     Path(db): Path<String>,
 ) -> Result<Json<Value>, AppError> {
     if SYSTEM_DATABASES.contains(&db.as_str()) {
-        return Err(AppError::BadRequest(format!("Cannot drop system database '{db}'")));
+        return Err(AppError::BadRequest(format!(
+            "Cannot drop system database '{db}'"
+        )));
     }
     state.db.read().await.drop_database(&db).await?;
     Ok(Json(json!({ "dropped": db })))
@@ -97,8 +118,16 @@ pub async fn create_collection(
     Path(db): Path<String>,
     Json(body): Json<CreateCollectionBody>,
 ) -> Result<(StatusCode, Json<Value>), AppError> {
-    state.db.read().await.create_collection(&db, &body.name).await?;
-    Ok((StatusCode::CREATED, Json(json!({ "db": db, "collection": body.name }))))
+    state
+        .db
+        .read()
+        .await
+        .create_collection(&db, &body.name)
+        .await?;
+    Ok((
+        StatusCode::CREATED,
+        Json(json!({ "db": db, "collection": body.name })),
+    ))
 }
 
 pub async fn drop_collection(
@@ -106,7 +135,12 @@ pub async fn drop_collection(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    state.db.read().await.drop_collection(&db, &collection).await?;
+    state
+        .db
+        .read()
+        .await
+        .drop_collection(&db, &collection)
+        .await?;
     Ok(Json(json!({ "dropped": collection })))
 }
 
@@ -305,13 +339,27 @@ pub async fn create_index(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<CreateIndexBody>,
 ) -> Result<(StatusCode, Json<Value>), AppError> {
-    let keys = json_to_doc(body.keys)
-        .map_err(|_| AppError::BadRequest("Invalid keys document".into()))?;
+    let keys =
+        json_to_doc(body.keys).map_err(|_| AppError::BadRequest("Invalid keys document".into()))?;
     if keys.is_empty() {
         return Err(AppError::BadRequest("Index keys cannot be empty".into()));
     }
-    let index_name = state.db.read().await
-        .create_index(&db, &collection, keys, body.name, body.unique, body.sparse, body.ttl, body.background)
+    let index_name = state
+        .db
+        .read()
+        .await
+        .create_index(
+            &db,
+            &collection,
+            CreateIndexParams {
+                keys,
+                name: body.name,
+                unique: body.unique,
+                sparse: body.sparse,
+                ttl: body.ttl,
+                background: body.background,
+            },
+        )
         .await?;
     Ok((StatusCode::CREATED, Json(json!({ "name": index_name }))))
 }
@@ -324,7 +372,12 @@ pub async fn drop_index(
     if name == "_id_" {
         return Err(AppError::BadRequest("Cannot drop the _id index".into()));
     }
-    state.db.read().await.drop_index(&db, &collection, &name).await?;
+    state
+        .db
+        .read()
+        .await
+        .drop_index(&db, &collection, &name)
+        .await?;
     Ok(Json(json!({ "dropped": name })))
 }
 
@@ -367,6 +420,11 @@ pub async fn run_command(
 ) -> Result<Json<Value>, AppError> {
     let cmd_doc: bson::Document = serde_json::from_value(body.command)
         .map_err(|e| AppError::BadRequest(format!("Invalid command document: {e}")))?;
-    let result = state.db.read().await.run_command(&db, cmd_doc, body.admin).await?;
+    let result = state
+        .db
+        .read()
+        .await
+        .run_command(&db, cmd_doc, body.admin)
+        .await?;
     Ok(Json(json!({ "result": result })))
 }

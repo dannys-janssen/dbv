@@ -1,11 +1,11 @@
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 use bson::{Bson, Document};
 use futures::TryStreamExt;
 use mongodb::options::FindOptions;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
 use crate::{auth::rbac::ReadAccess, errors::AppError, state::AppState};
@@ -72,13 +72,27 @@ fn collect_fields(doc: &Document, prefix: &str, map: &mut BTreeMap<String, Field
                 entry.nullable = true;
                 entry.types.insert("null".into());
             }
-            Bson::Double(_) => { entry.types.insert("double".into()); }
-            Bson::String(_) => { entry.types.insert("string".into()); }
-            Bson::Boolean(_) => { entry.types.insert("bool".into()); }
-            Bson::Int32(_) => { entry.types.insert("int32".into()); }
-            Bson::Int64(_) => { entry.types.insert("int64".into()); }
-            Bson::DateTime(_) => { entry.types.insert("date".into()); }
-            Bson::ObjectId(_) => { entry.types.insert("objectId".into()); }
+            Bson::Double(_) => {
+                entry.types.insert("double".into());
+            }
+            Bson::String(_) => {
+                entry.types.insert("string".into());
+            }
+            Bson::Boolean(_) => {
+                entry.types.insert("bool".into());
+            }
+            Bson::Int32(_) => {
+                entry.types.insert("int32".into());
+            }
+            Bson::Int64(_) => {
+                entry.types.insert("int64".into());
+            }
+            Bson::DateTime(_) => {
+                entry.types.insert("date".into());
+            }
+            Bson::ObjectId(_) => {
+                entry.types.insert("objectId".into());
+            }
             Bson::Array(arr) => {
                 entry.types.insert("array".into());
                 // Inspect element types
@@ -92,11 +106,21 @@ fn collect_fields(doc: &Document, prefix: &str, map: &mut BTreeMap<String, Field
                 entry.types.insert("object".into());
                 collect_fields(inner, &path, map);
             }
-            Bson::Decimal128(_) => { entry.types.insert("decimal128".into()); }
-            Bson::Binary(_) => { entry.types.insert("binary".into()); }
-            Bson::RegularExpression(_) => { entry.types.insert("regex".into()); }
-            Bson::Timestamp(_) => { entry.types.insert("timestamp".into()); }
-            _ => { entry.types.insert("other".into()); }
+            Bson::Decimal128(_) => {
+                entry.types.insert("decimal128".into());
+            }
+            Bson::Binary(_) => {
+                entry.types.insert("binary".into());
+            }
+            Bson::RegularExpression(_) => {
+                entry.types.insert("regex".into());
+            }
+            Bson::Timestamp(_) => {
+                entry.types.insert("timestamp".into());
+            }
+            _ => {
+                entry.types.insert("other".into());
+            }
         }
     }
 }

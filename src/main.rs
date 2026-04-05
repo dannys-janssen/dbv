@@ -1,6 +1,6 @@
 use axum::{
-    routing::{delete, get, post},
     Router,
+    routing::{delete, get, post},
 };
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -63,10 +63,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/health", get(routes::health::health))
         .route("/auth/login", post(routes::auth_proxy::login))
         .route("/auth/refresh", post(routes::auth_proxy::refresh))
-        .route(
-            "/databases",
-            get(routes::data::list_databases),
-        )
+        .route("/databases", get(routes::data::list_databases))
         .route(
             "/databases/{db}",
             post(routes::data::create_database).delete(routes::data::drop_database),
@@ -95,10 +92,7 @@ async fn main() -> anyhow::Result<()> {
             "/databases/{db}/collections/{collection}/aggregate",
             post(routes::data::aggregate),
         )
-        .route(
-            "/databases/{db}/stats",
-            get(routes::data::database_stats),
-        )
+        .route("/databases/{db}/stats", get(routes::data::database_stats))
         .route(
             "/databases/{db}/collections/{collection}/stats",
             get(routes::data::collection_stats),
@@ -127,7 +121,10 @@ async fn main() -> anyhow::Result<()> {
             "/databases/{db}/run_command",
             post(routes::data::run_command),
         )
-        .route("/connection", get(routes::connection::get_connection).post(routes::connection::set_connection))
+        .route(
+            "/connection",
+            get(routes::connection::get_connection).post(routes::connection::set_connection),
+        )
         .route("/connection/reconnect", post(routes::connection::reconnect))
         .route("/openapi.yaml", get(routes::openapi::openapi_spec));
 
@@ -137,8 +134,7 @@ async fn main() -> anyhow::Result<()> {
     // SPA fallback: serve dist files, fall back to index.html for client-side routes.
     // Must use .fallback() not .not_found_service() — the latter forces status 404
     // which breaks client-side routing behind proxies like Traefik.
-    let spa_service = ServeDir::new(&frontend_dist)
-        .fallback(ServeFile::new(&index_html));
+    let spa_service = ServeDir::new(&frontend_dist).fallback(ServeFile::new(&index_html));
     let app = Router::new()
         .nest("/api", api)
         .route("/docs", get(routes::openapi::swagger_ui))
