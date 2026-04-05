@@ -151,7 +151,8 @@ function convertWhere(node: any): Record<string, unknown> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractField(node: any): string {
   if (node.type === "column_ref") {
-    return node.column?.name ?? node.column ?? String(node.column);
+    const col: string = node.column?.name ?? node.column ?? String(node.column);
+    return node.table ? `${node.table}.${col}` : col;
   }
   throw new Error(`Expected column reference, got: ${node.type}`);
 }
@@ -185,7 +186,8 @@ function convertOrderBy(orderby: OrderBy[] | null): Record<string, 1 | -1> {
   for (const clause of orderby) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const col = (clause.expr as any);
-    const field: string = col.column?.name ?? col.column ?? String(col.column);
+    const colName: string = col.column?.name ?? col.column ?? String(col.column);
+    const field: string = col.table ? `${col.table}.${colName}` : colName;
     sort[field] = clause.type?.toUpperCase() === "DESC" ? -1 : 1;
   }
   return sort;
@@ -202,7 +204,8 @@ function convertColumns(columns: Column[] | "*"): Record<string, 1> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const expr = (col as any).expr ?? col;
     if (expr.type === "column_ref") {
-      const name: string = expr.column?.name ?? expr.column ?? String(expr.column);
+      const colName: string = expr.column?.name ?? expr.column ?? String(expr.column);
+      const name: string = expr.table ? `${expr.table}.${colName}` : colName;
       if (name !== "*") proj[name] = 1;
     }
   }
