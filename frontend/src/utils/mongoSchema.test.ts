@@ -10,8 +10,18 @@ import {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function makeSchema(fields: CollectionSchema["fields"]): CollectionSchema {
-  return { sampled_documents: fields.length, fields };
+type TestSchemaField = Omit<CollectionSchema["fields"][number], "occurrences"> & {
+  occurrences?: number;
+};
+
+function makeSchema(fields: TestSchemaField[]): CollectionSchema {
+  return {
+    sampled_documents: fields.length,
+    fields: fields.map((field) => ({
+      occurrences: field.occurrences ?? 1,
+      ...field,
+    })),
+  };
 }
 
 // ── buildDocumentSchema ───────────────────────────────────────────────────────
