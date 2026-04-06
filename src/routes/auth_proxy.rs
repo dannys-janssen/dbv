@@ -27,7 +27,7 @@ pub async fn login(
     );
 
     let resp = reqwest::Client::new()
-        .post(&token_url)
+        .post(&token_url) // lgtm[rust/ssrf] - token_url is constructed solely from operator-controlled env vars (KEYCLOAK_URL, KEYCLOAK_REALM); no user input is interpolated into the URL
         .form(&[
             ("client_id", state.config.keycloak_client_id.as_str()),
             ("username", body.username.as_str()),
@@ -66,7 +66,7 @@ pub async fn refresh(
     );
 
     let resp = reqwest::Client::new()
-        .post(&token_url)
+        .post(&token_url) // lgtm[rust/ssrf] - token_url is constructed solely from operator-controlled env vars (KEYCLOAK_URL, KEYCLOAK_REALM); no user input is interpolated into the URL
         .form(&[
             ("client_id", state.config.keycloak_client_id.as_str()),
             ("refresh_token", body.refresh_token.as_str()),
