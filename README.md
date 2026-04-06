@@ -584,8 +584,14 @@ The UI is fully localised via **react-i18next**. Translation files live in `fron
 | `it` | Italiano |
 | `pt` | Português |
 | `ar` | العربية |
+| `el` | Ελληνικά |
 | `hi` | हिन्दी |
 | `ja` | 日本語 |
+| `ko` | 한국어 |
+| `pl` | Polski |
+| `ru` | Русский |
+| `uk` | Українська |
+| `ur` | اردو |
 | `zh-CN` | 中文 (Simplified) |
 
 - Language is auto-detected from the browser (`navigator.language`) on first visit, then persisted to `localStorage` key `dbv-language`.

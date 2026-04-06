@@ -299,7 +299,7 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
 
 The UI is fully localised via **react-i18next**. Translation files live in `frontend/src/locales/`.
 
-Supported languages: English (en), German (de), French (fr), Danish (da), Dutch (nl), Spanish (es), Italian (it), Portuguese (pt), Arabic (ar), Hindi (hi), Japanese (ja), Simplified Chinese (zh-CN).
+Supported languages: English (en), German (de), French (fr), Danish (da), Dutch (nl), Spanish (es), Italian (it), Portuguese (pt), Arabic (ar), Greek (el), Hindi (hi), Japanese (ja), Korean (ko), Polish (pl), Russian (ru), Ukrainian (uk), Urdu (ur), Simplified Chinese (zh-CN).
 
 - Language is auto-detected from the browser (`navigator.language`) on first visit, then persisted to `localStorage` key `dbv-language`.
 - The language selector (flag + name dropdown) is shown in the BrowserPage header and on the Login card.

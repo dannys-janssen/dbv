@@ -1,0 +1,288 @@
+{
+  "brand": { "name": "dbv" },
+  "auth": {
+    "login": {
+      "title": "Σύνδεση",
+      "subtitle": "Πρόσβαση στις βάσεις δεδομένων MongoDB",
+      "footer": "Ασφαλής σύνδεση μέσω Keycloak OAuth2",
+      "button": { "label": "Σύνδεση", "loading": "Σύνδεση…" },
+      "validation": { "fieldsRequired": "Απαιτούνται όνομα χρήστη και κωδικός πρόσβασης" },
+      "error": { "invalidCredentials": "Αποτυχία σύνδεσης. Ελέγξτε τα στοιχεία σας." }
+    }
+  },
+  "nav": {
+    "signOut": "Αποσύνδεση",
+    "section": { "databases": "ΒΑΣΕΙΣ ΔΕΔΟΜΕΝΩΝ", "collections": "ΣΥΛΛΟΓΕΣ" }
+  },
+  "connection": {
+    "status": { "noInfo": "Χωρίς πληροφορίες σύνδεσης" },
+    "button": {
+      "reconnect": { "label": "↻ Επανασύνδεση", "title": "Επανασύνδεση με το τρέχον URI" },
+      "change": { "label": "⚙ Αλλαγή", "title": "Αλλαγή σύνδεσης MongoDB" }
+    },
+    "error": { "failed": "⚠ Αποτυχία σύνδεσης MongoDB:" }
+  },
+  "database": {
+    "search": { "placeholder": "Αναζήτηση βάσεων δεδομένων…" },
+    "list": { "empty": "Δεν βρέθηκαν βάσεις δεδομένων" },
+    "button": { "create": { "title": "Δημιουργία βάσης δεδομένων" }, "stats": { "title": "Στατιστικά βάσης δεδομένων «{{db}}»" }, "drop": { "title": "Διαγραφή βάσης δεδομένων «{{db}}»" } }
+  },
+  "collection": {
+    "search": { "placeholder": "Αναζήτηση συλλογών…" },
+    "list": { "empty": { "noCollections": "Δεν υπάρχουν συλλογές.", "canCreate": "Κάντε κλικ στο ＋ για να δημιουργήσετε." } },
+    "button": { "create": { "title": "Δημιουργία συλλογής" }, "drop": { "title": "Διαγραφή συλλογής «{{col}}»" } }
+  },
+  "tabs": {
+    "button": { "close": { "title": "Κλείσιμο καρτέλας" }, "new": { "title": "Νέα καρτέλα" } },
+    "documents": "Έγγραφα",
+    "aggregate": "Συγκέντρωση",
+    "schema": "Σχήμα",
+    "indexes": "Ευρετήρια",
+    "stats": "Στατιστικά",
+    "commands": "Εντολές"
+  },
+  "modals": {
+    "createDatabase": {
+      "title": "Δημιουργία Βάσης Δεδομένων",
+      "subtitle": "Η MongoDB δημιουργεί βάση δεδομένων όταν δημιουργείται η πρώτη συλλογή.",
+      "label": { "dbName": "Όνομα βάσης δεδομένων", "collectionName": "Όνομα αρχικής συλλογής" },
+      "placeholder": { "dbName": "π.χ. myapp", "collectionName": "π.χ. users" }
+    },
+    "createCollection": {
+      "title": "Δημιουργία Συλλογής",
+      "subtitle": "Προσθήκη νέας συλλογής σε",
+      "label": { "name": "Όνομα συλλογής" },
+      "placeholder": { "name": "π.χ. products" }
+    },
+    "dbStats": {
+      "title": "Βάση Δεδομένων:",
+      "subtitle": "Στατιστικά αποθήκευσης και εγγράφων",
+      "unavailable": "Τα στατιστικά δεν είναι διαθέσιμα."
+    },
+    "changeConnection": {
+      "title": "Αλλαγή Σύνδεσης MongoDB",
+      "subtitle": "Εισαγάγετε νέο URI σύνδεσης και προεπιλεγμένη βάση δεδομένων. Οι παράμετροι TLS είναι προαιρετικές.",
+      "label": {
+        "uri": "URI Σύνδεσης",
+        "defaultDb": "Προεπιλεγμένη Βάση Δεδομένων",
+        "tlsCaFile": "Αρχείο CA Πιστοποιητικού TLS",
+        "tlsCertKeyFile": "Αρχείο Πιστοποιητικού + Κλειδιού Πελάτη TLS",
+        "allowInvalidTls": "Αποδοχή μη έγκυρων / αυτο-υπογεγραμμένων πιστοποιητικών TLS"
+      },
+      "placeholder": {
+        "uri": "π.χ. mongodb://user:pass@host:27017",
+        "defaultDb": "π.χ. mydb",
+        "tlsCaFile": "π.χ. /certs/ca.pem",
+        "tlsCertKeyFile": "π.χ. /certs/client.pem"
+      },
+      "optional": "(προαιρετικό, διαδρομή στον διακομιστή)",
+      "warning": { "insecure": "⚠ μη ασφαλές" }
+    },
+    "confirmDrop": {
+      "database": "Διαγραφή ολόκληρης της βάσης δεδομένων «{{db}}»; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+      "collection": "Διαγραφή συλλογής «{{col}}»; Όλα τα έγγραφα θα διαγραφούν.",
+      "index": "Διαγραφή ευρετηρίου «{{name}}»;"
+    },
+    "editDocument": { "title": "Επεξεργασία Εγγράφου" },
+    "newDocument": { "title": "Νέο Έγγραφο" },
+    "createIndex": {
+      "title": "Δημιουργία Ευρετηρίου",
+      "subtitle": "Ορίστε τα πεδία και τις επιλογές για το νέο ευρετήριο.",
+      "label": { "keys": "Κλειδιά Ευρετηρίου", "name": "Όνομα Ευρετηρίου", "unique": "Μοναδικό", "sparse": "Αραιό", "background": "Παρασκήνιο", "ttl": "TTL" },
+      "optional": "(προαιρετικό)",
+      "hint": { "background": "(χωρίς αποκλεισμό)", "ttl": "(δευτερόλεπτα, προαιρετικό)" },
+      "placeholder": { "fieldName": "όνομα πεδίου", "name": "αυτόματη δημιουργία αν κενό", "ttl": "π.χ. 3600" },
+      "option": { "ascending": "1 (αύξουσα)", "descending": "-1 (φθίνουσα)" },
+      "button": { "addField": "+ Προσθήκη πεδίου", "submit": "Δημιουργία Ευρετηρίου" },
+      "validation": { "fieldRequired": "Απαιτείται τουλάχιστον ένα πεδίο." }
+    },
+    "import": { "confirmReplace": "Εισαγωγή {{count}} εγγράφων; (αντικατάσταση υπαρχόντων;)" },
+    "confirmDelete": { "document": "Διαγραφή αυτού του εγγράφου;" }
+  },
+  "buttons": {
+    "cancel": "Ακύρωση",
+    "create": "Δημιουργία",
+    "close": "Κλείσιμο",
+    "connect": "Σύνδεση",
+    "save": "Αποθήκευση",
+    "drop": "Διαγραφή",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "export": "Εξαγωγή",
+    "import": "Εισαγωγή",
+    "add": "Προσθήκη",
+    "refresh": "↻ Ανανέωση",
+    "form": "⊟ Φόρμα",
+    "json": "{ } JSON"
+  },
+  "form": {
+    "labels": { "username": "Όνομα χρήστη", "password": "Κωδικός πρόσβασης", "fieldName": "Όνομα πεδίου" },
+    "button": { "removeField": { "title": "Αφαίρεση πεδίου" }, "remove": "×", "setNull": "Ορισμός σε null:" },
+    "value": { "null": "null" },
+    "option": { "true": "αληθές", "false": "ψευδές" },
+    "label": { "utc": "UTC", "newFieldName": "Νέο όνομα πεδίου", "newFieldType": "Τύπος νέου πεδίου", "date": "Ημερομηνία", "time": "Ώρα", "type": "Τύπος" },
+    "placeholder": { "objectId": "Αλφαριθμητικό 24 χαρακτήρων", "jsonValue": "Τιμή JSON" },
+    "section": { "addField": "Προσθήκη πεδίου" },
+    "validation": { "fieldExists": "Το πεδίο «{{key}}» υπάρχει ήδη.", "fieldNameRequired": "Το όνομα πεδίου είναι υποχρεωτικό." }
+  },
+  "editor": {
+    "form": { "noSchema": "Δεν υπάρχει διαθέσιμο σχήμα. Χρησιμοποιήστε τη λειτουργία JSON για επεξεργασία." },
+    "mode": {
+      "form": { "subtitle": "Επεξεργασία πεδίων με εισόδους αναγνώρισης τύπου. Μεταβείτε στο JSON για άμεση επεξεργασία." },
+      "json": { "subtitle": "Επεξεργασία του ακατέργαστου εγγράφου JSON. Μεταβείτε στη Φόρμα για καθοδηγούμενη επεξεργασία." }
+    },
+    "error": { "saveFailure": "Μη έγκυρο JSON ή αποτυχία αποθήκευσης:" }
+  },
+  "query": {
+    "label": { "filter": "Φίλτρο", "sort": "Ταξινόμηση", "projection": "Προβολή", "limit": "Όριο" },
+    "hint": { "ctrlEnter": "Ctrl+Enter για εφαρμογή" },
+    "badge": { "active": "ενεργό", "invalidJson": "μη έγκυρο JSON" },
+    "button": { "apply": "Εφαρμογή", "clear": "Εκκαθάριση" },
+    "mode": { "label": "Λειτουργία ερωτήματος", "sqlHint": "Πληκτρολογήστε SQL SELECT — Ctrl+Enter για εφαρμογή" },
+    "sql": {
+      "label": "Ερώτημα SQL",
+      "parseError": "σφάλμα ανάλυσης",
+      "mqlPreview": "Ισοδύναμο MQL",
+      "noConstraints": "Χωρίς φίλτρο, ταξινόμηση ή προβολή — επιστρέφει όλα τα έγγραφα",
+      "example": "π.χ. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
+    }
+  },
+  "views": {
+    "table": { "title": "Προβολή πίνακα" },
+    "tree": { "title": "Προβολή δέντρου" }
+  },
+  "selection": {
+    "count_one": "{{count}} έγγραφο επιλεγμένο",
+    "count_other": "{{count}} έγγραφα επιλεγμένα",
+    "button": { "export": "Εξαγωγή Επιλεγμένων", "delete": "Διαγραφή Επιλεγμένων", "clear": "✕ Εκκαθάριση" },
+    "confirmDelete_one": "Διαγραφή {{count}} επιλεγμένου εγγράφου; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+    "confirmDelete_other": "Διαγραφή {{count}} επιλεγμένων εγγράφων; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί."
+  },
+  "documents": {
+    "list": { "empty": "Δεν βρέθηκαν έγγραφα", "emptyWithFilter": "Δοκιμάστε να προσαρμόσετε το φίλτρο ή την προβολή.", "emptyNoFilter": "Αυτή η συλλογή είναι κενή." },
+    "button": { "create": "+ Νέο Έγγραφο" },
+    "fieldCount_one": "{{count}} πεδίο",
+    "fieldCount_other": "{{count}} πεδία"
+  },
+  "table": {
+    "header": { "id": "_id", "preview": "Προεπισκόπηση", "actions": "Ενέργειες", "name": "Όνομα", "keys": "Κλειδιά", "unique": "Μοναδικό", "sparse": "Αραιό", "ttl": "TTL (s)", "index": "Ευρετήριο", "size": "Μέγεθος", "fieldPath": "Διαδρομή πεδίου", "types": "Τύποι", "coverage": "Κάλυψη", "nullable": "Nullable" }
+  },
+  "pagination": {
+    "label": "Εμφάνιση {{start}}–{{end}} από {{total}} έγγραφα",
+    "label_page": "Σελίδα {{page}}",
+    "button": { "prev": "← Προηγ.", "next": "Επόμ. →" }
+  },
+  "aggregate": {
+    "prompt": "Εισαγάγετε pipeline συγκέντρωσης (πίνακας JSON):",
+    "button": { "run": "▶ Εκτέλεση" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "results": { "count_one": "{{count}} έγγραφο", "count_other": "{{count}} έγγραφα" },
+    "placeholder": { "result": "// Εκτελέστε εντολή για να δείτε αποτελέσματα" }
+  },
+  "schema": {
+    "label": { "sampled": "Δείγμα", "document": "έγγραφο", "field": "πεδίο", "nullable": "nullable" },
+    "plural": { "documents": "α", "fields": "α" },
+    "inferring": "Συμπέρασμα σχήματος…",
+    "unavailable": "Δεν υπάρχουν διαθέσιμα δεδομένα σχήματος.",
+    "summary": "Δείγμα {{docCount}} εγγράφου{{docPlural}} · {{fieldCount}} πεδίου{{fieldPlural}}"
+  },
+  "indexes": {
+    "list": { "empty": "Δεν βρέθηκαν ευρετήρια." },
+    "button": { "create": "+ Νέο Ευρετήριο" },
+    "label": { "count_one": "{{count}} ευρετήριο", "count_other": "{{count}} ευρετήρια", "loading": "Φόρτωση…" }
+  },
+  "stats": {
+    "loading": "Φόρτωση στατιστικών…",
+    "unavailable": "Δεν υπάρχουν διαθέσιμα στατιστικά.",
+    "title": "Στατιστικά συλλογής",
+    "label": {
+      "collections": "Συλλογές",
+      "documents": "Έγγραφα",
+      "avgDocSize": "Μέσο μέγεθος εγγράφου",
+      "dataSize": "Μέγεθος δεδομένων",
+      "storageSize": "Μέγεθος αποθήκευσης",
+      "indexes": "Ευρετήρια",
+      "indexSize": "Μέγεθος ευρετηρίου",
+      "totalSize": "Συνολικό μέγεθος"
+    },
+    "section": { "indexSizes": "Μεγέθη ευρετηρίων" }
+  },
+  "commands": {
+    "search": { "placeholder": "Αναζήτηση εντολών…", "label": "Αναζήτηση εντολών" },
+    "category": { "server": "Διακομιστής", "database": "Βάση Δεδομένων", "collection": "Συλλογή", "replication": "Αναπαραγωγή", "administration": "Διαχείριση" },
+    "description": {
+      "ping": "Έλεγχος συνδεσιμότητας διακομιστή",
+      "buildInfo": "Έκδοση και πληροφορίες κατασκευής διακομιστή",
+      "hostInfo": "Πληροφορίες συστήματος υποδοχής",
+      "serverStatus": "Στατιστικά χρόνου εκτέλεσης",
+      "connectionStatus": "Τρέχουσες λεπτομέρειες σύνδεσης",
+      "hello": "Ρόλος / τοπολογία διακομιστή",
+      "listDatabases": "Λίστα όλων των βάσεων δεδομένων",
+      "currentOp": "Τρέχουσες λειτουργίες",
+      "killOp": "Τερματισμός εκτελούμενης λειτουργίας με opId",
+      "getLog": "Πρόσφατες καταχωρήσεις αρχείου καταγραφής",
+      "getParameter": "Λήψη παραμέτρου διακομιστή",
+      "setParameter": "Ορισμός παραμέτρου διακομιστή",
+      "dbStats": "Στατιστικά αποθήκευσης βάσης δεδομένων",
+      "listCollections": "Λίστα συλλογών σε αυτή τη βάση δεδομένων",
+      "usersInfo": "Λίστα χρηστών",
+      "createUser": "Δημιουργία χρήστη βάσης δεδομένων",
+      "dropUser": "Διαγραφή χρήστη",
+      "grantRolesToUser": "Εκχώρηση ρόλων σε χρήστη",
+      "revokeRolesFromUser": "Ανάκληση ρόλων από χρήστη",
+      "collStats": "Στατιστικά αποθήκευσης συλλογής",
+      "count": "Καταμέτρηση αντίστοιχων εγγράφων",
+      "validate": "Επικύρωση ακεραιότητας συλλογής",
+      "compact": "Συμπίεση / αποκατάσταση συλλογής",
+      "reIndex": "Ανακατασκευή όλων των ευρετηρίων",
+      "convertToCapped": "Μετατροπή σε capped συλλογή",
+      "replSetGetStatus": "Κατάσταση replica set",
+      "replSetGetConfig": "Ρύθμιση replica set",
+      "isMaster": "Έλεγχος ρόλου διακομιστή (παλαιό)",
+      "renameCollection": "Μετονομασία συλλογής",
+      "dropDatabase": "Διαγραφή βάσης δεδομένων",
+      "fsync": "Έκπλυση και προαιρετικό κλείδωμα",
+      "rotateCertificates": "Εναλλαγή πιστοποιητικών TLS",
+      "listIndexes": "Λίστα ευρετηρίων σε συλλογή",
+      "profile": "Λήψη/ορισμός επιπέδου profiler βάσης δεδομένων"
+    },
+    "context": { "runningOn": "Εκτέλεση σε βάση δεδομένων:" },
+    "checkbox": { "useAdminDb": "Χρήση βάσης δεδομένων admin" },
+    "button": { "run": "▶ Εκτέλεση  (Ctrl+Enter)", "running": "⏳ Εκτέλεση…" },
+    "label": { "command": "Εντολή", "result": "Αποτέλεσμα" },
+    "error": { "invalidJson": "Μη έγκυρο JSON — διορθώστε την εντολή πριν την εκτέλεση." }
+  },
+  "badge": {
+    "admin": "● Διαχειριστής",
+    "viewer": "● Θεατής",
+    "error": "Σφάλμα",
+    "success": "ΟΚ"
+  },
+  "tree": {
+    "button": { "expandAll": "Ανάπτυξη όλων", "collapseAll": "Σύμπτυξη όλων" },
+    "checkbox": { "selectAllLabel": "Επιλογή όλων στη σελίδα" }
+  },
+  "ui": {
+    "loading": "Φόρτωση…",
+    "connecting": "Σύνδεση…",
+    "sidebar": { "resize": { "title": "Σύρετε για αλλαγή μεγέθους πλευρικής μπάρας" } }
+  },
+  "empty": {
+    "title": "Επιλέξτε βάση δεδομένων και συλλογή",
+    "subtitle": {
+      "collectionNeeded": "Επιλέξτε συλλογή από την πλευρική μπάρα για περιήγηση σε έγγραφα.",
+      "databaseNeeded": "Επιλέξτε βάση δεδομένων από την πλευρική μπάρα για να ξεκινήσετε."
+    }
+  },
+  "language": { "label": "Γλώσσα" },
+  "a11y": {
+    "skipToContent": "Μετάβαση στο κύριο περιεχόμενο",
+    "tabList": "Ανοικτές καρτέλες",
+    "closeTab": "Κλείσιμο καρτέλας {{name}}",
+    "newTab": "Νέα καρτέλα",
+    "collectionStats": "Στατιστικά συλλογής {{name}}",
+    "dropCollection": "Διαγραφή συλλογής {{name}}",
+    "dropDatabase": "Διαγραφή βάσης δεδομένων {{name}}",
+    "openCollection": "Άνοιγμα συλλογής {{name}}"
+  }
+}
