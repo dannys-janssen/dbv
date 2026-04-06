@@ -250,8 +250,20 @@ mod tests {
     #[test]
     fn find_key_returns_matching_key() {
         let keys = vec![
-            Jwk { kid: "key1".to_string(), kty: "RSA".to_string(), alg: None, n: None, e: None },
-            Jwk { kid: "key2".to_string(), kty: "RSA".to_string(), alg: None, n: None, e: None },
+            Jwk {
+                kid: "key1".to_string(),
+                kty: "RSA".to_string(),
+                alg: None,
+                n: None,
+                e: None,
+            },
+            Jwk {
+                kid: "key2".to_string(),
+                kty: "RSA".to_string(),
+                alg: None,
+                n: None,
+                e: None,
+            },
         ];
         let found = find_key(&keys, "key2");
         assert!(found.is_some());
@@ -260,9 +272,13 @@ mod tests {
 
     #[test]
     fn find_key_returns_none_when_not_found() {
-        let keys = vec![
-            Jwk { kid: "key1".to_string(), kty: "RSA".to_string(), alg: None, n: None, e: None },
-        ];
+        let keys = vec![Jwk {
+            kid: "key1".to_string(),
+            kty: "RSA".to_string(),
+            alg: None,
+            n: None,
+            e: None,
+        }];
         assert!(find_key(&keys, "missing").is_none());
     }
 
@@ -353,10 +369,7 @@ mod tests {
     #[test]
     fn extract_bearer_token_returns_none_for_empty_auth_header() {
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert(
-            axum::http::header::AUTHORIZATION,
-            "".parse().unwrap(),
-        );
+        headers.insert(axum::http::header::AUTHORIZATION, "".parse().unwrap());
         assert!(super::extract_bearer_token(&headers).is_none());
     }
 }

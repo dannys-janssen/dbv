@@ -60,8 +60,8 @@ impl IntoResponse for AppError {
 mod tests {
     use super::*;
     use axum::body::to_bytes;
-    use axum::response::IntoResponse;
     use axum::http::StatusCode;
+    use axum::response::IntoResponse;
 
     async fn response_parts(err: AppError) -> (StatusCode, serde_json::Value) {
         let resp = err.into_response();

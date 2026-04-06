@@ -98,7 +98,10 @@ mod tests {
     fn jwks_url_handles_trailing_slash() {
         let cfg = make_config("http://keycloak:8080/", "myrealm");
         // The URL is built by string concat; trailing slash is preserved
-        assert!(cfg.jwks_url().contains("/realms/myrealm/protocol/openid-connect/certs"));
+        assert!(
+            cfg.jwks_url()
+                .contains("/realms/myrealm/protocol/openid-connect/certs")
+        );
     }
 
     #[test]
