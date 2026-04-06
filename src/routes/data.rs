@@ -428,3 +428,116 @@ pub async fn run_command(
         .await?;
     Ok(Json(json!({ "result": result })))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    // ── json_to_doc ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn json_to_doc_converts_plain_object() {
+        let val = json!({ "name": "Alice", "age": 30 });
+        let doc = json_to_doc(val).unwrap();
+        assert_eq!(doc.get_str("name").unwrap(), "Alice");
+        assert_eq!(doc.get_i32("age").unwrap(), 30);
+    }
+
+    #[test]
+    fn json_to_doc_converts_extended_json_oid() {
+        let val = json!({ "_id": { "$oid": "507f1f77bcf86cd799439011" } });
+        let doc = json_to_doc(val).unwrap();
+        let id = doc.get_object_id("_id").unwrap();
+        assert_eq!(id.to_hex(), "507f1f77bcf86cd799439011");
+    }
+
+    #[test]
+    fn json_to_doc_converts_extended_json_date() {
+        let val = json!({ "created": { "$date": { "$numberLong": "0" } } });
+        let doc = json_to_doc(val).unwrap();
+        // Should deserialise without error
+        assert!(doc.contains_key("created"));
+    }
+
+    #[test]
+    fn json_to_doc_returns_error_for_non_object() {
+        let val = json!([1, 2, 3]);
+        let err = json_to_doc(val).unwrap_err();
+        match err {
+            AppError::BadRequest(_) => {}
+            other => panic!("Expected BadRequest, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn json_to_doc_returns_error_for_primitive() {
+        let val = json!(42);
+        let err = json_to_doc(val).unwrap_err();
+        match err {
+            AppError::BadRequest(_) => {}
+            other => panic!("Expected BadRequest, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn json_to_doc_empty_object_produces_empty_document() {
+        let val = json!({});
+        let doc = json_to_doc(val).unwrap();
+        assert!(doc.is_empty());
+    }
+
+    // ── parse_id_bson ─────────────────────────────────────────────────────────
+
+    #[test]
+    fn parse_id_bson_parses_valid_object_id() {
+        let bson_val = parse_id_bson("507f1f77bcf86cd799439011");
+        match bson_val {
+            bson::Bson::ObjectId(oid) => assert_eq!(oid.to_hex(), "507f1f77bcf86cd799439011"),
+            other => panic!("Expected ObjectId, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_id_bson_falls_back_to_string_for_non_hex() {
+        let bson_val = parse_id_bson("not-an-objectid");
+        match bson_val {
+            bson::Bson::String(s) => assert_eq!(s, "not-an-objectid"),
+            other => panic!("Expected String, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_id_bson_falls_back_to_string_for_short_hex() {
+        // 22 hex chars — too short for a valid ObjectId (needs exactly 24)
+        let bson_val = parse_id_bson("507f1f77bcf86cd7994390");
+        match bson_val {
+            bson::Bson::String(_) => {}
+            other => panic!("Expected String fallback, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_id_bson_falls_back_to_string_for_empty_id() {
+        let bson_val = parse_id_bson("");
+        match bson_val {
+            bson::Bson::String(s) => assert_eq!(s, ""),
+            other => panic!("Expected String, got {other:?}"),
+        }
+    }
+
+    // ── SYSTEM_DATABASES constant ─────────────────────────────────────────────
+
+    #[test]
+    fn system_databases_contains_known_system_dbs() {
+        assert!(SYSTEM_DATABASES.contains(&"admin"));
+        assert!(SYSTEM_DATABASES.contains(&"config"));
+        assert!(SYSTEM_DATABASES.contains(&"local"));
+    }
+
+    #[test]
+    fn system_databases_does_not_contain_user_db() {
+        assert!(!SYSTEM_DATABASES.contains(&"myapp"));
+        assert!(!SYSTEM_DATABASES.contains(&"production"));
+    }
+}

@@ -1,3 +1,21 @@
+/// Replace the password in a MongoDB URI with `***` for safe display.
+/// e.g. `mongodb://user:pass@host:27017` → `mongodb://user:***@host:27017`
+pub(crate) fn mask_uri_password(uri: &str) -> String {
+    if let Some(proto_end) = uri.find("://") {
+        let after_proto = &uri[proto_end + 3..];
+        if let Some(at_pos) = after_proto.find('@') {
+            let user_info = &after_proto[..at_pos];
+            if let Some(colon_pos) = user_info.find(':') {
+                let proto = &uri[..proto_end + 3];
+                let user = &user_info[..colon_pos];
+                let rest = &uri[proto_end + 3 + at_pos..];
+                return format!("{}{}:***{}", proto, user, rest);
+            }
+        }
+    }
+    uri.to_string()
+}
+
 use futures::TryStreamExt;
 use mongodb::{
     Client, Collection, Database, IndexModel,
@@ -97,19 +115,7 @@ impl DbClient {
     /// Returns the URI with any password replaced by `***`.
     /// e.g. `mongodb://user:pass@host:27017` → `mongodb://user:***@host:27017`
     pub fn masked_uri(&self) -> String {
-        if let Some(proto_end) = self.uri.find("://") {
-            let after_proto = &self.uri[proto_end + 3..];
-            if let Some(at_pos) = after_proto.find('@') {
-                let user_info = &after_proto[..at_pos];
-                if let Some(colon_pos) = user_info.find(':') {
-                    let proto = &self.uri[..proto_end + 3];
-                    let user = &user_info[..colon_pos];
-                    let rest = &self.uri[proto_end + 3 + at_pos..];
-                    return format!("{}{}:***{}", proto, user, rest);
-                }
-            }
-        }
-        self.uri.clone()
+        mask_uri_password(&self.uri)
     }
 
     pub fn database(&self, name: &str) -> Database {
@@ -228,5 +234,53 @@ impl DbClient {
         };
         let result = db.run_command(command).await?;
         Ok(serde_json::to_value(result)?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::mask_uri_password;
+
+    #[test]
+    fn masked_uri_replaces_password() {
+        let result = mask_uri_password("mongodb://admin:s3cr3t@mongo:27017");
+        assert_eq!(result, "mongodb://admin:***@mongo:27017");
+    }
+
+    #[test]
+    fn masked_uri_no_credentials_returns_unchanged() {
+        let uri = "mongodb://localhost:27017";
+        assert_eq!(mask_uri_password(uri), uri);
+    }
+
+    #[test]
+    fn masked_uri_with_auth_source_param() {
+        let result = mask_uri_password("mongodb://user:pass@host:27017/?authSource=admin");
+        assert_eq!(result, "mongodb://user:***@host:27017/?authSource=admin");
+    }
+
+    #[test]
+    fn masked_uri_with_empty_password() {
+        let result = mask_uri_password("mongodb://user:@host:27017");
+        assert_eq!(result, "mongodb://user:***@host:27017");
+    }
+
+    #[test]
+    fn masked_uri_srv_scheme() {
+        let result = mask_uri_password("mongodb+srv://admin:password@cluster.mongodb.net/");
+        assert_eq!(result, "mongodb+srv://admin:***@cluster.mongodb.net/");
+    }
+
+    #[test]
+    fn masked_uri_with_special_chars_in_password() {
+        let result = mask_uri_password("mongodb://user:p%40ss!@host:27017");
+        assert_eq!(result, "mongodb://user:***@host:27017");
+    }
+
+    #[test]
+    fn masked_uri_username_only_no_colon_returns_unchanged() {
+        // No colon in userinfo means no password to mask
+        let uri = "mongodb://useronly@host:27017";
+        assert_eq!(mask_uri_password(uri), uri);
     }
 }

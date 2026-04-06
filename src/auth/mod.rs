@@ -186,3 +186,190 @@ fn build_decoding_key(jwk: &Jwk) -> Result<DecodingKey, AppError> {
     DecodingKey::from_rsa_components(n, e)
         .map_err(|e| AppError::Internal(format!("Failed to build decoding key: {e}")))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_claims(roles: Vec<&str>) -> Claims {
+        Claims {
+            sub: "user-123".to_string(),
+            preferred_username: Some("alice".to_string()),
+            email: Some("alice@example.com".to_string()),
+            realm_access: Some(RealmAccess {
+                roles: roles.into_iter().map(str::to_string).collect(),
+            }),
+            azp: Some("dbv".to_string()),
+            exp: 9999999999,
+            iat: 0,
+        }
+    }
+
+    // ── Claims::has_role ──────────────────────────────────────────────────────
+
+    #[test]
+    fn has_role_returns_true_for_matching_role() {
+        let claims = make_claims(vec!["dbv-admin", "offline_access"]);
+        assert!(claims.has_role("dbv-admin"));
+    }
+
+    #[test]
+    fn has_role_returns_false_for_missing_role() {
+        let claims = make_claims(vec!["dbv-viewer"]);
+        assert!(!claims.has_role("dbv-admin"));
+    }
+
+    #[test]
+    fn has_role_returns_false_when_no_realm_access() {
+        let claims = Claims {
+            sub: "user-1".to_string(),
+            preferred_username: None,
+            email: None,
+            realm_access: None,
+            azp: None,
+            exp: 9999999999,
+            iat: 0,
+        };
+        assert!(!claims.has_role("dbv-admin"));
+    }
+
+    #[test]
+    fn has_role_returns_false_for_empty_roles() {
+        let claims = make_claims(vec![]);
+        assert!(!claims.has_role("dbv-viewer"));
+    }
+
+    #[test]
+    fn has_role_is_case_sensitive() {
+        let claims = make_claims(vec!["DBV-ADMIN"]);
+        assert!(!claims.has_role("dbv-admin"));
+    }
+
+    // ── find_key ──────────────────────────────────────────────────────────────
+
+    #[test]
+    fn find_key_returns_matching_key() {
+        let keys = vec![
+            Jwk {
+                kid: "key1".to_string(),
+                kty: "RSA".to_string(),
+                alg: None,
+                n: None,
+                e: None,
+            },
+            Jwk {
+                kid: "key2".to_string(),
+                kty: "RSA".to_string(),
+                alg: None,
+                n: None,
+                e: None,
+            },
+        ];
+        let found = find_key(&keys, "key2");
+        assert!(found.is_some());
+        assert_eq!(found.unwrap().kid, "key2");
+    }
+
+    #[test]
+    fn find_key_returns_none_when_not_found() {
+        let keys = vec![Jwk {
+            kid: "key1".to_string(),
+            kty: "RSA".to_string(),
+            alg: None,
+            n: None,
+            e: None,
+        }];
+        assert!(find_key(&keys, "missing").is_none());
+    }
+
+    #[test]
+    fn find_key_returns_none_on_empty_slice() {
+        let keys: Vec<Jwk> = vec![];
+        assert!(find_key(&keys, "any").is_none());
+    }
+
+    // ── build_decoding_key ────────────────────────────────────────────────────
+
+    #[test]
+    fn build_decoding_key_fails_when_n_is_missing() {
+        let jwk = Jwk {
+            kid: "k1".to_string(),
+            kty: "RSA".to_string(),
+            alg: Some("RS256".to_string()),
+            n: None,
+            e: Some("AQAB".to_string()),
+        };
+        let result = build_decoding_key(&jwk);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            AppError::Internal(msg) => assert!(msg.contains("JWK missing 'n'")),
+            other => panic!("Expected Internal error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn build_decoding_key_fails_when_e_is_missing() {
+        let jwk = Jwk {
+            kid: "k1".to_string(),
+            kty: "RSA".to_string(),
+            alg: Some("RS256".to_string()),
+            n: Some("some_n".to_string()),
+            e: None,
+        };
+        let result = build_decoding_key(&jwk);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            AppError::Internal(msg) => assert!(msg.contains("JWK missing 'e'")),
+            other => panic!("Expected Internal error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn build_decoding_key_fails_for_invalid_rsa_components() {
+        let jwk = Jwk {
+            kid: "k1".to_string(),
+            kty: "RSA".to_string(),
+            alg: Some("RS256".to_string()),
+            n: Some("not_valid_base64url!!!".to_string()),
+            e: Some("AQAB".to_string()),
+        };
+        let result = build_decoding_key(&jwk);
+        assert!(result.is_err());
+    }
+
+    // ── extract_bearer_token (tested indirectly via pub helper) ──────────────
+
+    #[test]
+    fn extract_bearer_token_returns_token_from_valid_header() {
+        let mut headers = axum::http::HeaderMap::new();
+        headers.insert(
+            axum::http::header::AUTHORIZATION,
+            "Bearer mytoken123".parse().unwrap(),
+        );
+        let token = super::extract_bearer_token(&headers);
+        assert_eq!(token, Some("mytoken123".to_string()));
+    }
+
+    #[test]
+    fn extract_bearer_token_returns_none_when_header_missing() {
+        let headers = axum::http::HeaderMap::new();
+        assert!(super::extract_bearer_token(&headers).is_none());
+    }
+
+    #[test]
+    fn extract_bearer_token_returns_none_for_basic_auth() {
+        let mut headers = axum::http::HeaderMap::new();
+        headers.insert(
+            axum::http::header::AUTHORIZATION,
+            "Basic dXNlcjpwYXNz".parse().unwrap(),
+        );
+        assert!(super::extract_bearer_token(&headers).is_none());
+    }
+
+    #[test]
+    fn extract_bearer_token_returns_none_for_empty_auth_header() {
+        let mut headers = axum::http::HeaderMap::new();
+        headers.insert(axum::http::header::AUTHORIZATION, "".parse().unwrap());
+        assert!(super::extract_bearer_token(&headers).is_none());
+    }
+}
