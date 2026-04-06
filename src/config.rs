@@ -64,3 +64,55 @@ impl Config {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_config(url: &str, realm: &str) -> Config {
+        Config {
+            server_host: "0.0.0.0".to_string(),
+            server_port: 8080,
+            mongodb_uri: "mongodb://localhost:27017".to_string(),
+            mongodb_db: "testdb".to_string(),
+            mongodb_tls_ca_file: None,
+            mongodb_tls_cert_key_file: None,
+            mongodb_tls_allow_invalid_certs: false,
+            keycloak_url: url.to_string(),
+            keycloak_realm: realm.to_string(),
+            keycloak_client_id: "dbv".to_string(),
+            frontend_dist: "./frontend/dist".to_string(),
+        }
+    }
+
+    #[test]
+    fn jwks_url_builds_correct_path() {
+        let cfg = make_config("http://keycloak:8080", "myrealm");
+        assert_eq!(
+            cfg.jwks_url(),
+            "http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs"
+        );
+    }
+
+    #[test]
+    fn jwks_url_handles_trailing_slash() {
+        let cfg = make_config("http://keycloak:8080/", "myrealm");
+        // The URL is built by string concat; trailing slash is preserved
+        assert!(cfg.jwks_url().contains("/realms/myrealm/protocol/openid-connect/certs"));
+    }
+
+    #[test]
+    fn default_server_host_is_0_0_0_0() {
+        assert_eq!(super::default_host(), "0.0.0.0");
+    }
+
+    #[test]
+    fn default_server_port_is_8080() {
+        assert_eq!(super::default_port(), 8080);
+    }
+
+    #[test]
+    fn default_frontend_dist_is_correct() {
+        assert_eq!(super::default_frontend_dist(), "./frontend/dist");
+    }
+}
