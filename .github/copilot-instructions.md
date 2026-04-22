@@ -355,10 +355,11 @@ The UI targets WCAG 2.1 Level AA. Key patterns:
   - `cargo test --all-features`
   - Frontend: `npm ci && npm run build`
   - Uses `dtolnay/rust-toolchain@stable` and `actions/cache` for Cargo + npm caching.
-- **`.github/workflows/docker.yml`** — runs on push to `main` and on `v*.*.*` tags:
+- **`.github/workflows/docker.yml`** — runs on `v*.*.*` tags and manual dispatch:
   - Multi-arch build: `linux/amd64` + `linux/arm64` via QEMU + Buildx.
   - Pushes to `ghcr.io/<owner>/dbv`.
-  - Tags: `:latest` (main), `:1.2.3` / `:1.2` / `:1` (semver tags), `:sha-<short>`.
+  - Tags: `:latest`, `:1.2.3` / `:1.2` / `:1` (semver tags), `:sha-<short>`.
+  - Adds OCI labels for authors, vendor, title, documentation, source, description, and license metadata.
   - Uses `GITHUB_TOKEN` — no extra secrets required.
   - Uses GitHub Actions cache (`type=gha`) for Docker layer caching.
 - **`.github/dependabot.yml`** — weekly PRs for Cargo, npm, and GitHub Actions dependencies.

@@ -2,7 +2,6 @@ name: Docker
 
 on:
   push:
-    branches: [main]
     tags: ["v*.*.*"]
   workflow_dispatch:
 
@@ -44,14 +43,22 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Branch push → :latest
-            type=raw,value=latest,enable={{is_default_branch}}
+            # Version tags and manual runs update :latest
+            type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') }}
             # Semver tag → :1.2.3 + :1.2 + :1
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             # Short SHA for traceability
             type=sha,prefix=sha-
+          labels: |
+            org.opencontainers.image.authors=Danny Janssen
+            org.opencontainers.image.vendor=dannys-janssen
+            org.opencontainers.image.title=dbv
+            org.opencontainers.image.documentation=https://github.com/dannys-janssen/dbv#readme
+            org.opencontainers.image.source=https://github.com/dannys-janssen/dbv
+            org.opencontainers.image.description=Browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authentication.
+            org.opencontainers.image.licenses=MIT
 
       - name: Build and push
         uses: docker/build-push-action@v7
@@ -61,5 +68,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max

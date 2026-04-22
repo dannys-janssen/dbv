@@ -741,13 +741,13 @@ Replace the two badge URLs at the top of this file with your actual GitHub usern
 | Workflow | File | Trigger | What it does |
 |---|---|---|---|
 | **CI** | `.github/workflows/ci.yml` | Push / PR → `main` | `cargo fmt`, `cargo clippy`, `cargo test`, `npm ci && npm run build` |
-| **Docker** | `.github/workflows/docker.yml` | Push → `main`, tags `v*.*.*`, manual | Builds multi-arch image (`linux/amd64` + `linux/arm64`) and pushes to `ghcr.io` |
+| **Docker** | `.github/workflows/docker.yml` | Tags `v*.*.*`, manual | Builds multi-arch image (`linux/amd64` + `linux/arm64`) and pushes to `ghcr.io` |
 
 The Docker workflow uses the built-in `GITHUB_TOKEN` — **no extra secrets are needed** for `ghcr.io` publishing.
 
 #### Published Docker image
 
-After the first push to `main` the image is available at:
+After the first tagged release or manual publish, the image is available at:
 
 ```
 ghcr.io/dannys-janssen/dbv:latest
@@ -769,6 +769,8 @@ git push origin v1.0.0
 ```
 
 This triggers the Docker workflow which publishes `ghcr.io/…/dbv:1.0.0`, `:1.0`, `:1`, and `:latest`.
+
+The published image includes standard OCI metadata labels for authors, vendor, title, documentation, source, description, and license information so registries can classify it correctly.
 
 #### Dependabot
 
