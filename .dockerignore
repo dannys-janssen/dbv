@@ -1,0 +1,12 @@
+.git
+.github
+target
+frontend/node_modules
+frontend/dist
+kubernetes
+.env
+.env.*
+!.env.example
+docker-compose.yml
+README.md
+LICENSE
