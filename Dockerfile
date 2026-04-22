@@ -38,7 +38,7 @@ WORKDIR /app
 COPY --from=builder /app/target/release/dbv ./dbv
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-LABEL org.opencontainers.image.authors="Danny Janssen" \
+LABEL org.opencontainers.image.authors="Dannys Janssen" \
       org.opencontainers.image.vendor="dannys-janssen" \
       org.opencontainers.image.title="dbv" \
       org.opencontainers.image.documentation="https://github.com/dannys-janssen/dbv#readme" \
