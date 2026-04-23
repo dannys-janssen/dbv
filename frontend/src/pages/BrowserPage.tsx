@@ -179,7 +179,7 @@ export default function BrowserPage() {
   const { t } = useTranslation();
 
   // ── Sidebar resize ──
-  const [sidebarWidth, setSidebarWidth] = useState(260);
+  const [sidebarWidth, setSidebarWidth] = useState(420);
   const isResizing = useRef(false);
 
   // ── Modal focus management ──
@@ -197,7 +197,7 @@ export default function BrowserPage() {
     isResizing.current = true;
     const onMouseMove = (ev: MouseEvent) => {
       if (!isResizing.current) return;
-      setSidebarWidth(Math.min(480, Math.max(180, ev.clientX)));
+      setSidebarWidth(Math.min(700, Math.max(200, ev.clientX)));
     };
     const onMouseUp = () => {
       isResizing.current = false;
@@ -493,7 +493,7 @@ export default function BrowserPage() {
           background: "#1a2236",
           display: "flex",
           flexDirection: "column",
-          overflowY: "auto",
+          overflow: "hidden",
           flexShrink: 0,
         }}
       >
@@ -629,175 +629,178 @@ export default function BrowserPage() {
           </div>
         </div>
 
-        {/* Database section */}
-        <div style={{ padding: "12px 16px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "8px",
-            }}
-          >
-            <span style={sectionLabelStyle}>{t("nav.section.databases")}</span>
-            {canWrite && (
-              <button
-                onClick={(e) => { newDbOpenerRef.current = e.currentTarget as HTMLElement; setNewDbOpen(true); }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#60a5fa",
-                  fontSize: "16px",
-                  lineHeight: 1,
-                  padding: "0 2px",
-                }}
-                title={t("database.button.create.title")}
-                aria-label={t("database.button.create.title")}
-              >
-                ＋
-              </button>
-            )}
-          </div>
-          <input
-            value={dbSearch}
-            onChange={(e) => setDbSearch(e.target.value)}
-            placeholder={t("database.search.placeholder")}
-            style={sidebarSearchStyle}
-          />
-          {filteredDatabases.length === 0 ? (
-            <p
-              style={{
-                color: "#64748b",
-                fontSize: "12px",
-                fontStyle: "italic",
-                padding: "8px 0",
-                margin: 0,
-                fontFamily: FONT,
-              }}
-            >
-              {t("database.list.empty")}
-            </p>
-          ) : (
-            <div>
-              {filteredDatabases.map((db) => {
-                const isSelected = db === selectedDb;
-                const isHovered = hoveredDb === db;
-                return (
-                  <div
-                    key={db}
-                    onClick={() => setSelectedDb(db)}
-                    onMouseEnter={() => setHoveredDb(db)}
-                    onMouseLeave={() => setHoveredDb(null)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedDb(db); } }}
-                    aria-label={t("a11y.openCollection", { name: db })}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "7px 8px",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      background: isSelected
-                        ? "#2563eb"
-                        : isHovered
-                        ? "#1e2d47"
-                        : "transparent",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px" }}>🗄</span>
-                    <span
-                      style={{
-                        flex: 1,
-                        fontSize: "13px",
-                        color: isSelected ? "#ffffff" : "#cbd5e1",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontFamily: FONT,
-                        textAlign: "left",
-                      }}
-                    >
-                      {db}
-                    </span>
-                    {isSelected && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          dbStatsOpenerRef.current = e.currentTarget as HTMLElement;
-                          setDbStats(null);
-                          setDbStatsOpen(true);
-                          setDbStatsLoading(true);
-                          getDatabaseStats(db)
-                            .then(setDbStats)
-                            .catch(() => setDbStats(null))
-                            .finally(() => setDbStatsLoading(false));
-                        }}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#94a3b8",
-                          fontSize: "14px",
-                          padding: "0 2px",
-                          lineHeight: 1,
-                        }}
-                        title={t("database.button.stats.title", { db })}
-                        aria-label={t("a11y.collectionStats", { name: db })}
-                      >
-                        ℹ
-                      </button>
-                    )}
-                    {canWrite && isSelected && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          void handleDropDb();
-                        }}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#f87171",
-                          fontSize: "14px",
-                          padding: "0 2px",
-                          opacity: 0.8,
-                          lineHeight: 1,
-                        }}
-                        title={t("database.button.drop.title", { db })}
-                        aria-label={t("a11y.dropDatabase", { name: db })}
-                      >
-                        🗑
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {/* Database + Collection sections – side by side */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "row", overflow: "hidden", borderTop: "1px solid #243044" }}>
 
-        {/* Collection section */}
-        {selectedDb && (
-          <div
-            style={{
-              padding: "12px 16px",
-              borderTop: "1px solid #243044",
-            }}
-          >
+          {/* Database column */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", borderRight: "1px solid #243044", minWidth: 0 }}>
             <div
               style={{
+                padding: "8px 12px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "8px",
+                flexShrink: 0,
+              }}
+            >
+              <span style={sectionLabelStyle}>{t("nav.section.databases")}</span>
+              {canWrite && (
+                <button
+                  onClick={(e) => { newDbOpenerRef.current = e.currentTarget as HTMLElement; setNewDbOpen(true); }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#60a5fa",
+                    fontSize: "16px",
+                    lineHeight: 1,
+                    padding: "0 2px",
+                  }}
+                  title={t("database.button.create.title")}
+                  aria-label={t("database.button.create.title")}
+                >
+                  ＋
+                </button>
+              )}
+            </div>
+            <div style={{ padding: "0 12px 8px", flexShrink: 0 }}>
+              <input
+                value={dbSearch}
+                onChange={(e) => setDbSearch(e.target.value)}
+                placeholder={t("database.search.placeholder")}
+                style={sidebarSearchStyle}
+              />
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+              {filteredDatabases.length === 0 ? (
+                <p
+                  style={{
+                    color: "#64748b",
+                    fontSize: "12px",
+                    fontStyle: "italic",
+                    padding: "8px 0",
+                    margin: 0,
+                    fontFamily: FONT,
+                  }}
+                >
+                  {t("database.list.empty")}
+                </p>
+              ) : (
+                filteredDatabases.map((db) => {
+                  const isSelected = db === selectedDb;
+                  const isHovered = hoveredDb === db;
+                  return (
+                    <div
+                      key={db}
+                      onClick={() => setSelectedDb(db)}
+                      onMouseEnter={() => setHoveredDb(db)}
+                      onMouseLeave={() => setHoveredDb(null)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedDb(db); } }}
+                      aria-label={t("a11y.openCollection", { name: db })}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "7px 8px",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        background: isSelected
+                          ? "#2563eb"
+                          : isHovered
+                          ? "#1e2d47"
+                          : "transparent",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", flexShrink: 0 }}>🗄</span>
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: "13px",
+                          color: isSelected ? "#ffffff" : "#cbd5e1",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          fontFamily: FONT,
+                          textAlign: "left",
+                        }}
+                      >
+                        {db}
+                      </span>
+                      {isSelected && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dbStatsOpenerRef.current = e.currentTarget as HTMLElement;
+                            setDbStats(null);
+                            setDbStatsOpen(true);
+                            setDbStatsLoading(true);
+                            getDatabaseStats(db)
+                              .then(setDbStats)
+                              .catch(() => setDbStats(null))
+                              .finally(() => setDbStatsLoading(false));
+                          }}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#94a3b8",
+                            fontSize: "14px",
+                            padding: "0 2px",
+                            lineHeight: 1,
+                            flexShrink: 0,
+                          }}
+                          title={t("database.button.stats.title", { db })}
+                          aria-label={t("a11y.collectionStats", { name: db })}
+                        >
+                          ℹ
+                        </button>
+                      )}
+                      {canWrite && isSelected && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDropDb();
+                          }}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#f87171",
+                            fontSize: "14px",
+                            padding: "0 2px",
+                            opacity: 0.8,
+                            lineHeight: 1,
+                            flexShrink: 0,
+                          }}
+                          title={t("database.button.drop.title", { db })}
+                          aria-label={t("a11y.dropDatabase", { name: db })}
+                        >
+                          🗑
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Collection column */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+            <div
+              style={{
+                padding: "8px 12px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexShrink: 0,
               }}
             >
               <span style={sectionLabelStyle}>{t("nav.section.collections")}</span>
-              {canWrite && (
+              {canWrite && selectedDb && (
                 <button
                   onClick={(e) => { newColOpenerRef.current = e.currentTarget as HTMLElement; setNewColOpen(true); }}
                   style={{
@@ -816,28 +819,44 @@ export default function BrowserPage() {
                 </button>
               )}
             </div>
-            <input
-              value={colSearch}
-              onChange={(e) => setColSearch(e.target.value)}
-              placeholder={t("collection.search.placeholder")}
-              style={sidebarSearchStyle}
-            />
-            {filteredCollections.length === 0 ? (
-              <p
-                style={{
-                  color: "#64748b",
-                  fontSize: "12px",
-                  fontStyle: "italic",
-                  padding: "8px 0",
-                  margin: 0,
-                  fontFamily: FONT,
-                }}
-              >
-                {t("collection.list.empty.noCollections")}{canWrite ? ` ${t("collection.list.empty.canCreate")}` : ""}
-              </p>
-            ) : (
-              <div>
-                {filteredCollections.map((col) => {
+            <div style={{ padding: "0 12px 8px", flexShrink: 0 }}>
+              <input
+                value={colSearch}
+                onChange={(e) => setColSearch(e.target.value)}
+                placeholder={t("collection.search.placeholder")}
+                style={sidebarSearchStyle}
+                disabled={!selectedDb}
+              />
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+              {!selectedDb ? (
+                <p
+                  style={{
+                    color: "#64748b",
+                    fontSize: "12px",
+                    fontStyle: "italic",
+                    padding: "8px 0",
+                    margin: 0,
+                    fontFamily: FONT,
+                  }}
+                >
+                  {t("database.list.empty")}
+                </p>
+              ) : filteredCollections.length === 0 ? (
+                <p
+                  style={{
+                    color: "#64748b",
+                    fontSize: "12px",
+                    fontStyle: "italic",
+                    padding: "8px 0",
+                    margin: 0,
+                    fontFamily: FONT,
+                  }}
+                >
+                  {t("collection.list.empty.noCollections")}{canWrite ? ` ${t("collection.list.empty.canCreate")}` : ""}
+                </p>
+              ) : (
+                filteredCollections.map((col) => {
                   const isSelected = col === activeTab?.col && selectedDb === activeTab?.db;
                   const isHovered = hoveredCol === col;
                   return (
@@ -893,6 +912,7 @@ export default function BrowserPage() {
                             fontSize: "12px",
                             padding: "0 2px",
                             lineHeight: 1,
+                            flexShrink: 0,
                           }}
                           title={t("collection.button.drop.title", { col })}
                           aria-label={t("a11y.dropCollection", { name: col })}
@@ -902,11 +922,12 @@ export default function BrowserPage() {
                       )}
                     </div>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </div>
-        )}
+
+        </div>
       </aside>
 
       {/* ── Resize handle ── */}

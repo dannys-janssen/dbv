@@ -209,12 +209,12 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "6px 10px",
+  padding: "8px 12px",
   background: "#1e293b",
   border: "1px solid #334155",
   borderRadius: 6,
   color: "#f1f5f9",
-  fontSize: 14,
+  fontSize: 15,
   boxSizing: "border-box",
   outline: "none",
 };
@@ -223,7 +223,7 @@ const textareaStyle: React.CSSProperties = {
   ...inputStyle,
   fontFamily: "monospace",
   resize: "vertical",
-  minHeight: 60,
+  minHeight: 100,
 };
 
 const typeTagStyle = (type: string): React.CSSProperties => {
@@ -526,7 +526,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   }
 
   return (
-    <div style={{ overflowY: "auto", maxHeight: 420, paddingRight: 4 }}>
+    <div style={{ overflowY: "auto", maxHeight: "calc(90vh - 200px)", paddingRight: 4 }}>
       {/* _id field at the top */}
       {idField && (
         <>
