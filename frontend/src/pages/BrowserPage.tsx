@@ -840,7 +840,7 @@ export default function BrowserPage() {
                     fontFamily: FONT,
                   }}
                 >
-                  {t("database.list.empty")}
+                  {t("empty.subtitle.databaseNeeded")}
                 </p>
               ) : filteredCollections.length === 0 ? (
                 <p
