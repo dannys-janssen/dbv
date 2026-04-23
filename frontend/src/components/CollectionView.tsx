@@ -1423,7 +1423,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       {/* ── Editor modal ── */}
       {editorOpen && (
         <div style={overlayStyle}>
-          <div style={{ ...modalBaseStyle, width: "700px" }}>
+          <div style={{ ...modalBaseStyle, width: "min(900px, 92vw)", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
             {/* Header row: title + Form/JSON toggle */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
               <h3 style={{ ...modalTitleStyle, marginBottom: 0 }}>
@@ -1465,7 +1465,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               />
             ) : (
               <Editor
-                height="400px"
+                height="500px"
                 defaultLanguage="json"
                 path="dbv://document"
                 value={editorValue}
