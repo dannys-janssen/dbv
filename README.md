@@ -115,10 +115,11 @@ Open `https://dbv.localhost`. Enter your Keycloak **username** and **password** 
 
 **Managing databases**
 
-- The left sidebar shows all available databases. Click a database to expand its collections.
-- *(admin only)* Click **＋** next to "Database" to create a new database. MongoDB requires an initial collection name — the database is created along with it.
+- The left sidebar is split into two columns: **Databases** on the left and **Collections** on the right. Both columns scroll independently, so collections are always visible alongside the databases list.
+- Click a database in the left column to show its collections in the right column.
+- *(admin only)* Click **＋** next to "Databases" to create a new database. MongoDB requires an initial collection name — the database is created along with it.
 - *(admin only)* Click **🗑** next to the selected database to drop it permanently. System databases (`admin`, `config`, `local`) are protected and cannot be dropped.
-- The sidebar is **resizable** — drag the handle on its right edge to adjust the width (range: 180 px – 480 px).
+- The sidebar is **resizable** — drag the handle on its right edge to adjust the width (range: 200 px – 700 px, default 420 px).
 
 **Connection status and reconnect**
 
@@ -138,8 +139,8 @@ A status strip at the top of the sidebar shows the current MongoDB connection:
 
 **Managing collections**
 
-- After selecting a database, its collections appear in the sidebar below.
-- *(admin only)* Click **＋** next to "Collection" to create a new collection.
+- After selecting a database, its collections appear immediately in the right column of the sidebar — no scrolling required.
+- *(admin only)* Click **＋** next to "Collections" to create a new collection.
 - *(admin only)* Click **✕** on any collection to drop it and all its documents.
 
 **Tabs**
@@ -208,6 +209,7 @@ The query bar supports two modes, toggled with the **MQL / SQL** button group:
 
 - **+ New** — opens the document editor to create a new document
 - **Edit** — opens the document in the editor
+- The editor opens in a large modal (up to 900 px wide, 90 % of the viewport height) to give ample space for documents with many or deeply nested fields.
 - The editor has two modes toggled with a **Form / JSON** pill in the modal header:
   - **Form mode** (default) — a field-by-field form built from the inferred schema with type-aware inputs:
     - `date` → separate UTC date + time inputs (stored as BSON `$date`)
