@@ -5,7 +5,9 @@ import {
   deleteDocument,
   bulkDeleteDocuments,
   exportCollection,
+  exportCollectionBson,
   importCollection,
+  importCollectionBson,
   aggregate,
   createDocument,
   updateDocument,
@@ -336,10 +338,17 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    const docs = JSON.parse(text) as unknown[];
-    if (!confirm(t("modals.import.confirmReplace", { count: docs.length }))) return;
-    await importCollection(db, col, docs, true);
+    const isBson = file.name.endsWith(".bson");
+    if (isBson) {
+      const buffer = await file.arrayBuffer();
+      if (!confirm(t("modals.import.confirmReplace", { count: "?" }))) return;
+      await importCollectionBson(db, col, buffer, true);
+    } else {
+      const text = await file.text();
+      const docs = JSON.parse(text) as unknown[];
+      if (!confirm(t("modals.import.confirmReplace", { count: docs.length }))) return;
+      await importCollection(db, col, docs, true);
+    }
     loadDocuments();
   };
 
@@ -759,17 +768,27 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           ⊞
                         </button>
                       </div>
-                      <button
-                        onClick={() => exportCollection(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                        style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
-                      >
-                        {t("buttons.export")}
-                      </button>
+                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                        <button
+                          onClick={() => exportCollection(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                          title={t("buttons.exportJson")}
+                        >
+                          {t("buttons.export")} JSON
+                        </button>
+                        <button
+                          onClick={() => exportCollectionBson(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
+                          title={t("buttons.exportBson")}
+                        >
+                          {t("buttons.export")} BSON
+                        </button>
+                      </div>
                       {canWrite && (
                         <>
                           <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                             {t("buttons.import")}
-                            <input type="file" accept=".json" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
+                            <input type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
                           <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
                             {t("documents.button.create")}

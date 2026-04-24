@@ -119,6 +119,25 @@ export const exportCollection = async (db: string, collection: string): Promise<
   URL.revokeObjectURL(objectUrl);
 };
 
+export const exportCollectionBson = async (db: string, collection: string): Promise<void> => {
+  const token = localStorage.getItem("access_token");
+  const url = `/api/databases/${db}/collections/${collection}/export/bson`;
+  const resp = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: "Export failed" }));
+    throw new Error((err as { error?: string }).error ?? "Export failed");
+  }
+  const blob = await resp.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = `${collection}.bson`;
+  a.click();
+  URL.revokeObjectURL(objectUrl);
+};
+
 export interface SchemaField {
   path: string;
   types: string[];
@@ -151,6 +170,29 @@ export const importCollection = (
       replace,
     })
     .then((r) => r.data);
+
+export const importCollectionBson = async (
+  db: string,
+  collection: string,
+  data: ArrayBuffer,
+  replace = false
+): Promise<{ inserted: number }> => {
+  const token = localStorage.getItem("access_token");
+  const url = `/api/databases/${db}/collections/${collection}/import/bson${replace ? "?replace=true" : ""}`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/octet-stream",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: data,
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: "Import failed" }));
+    throw new Error((err as { error?: string }).error ?? "Import failed");
+  }
+  return resp.json() as Promise<{ inserted: number }>;
+};
 
 // ── Index management ──────────────────────────────────────────────────────────
 

@@ -1,39 +1,96 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "سائن ان",
       "subtitle": "اپنے MongoDB ڈیٹا بیس تک رسائی حاصل کریں",
       "footer": "Keycloak OAuth2 کے ذریعے محفوظ",
-      "button": { "label": "سائن ان", "loading": "سائن ان ہو رہا ہے…" },
-      "validation": { "fieldsRequired": "صارف نام اور پاس ورڈ درکار ہیں" },
-      "error": { "invalidCredentials": "لاگ ان ناکام۔ اپنی اسناد جانچیں۔" }
+      "button": {
+        "label": "سائن ان",
+        "loading": "سائن ان ہو رہا ہے…"
+      },
+      "validation": {
+        "fieldsRequired": "صارف نام اور پاس ورڈ درکار ہیں"
+      },
+      "error": {
+        "invalidCredentials": "لاگ ان ناکام۔ اپنی اسناد جانچیں۔"
+      }
     }
   },
   "nav": {
     "signOut": "سائن آؤٹ",
-    "section": { "databases": "ڈیٹا بیس", "collections": "مجموعے" }
+    "section": {
+      "databases": "ڈیٹا بیس",
+      "collections": "مجموعے"
+    }
   },
   "connection": {
-    "status": { "noInfo": "کنکشن کی کوئی معلومات نہیں" },
-    "button": {
-      "reconnect": { "label": "↻ دوبارہ جوڑیں", "title": "موجودہ URI سے دوبارہ جڑیں" },
-      "change": { "label": "⚙ تبدیل کریں", "title": "MongoDB کنکشن تبدیل کریں" }
+    "status": {
+      "noInfo": "کنکشن کی کوئی معلومات نہیں"
     },
-    "error": { "failed": "⚠ MongoDB کنکشن ناکام:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ دوبارہ جوڑیں",
+        "title": "موجودہ URI سے دوبارہ جڑیں"
+      },
+      "change": {
+        "label": "⚙ تبدیل کریں",
+        "title": "MongoDB کنکشن تبدیل کریں"
+      }
+    },
+    "error": {
+      "failed": "⚠ MongoDB کنکشن ناکام:"
+    }
   },
   "database": {
-    "search": { "placeholder": "ڈیٹا بیس تلاش کریں…" },
-    "list": { "empty": "کوئی ڈیٹا بیس نہیں ملا" },
-    "button": { "create": { "title": "ڈیٹا بیس بنائیں" }, "stats": { "title": "«{{db}}» ڈیٹا بیس کے اعداد و شمار" }, "drop": { "title": "«{{db}}» ڈیٹا بیس حذف کریں" } }
+    "search": {
+      "placeholder": "ڈیٹا بیس تلاش کریں…"
+    },
+    "list": {
+      "empty": "کوئی ڈیٹا بیس نہیں ملا"
+    },
+    "button": {
+      "create": {
+        "title": "ڈیٹا بیس بنائیں"
+      },
+      "stats": {
+        "title": "«{{db}}» ڈیٹا بیس کے اعداد و شمار"
+      },
+      "drop": {
+        "title": "«{{db}}» ڈیٹا بیس حذف کریں"
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "مجموعے تلاش کریں…" },
-    "list": { "empty": { "noCollections": "کوئی مجموعہ نہیں۔", "canCreate": "بنانے کے لیے ＋ پر کلک کریں۔" } },
-    "button": { "create": { "title": "مجموعہ بنائیں" }, "drop": { "title": "«{{col}}» مجموعہ حذف کریں" } }
+    "search": {
+      "placeholder": "مجموعے تلاش کریں…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "کوئی مجموعہ نہیں۔",
+        "canCreate": "بنانے کے لیے ＋ پر کلک کریں۔"
+      }
+    },
+    "button": {
+      "create": {
+        "title": "مجموعہ بنائیں"
+      },
+      "drop": {
+        "title": "«{{col}}» مجموعہ حذف کریں"
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "ٹیب بند کریں" }, "new": { "title": "نیا ٹیب" } },
+    "button": {
+      "close": {
+        "title": "ٹیب بند کریں"
+      },
+      "new": {
+        "title": "نیا ٹیب"
+      }
+    },
     "documents": "دستاویزات",
     "aggregate": "مجموعی",
     "schema": "اسکیما",
@@ -45,14 +102,24 @@
     "createDatabase": {
       "title": "ڈیٹا بیس بنائیں",
       "subtitle": "MongoDB پہلا مجموعہ بنانے پر ڈیٹا بیس بناتا ہے۔",
-      "label": { "dbName": "ڈیٹا بیس کا نام", "collectionName": "پہلے مجموعے کا نام" },
-      "placeholder": { "dbName": "مثلاً myapp", "collectionName": "مثلاً users" }
+      "label": {
+        "dbName": "ڈیٹا بیس کا نام",
+        "collectionName": "پہلے مجموعے کا نام"
+      },
+      "placeholder": {
+        "dbName": "مثلاً myapp",
+        "collectionName": "مثلاً users"
+      }
     },
     "createCollection": {
       "title": "مجموعہ بنائیں",
       "subtitle": "نیا مجموعہ شامل کریں",
-      "label": { "name": "مجموعے کا نام" },
-      "placeholder": { "name": "مثلاً products" }
+      "label": {
+        "name": "مجموعے کا نام"
+      },
+      "placeholder": {
+        "name": "مثلاً products"
+      }
     },
     "dbStats": {
       "title": "ڈیٹا بیس:",
@@ -76,28 +143,60 @@
         "tlsCertKeyFile": "مثلاً /certs/client.pem"
       },
       "optional": "(اختیاری، سرور پر راستہ)",
-      "warning": { "insecure": "⚠ غیر محفوظ" }
+      "warning": {
+        "insecure": "⚠ غیر محفوظ"
+      }
     },
     "confirmDrop": {
       "database": "پورا ڈیٹا بیس «{{db}}» حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔",
       "collection": "مجموعہ «{{col}}» حذف کریں؟ تمام دستاویزات حذف ہو جائیں گی۔",
       "index": "اشاریہ «{{name}}» حذف کریں؟"
     },
-    "editDocument": { "title": "دستاویز ترمیم کریں" },
-    "newDocument": { "title": "نئی دستاویز" },
+    "editDocument": {
+      "title": "دستاویز ترمیم کریں"
+    },
+    "newDocument": {
+      "title": "نئی دستاویز"
+    },
     "createIndex": {
       "title": "اشاریہ بنائیں",
       "subtitle": "نئے اشاریے کے لیے فیلڈز اور اختیارات متعین کریں۔",
-      "label": { "keys": "اشاریے کی کلیدیں", "name": "اشاریے کا نام", "unique": "منفرد", "sparse": "متفرق", "background": "پس منظر", "ttl": "TTL" },
+      "label": {
+        "keys": "اشاریے کی کلیدیں",
+        "name": "اشاریے کا نام",
+        "unique": "منفرد",
+        "sparse": "متفرق",
+        "background": "پس منظر",
+        "ttl": "TTL"
+      },
       "optional": "(اختیاری)",
-      "hint": { "background": "(غیر مسدود)", "ttl": "(سیکنڈ، اختیاری)" },
-      "placeholder": { "fieldName": "فیلڈ کا نام", "name": "خالی ہو تو خودکار", "ttl": "مثلاً 3600" },
-      "option": { "ascending": "1 (اوپر کی طرف)", "descending": "-1 (نیچے کی طرف)" },
-      "button": { "addField": "+ فیلڈ شامل کریں", "submit": "اشاریہ بنائیں" },
-      "validation": { "fieldRequired": "کم از کم ایک فیلڈ درکار ہے۔" }
+      "hint": {
+        "background": "(غیر مسدود)",
+        "ttl": "(سیکنڈ، اختیاری)"
+      },
+      "placeholder": {
+        "fieldName": "فیلڈ کا نام",
+        "name": "خالی ہو تو خودکار",
+        "ttl": "مثلاً 3600"
+      },
+      "option": {
+        "ascending": "1 (اوپر کی طرف)",
+        "descending": "-1 (نیچے کی طرف)"
+      },
+      "button": {
+        "addField": "+ فیلڈ شامل کریں",
+        "submit": "اشاریہ بنائیں"
+      },
+      "validation": {
+        "fieldRequired": "کم از کم ایک فیلڈ درکار ہے۔"
+      }
     },
-    "import": { "confirmReplace": "{{count}} دستاویزات درآمد کریں؟ (موجودہ کو تبدیل کریں؟)" },
-    "confirmDelete": { "document": "یہ دستاویز حذف کریں؟" }
+    "import": {
+      "confirmReplace": "{{count}} دستاویزات درآمد کریں؟ (موجودہ کو تبدیل کریں؟)"
+    },
+    "confirmDelete": {
+      "document": "یہ دستاویز حذف کریں؟"
+    }
   },
   "buttons": {
     "cancel": "منسوخ",
@@ -109,6 +208,8 @@
     "edit": "ترمیم",
     "delete": "حذف کریں",
     "export": "برآمد کریں",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "درآمد کریں",
     "add": "شامل کریں",
     "refresh": "↻ تازہ کریں",
@@ -116,29 +217,83 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "صارف نام", "password": "پاس ورڈ", "fieldName": "فیلڈ کا نام" },
-    "button": { "removeField": { "title": "فیلڈ ہٹائیں" }, "remove": "×", "setNull": "null پر سیٹ کریں:" },
-    "value": { "null": "null" },
-    "option": { "true": "درست", "false": "غلط" },
-    "label": { "utc": "UTC", "newFieldName": "نئے فیلڈ کا نام", "newFieldType": "نئے فیلڈ کی قسم", "date": "تاریخ", "time": "وقت", "type": "قسم" },
-    "placeholder": { "objectId": "24 حرفی ہیکس سٹرنگ", "jsonValue": "JSON قدر" },
-    "section": { "addField": "فیلڈ شامل کریں" },
-    "validation": { "fieldExists": "فیلڈ «{{key}}» پہلے سے موجود ہے۔", "fieldNameRequired": "فیلڈ کا نام ضروری ہے۔" }
+    "labels": {
+      "username": "صارف نام",
+      "password": "پاس ورڈ",
+      "fieldName": "فیلڈ کا نام"
+    },
+    "button": {
+      "removeField": {
+        "title": "فیلڈ ہٹائیں"
+      },
+      "remove": "×",
+      "setNull": "null پر سیٹ کریں:"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "درست",
+      "false": "غلط"
+    },
+    "label": {
+      "utc": "UTC",
+      "newFieldName": "نئے فیلڈ کا نام",
+      "newFieldType": "نئے فیلڈ کی قسم",
+      "date": "تاریخ",
+      "time": "وقت",
+      "type": "قسم"
+    },
+    "placeholder": {
+      "objectId": "24 حرفی ہیکس سٹرنگ",
+      "jsonValue": "JSON قدر"
+    },
+    "section": {
+      "addField": "فیلڈ شامل کریں"
+    },
+    "validation": {
+      "fieldExists": "فیلڈ «{{key}}» پہلے سے موجود ہے۔",
+      "fieldNameRequired": "فیلڈ کا نام ضروری ہے۔"
+    }
   },
   "editor": {
-    "form": { "noSchema": "کوئی اسکیما دستیاب نہیں۔ دستاویز ترمیم کے لیے JSON موڈ استعمال کریں۔" },
-    "mode": {
-      "form": { "subtitle": "قسم آگاہ ان پٹ کے ساتھ فیلڈز ترمیم کریں۔ براہ راست ترمیم کے لیے JSON پر جائیں۔" },
-      "json": { "subtitle": "خام JSON دستاویز ترمیم کریں۔ رہنمائی ترمیم کے لیے فارم پر جائیں۔" }
+    "form": {
+      "noSchema": "کوئی اسکیما دستیاب نہیں۔ دستاویز ترمیم کے لیے JSON موڈ استعمال کریں۔"
     },
-    "error": { "saveFailure": "غلط JSON یا محفوظ کرنے میں ناکامی:" }
+    "mode": {
+      "form": {
+        "subtitle": "قسم آگاہ ان پٹ کے ساتھ فیلڈز ترمیم کریں۔ براہ راست ترمیم کے لیے JSON پر جائیں۔"
+      },
+      "json": {
+        "subtitle": "خام JSON دستاویز ترمیم کریں۔ رہنمائی ترمیم کے لیے فارم پر جائیں۔"
+      }
+    },
+    "error": {
+      "saveFailure": "غلط JSON یا محفوظ کرنے میں ناکامی:"
+    }
   },
   "query": {
-    "label": { "filter": "فلٹر", "sort": "ترتیب", "projection": "پروجیکشن", "limit": "حد" },
-    "hint": { "ctrlEnter": "Ctrl+Enter لاگو کرنے کے لیے" },
-    "badge": { "active": "فعال", "invalidJson": "غلط JSON" },
-    "button": { "apply": "لاگو کریں", "clear": "صاف کریں" },
-    "mode": { "label": "سوال کا طریقہ", "sqlHint": "SQL SELECT درج کریں — Ctrl+Enter لاگو کرنے کے لیے" },
+    "label": {
+      "filter": "فلٹر",
+      "sort": "ترتیب",
+      "projection": "پروجیکشن",
+      "limit": "حد"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter لاگو کرنے کے لیے"
+    },
+    "badge": {
+      "active": "فعال",
+      "invalidJson": "غلط JSON"
+    },
+    "button": {
+      "apply": "لاگو کریں",
+      "clear": "صاف کریں"
+    },
+    "mode": {
+      "label": "سوال کا طریقہ",
+      "sqlHint": "SQL SELECT درج کریں — Ctrl+Enter لاگو کرنے کے لیے"
+    },
     "sql": {
       "label": "SQL سوال",
       "parseError": "پارس خرابی",
@@ -148,48 +303,105 @@
     }
   },
   "views": {
-    "table": { "title": "ٹیبل ویو" },
-    "tree": { "title": "ٹری ویو" }
+    "table": {
+      "title": "ٹیبل ویو"
+    },
+    "tree": {
+      "title": "ٹری ویو"
+    }
   },
   "selection": {
     "count_one": "{{count}} دستاویز منتخب",
     "count_other": "{{count}} دستاویزات منتخب",
-    "button": { "export": "منتخب برآمد کریں", "delete": "منتخب حذف کریں", "clear": "✕ صاف کریں" },
+    "button": {
+      "export": "منتخب برآمد کریں",
+      "delete": "منتخب حذف کریں",
+      "clear": "✕ صاف کریں"
+    },
     "confirmDelete_one": "{{count}} منتخب دستاویز حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔",
     "confirmDelete_other": "{{count}} منتخب دستاویزات حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔"
   },
   "documents": {
-    "list": { "empty": "کوئی دستاویز نہیں ملی", "emptyWithFilter": "اپنا فلٹر یا پروجیکشن تبدیل کریں۔", "emptyNoFilter": "یہ مجموعہ خالی ہے۔" },
-    "button": { "create": "+ نئی دستاویز" },
+    "list": {
+      "empty": "کوئی دستاویز نہیں ملی",
+      "emptyWithFilter": "اپنا فلٹر یا پروجیکشن تبدیل کریں۔",
+      "emptyNoFilter": "یہ مجموعہ خالی ہے۔"
+    },
+    "button": {
+      "create": "+ نئی دستاویز"
+    },
     "fieldCount_one": "{{count}} فیلڈ",
     "fieldCount_other": "{{count}} فیلڈز"
   },
   "table": {
-    "header": { "id": "_id", "preview": "پیش نظارہ", "actions": "اعمال", "name": "نام", "keys": "کلیدیں", "unique": "منفرد", "sparse": "متفرق", "ttl": "TTL (s)", "index": "اشاریہ", "size": "سائز", "fieldPath": "فیلڈ راستہ", "types": "اقسام", "coverage": "کوریج", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "پیش نظارہ",
+      "actions": "اعمال",
+      "name": "نام",
+      "keys": "کلیدیں",
+      "unique": "منفرد",
+      "sparse": "متفرق",
+      "ttl": "TTL (s)",
+      "index": "اشاریہ",
+      "size": "سائز",
+      "fieldPath": "فیلڈ راستہ",
+      "types": "اقسام",
+      "coverage": "کوریج",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "{{total}} دستاویزات میں سے {{start}}–{{end}} دکھا رہے ہیں",
     "label_page": "صفحہ {{page}}",
-    "button": { "prev": "← پچھلا", "next": "اگلا →" }
+    "button": {
+      "prev": "← پچھلا",
+      "next": "اگلا →"
+    }
   },
   "aggregate": {
     "prompt": "مجموعی پائپ لائن درج کریں (JSON ارے):",
-    "button": { "run": "▶ چلائیں" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}} دستاویز", "count_other": "{{count}} دستاویزات" },
-    "placeholder": { "result": "// نتائج دیکھنے کے لیے حکم چلائیں" }
+    "button": {
+      "run": "▶ چلائیں"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}} دستاویز",
+      "count_other": "{{count}} دستاویزات"
+    },
+    "placeholder": {
+      "result": "// نتائج دیکھنے کے لیے حکم چلائیں"
+    }
   },
   "schema": {
-    "label": { "sampled": "نمونہ", "document": "دستاویز", "field": "فیلڈ", "nullable": "nullable" },
-    "plural": { "documents": "", "fields": "" },
+    "label": {
+      "sampled": "نمونہ",
+      "document": "دستاویز",
+      "field": "فیلڈ",
+      "nullable": "nullable"
+    },
+    "plural": {
+      "documents": "",
+      "fields": ""
+    },
     "inferring": "اسکیما معلوم کر رہے ہیں…",
     "unavailable": "اسکیما ڈیٹا دستیاب نہیں۔",
     "summary": "{{docCount}} دستاویز{{docPlural}} کا نمونہ · {{fieldCount}} فیلڈ{{fieldPlural}}"
   },
   "indexes": {
-    "list": { "empty": "کوئی اشاریہ نہیں ملا۔" },
-    "button": { "create": "+ نیا اشاریہ" },
-    "label": { "count_one": "{{count}} اشاریہ", "count_other": "{{count}} اشاریے", "loading": "لوڈ ہو رہا ہے…" }
+    "list": {
+      "empty": "کوئی اشاریہ نہیں ملا۔"
+    },
+    "button": {
+      "create": "+ نیا اشاریہ"
+    },
+    "label": {
+      "count_one": "{{count}} اشاریہ",
+      "count_other": "{{count}} اشاریے",
+      "loading": "لوڈ ہو رہا ہے…"
+    }
   },
   "stats": {
     "loading": "اعداد و شمار لوڈ ہو رہے ہیں…",
@@ -205,11 +417,22 @@
       "indexSize": "اشاریہ سائز",
       "totalSize": "کل سائز"
     },
-    "section": { "indexSizes": "اشاریہ سائز" }
+    "section": {
+      "indexSizes": "اشاریہ سائز"
+    }
   },
   "commands": {
-    "search": { "placeholder": "احکامات تلاش کریں…", "label": "احکامات تلاش کریں" },
-    "category": { "server": "سرور", "database": "ڈیٹا بیس", "collection": "مجموعہ", "replication": "نقل", "administration": "انتظامیہ" },
+    "search": {
+      "placeholder": "احکامات تلاش کریں…",
+      "label": "احکامات تلاش کریں"
+    },
+    "category": {
+      "server": "سرور",
+      "database": "ڈیٹا بیس",
+      "collection": "مجموعہ",
+      "replication": "نقل",
+      "administration": "انتظامیہ"
+    },
     "description": {
       "ping": "سرور کنکٹیویٹی جانچیں",
       "buildInfo": "سرور ورژن اور بلڈ معلومات",
@@ -246,11 +469,23 @@
       "listIndexes": "مجموعے پر اشاریوں کی فہرست",
       "profile": "ڈیٹا بیس پروفائلر سطح حاصل/سیٹ کریں"
     },
-    "context": { "runningOn": "ڈیٹا بیس پر چل رہا ہے:" },
-    "checkbox": { "useAdminDb": "admin ڈیٹا بیس استعمال کریں" },
-    "button": { "run": "▶ چلائیں  (Ctrl+Enter)", "running": "⏳ چل رہا ہے…" },
-    "label": { "command": "حکم", "result": "نتیجہ" },
-    "error": { "invalidJson": "غلط JSON — چلانے سے پہلے حکم درست کریں۔" }
+    "context": {
+      "runningOn": "ڈیٹا بیس پر چل رہا ہے:"
+    },
+    "checkbox": {
+      "useAdminDb": "admin ڈیٹا بیس استعمال کریں"
+    },
+    "button": {
+      "run": "▶ چلائیں  (Ctrl+Enter)",
+      "running": "⏳ چل رہا ہے…"
+    },
+    "label": {
+      "command": "حکم",
+      "result": "نتیجہ"
+    },
+    "error": {
+      "invalidJson": "غلط JSON — چلانے سے پہلے حکم درست کریں۔"
+    }
   },
   "badge": {
     "admin": "● ایڈمن",
@@ -259,13 +494,22 @@
     "success": "ٹھیک"
   },
   "tree": {
-    "button": { "expandAll": "سب پھیلائیں", "collapseAll": "سب سمیٹیں" },
-    "checkbox": { "selectAllLabel": "صفحے پر سب منتخب کریں" }
+    "button": {
+      "expandAll": "سب پھیلائیں",
+      "collapseAll": "سب سمیٹیں"
+    },
+    "checkbox": {
+      "selectAllLabel": "صفحے پر سب منتخب کریں"
+    }
   },
   "ui": {
     "loading": "لوڈ ہو رہا ہے…",
     "connecting": "جوڑ رہے ہیں…",
-    "sidebar": { "resize": { "title": "سائڈبار سائز تبدیل کرنے کے لیے گھسیٹیں" } }
+    "sidebar": {
+      "resize": {
+        "title": "سائڈبار سائز تبدیل کرنے کے لیے گھسیٹیں"
+      }
+    }
   },
   "empty": {
     "title": "ڈیٹا بیس اور مجموعہ منتخب کریں",
@@ -274,7 +518,9 @@
       "databaseNeeded": "شروع کرنے کے لیے سائڈبار سے ڈیٹا بیس منتخب کریں۔"
     }
   },
-  "language": { "label": "زبان" },
+  "language": {
+    "label": "زبان"
+  },
   "a11y": {
     "skipToContent": "مرکزی مواد پر جائیں",
     "tabList": "کھلے ٹیبز",

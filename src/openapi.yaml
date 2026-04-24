@@ -746,9 +746,30 @@ paths:
                 items:
                   $ref: "#/components/schemas/Document"
 
+  /databases/{db}/collections/{col}/export/bson:
+    get:
+      summary: Export collection as BSON
+      description: |
+        Downloads all documents in the collection as a concatenated BSON binary stream.
+        The format is compatible with `mongodump` `.bson` files — each document is a
+        self-delimiting BSON document (4-byte LE length prefix followed by the document data).
+      operationId: exportCollectionBson
+      tags: [Transfer]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+      responses:
+        "200":
+          description: Concatenated BSON documents (mongodump format)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
   /databases/{db}/collections/{col}/import:
     post:
-      summary: Import documents
+      summary: Import documents from JSON
       description: |
         Inserts documents into the collection.
         If `replace` is true, drops the collection first.
@@ -774,6 +795,44 @@ paths:
                   type: boolean
                   default: false
                   description: Drop the collection before importing
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inserted:
+                    type: integer
+
+  /databases/{db}/collections/{col}/import/bson:
+    post:
+      summary: Import documents from BSON
+      description: |
+        Inserts documents from a concatenated BSON binary body (compatible with
+        `mongodump` `.bson` files) into the collection.
+        Pass `?replace=true` to drop the collection before importing.
+        Requires `dbv-admin` role.
+      operationId: importCollectionBson
+      tags: [Transfer]
+      parameters:
+        - $ref: "#/components/parameters/db"
+        - $ref: "#/components/parameters/col"
+        - name: replace
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Drop the collection before importing
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              description: Concatenated BSON documents (mongodump format)
       responses:
         "200":
           description: Import result

@@ -291,8 +291,9 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 
 **Export / Import** *(import requires dbv-admin)*
 
-- **Export** — downloads the entire collection as a pretty-printed JSON file
-- **Import** — uploads a JSON file (array of documents); you will be asked whether to replace the existing data
+- **Export JSON** — downloads the entire collection as a pretty-printed JSON file
+- **Export BSON** — downloads the entire collection as a binary BSON file (compatible with `mongodump` format)
+- **Import** — uploads a JSON (`.json`) or BSON (`.bson`) file; format is auto-detected from the file extension; you will be asked whether to replace the existing data
 
 ---
 
@@ -306,6 +307,7 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | View collection schema | ✅ | ✅ |
 | View indexes | ✅ | ✅ |
 | Export collection to JSON | ✅ | ✅ |
+| Export collection to BSON | ✅ | ✅ |
 | Export selected documents to JSON | ✅ | ✅ |
 | Create database | ❌ | ✅ |
 | Drop database | ❌ | ✅ |
@@ -316,6 +318,7 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | Delete document | ❌ | ✅ |
 | Bulk delete selected documents | ❌ | ✅ |
 | Import JSON into collection | ❌ | ✅ |
+| Import BSON into collection | ❌ | ✅ |
 | Create index | ❌ | ✅ |
 | Drop index | ❌ | ✅ |
 | Run MongoDB commands | ❌ | ✅ |
@@ -404,7 +407,7 @@ src/
     ├── health.rs     # GET /api/health  (no auth, pings MongoDB)
     ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection, run_command
     ├── schema.rs     # Schema inference (samples 100 docs, infers BSON types)
-    ├── transfer.rs   # Export (GET) and Import (POST)
+    ├── transfer.rs   # JSON Export/Import (GET/POST) and BSON Export/Import (GET/POST)
     └── connection.rs # GET/POST /api/connection and POST /api/connection/reconnect
 
 frontend/src/
@@ -547,7 +550,9 @@ All endpoints are under `/api`.
 | Method | Path | Role | Description |
 |---|---|---|---|
 | GET | `/api/databases/:db/collections/:col/export` | viewer+ | Download collection as JSON |
+| GET | `/api/databases/:db/collections/:col/export/bson` | viewer+ | Download collection as BSON (mongodump format) |
 | POST | `/api/databases/:db/collections/:col/import` | admin | Import `{ "documents": [...], "replace": false }` |
+| POST | `/api/databases/:db/collections/:col/import/bson` | admin | Import raw BSON binary body (mongodump format); pass `?replace=true` to drop collection first |
 
 #### Commands
 

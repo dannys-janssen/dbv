@@ -208,6 +208,8 @@
     "edit": "Rediger",
     "delete": "Slet",
     "export": "Eksporter",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "Importer",
     "add": "Tilføj",
     "refresh": "↻ Opdater",

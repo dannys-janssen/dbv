@@ -208,6 +208,8 @@
     "edit": "Bearbeiten",
     "delete": "Löschen",
     "export": "Exportieren",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "Importieren",
     "add": "Hinzufügen",
     "refresh": "↻ Aktualisieren",

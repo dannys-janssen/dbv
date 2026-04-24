@@ -109,6 +109,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "export": "Export",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "Import",
     "add": "Add",
     "refresh": "↻ Refresh",

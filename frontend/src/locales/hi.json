@@ -208,6 +208,8 @@
     "edit": "संपादित करें",
     "delete": "मिटाएँ",
     "export": "निर्यात करें",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "आयात करें",
     "add": "जोड़ें",
     "refresh": "↻ ताज़ा करें",

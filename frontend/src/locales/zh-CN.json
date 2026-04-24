@@ -208,6 +208,8 @@
     "edit": "编辑",
     "delete": "删除",
     "export": "导出",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "导入",
     "add": "添加",
     "refresh": "↻ 刷新",
