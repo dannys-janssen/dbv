@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）"
+      "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）",
+      "confirmReplaceBson": "导入BSON文件？（替换现有数据？）",
+      "title": "导入文档",
+      "subtitleJson": "文件：{{filename}} — 找到 {{count}} 个文档。",
+      "subtitleBson": "文件：{{filename}}",
+      "replaceLabel": "替换现有数据（导入前删除集合）",
+      "button": {
+        "import": "导入"
+      },
+      "error": "导入失败："
     },
     "confirmDelete": {
       "document": "删除此文档？"
@@ -208,6 +217,8 @@
     "edit": "编辑",
     "delete": "删除",
     "export": "导出",
+    "exportJson": "将集合导出为JSON",
+    "exportBson": "将集合导出为BSON（mongodump格式）",
     "import": "导入",
     "add": "添加",
     "refresh": "↻ 刷新",
@@ -308,7 +319,9 @@
     "button": {
       "export": "导出所选",
       "delete": "删除所选",
-      "clear": "✕ 清除"
+      "clear": "✕ 清除",
+      "exportJson": "导出JSON",
+      "exportBson": "导出BSON"
     },
     "confirmDelete_one": "删除选定的 {{count}} 个文档？此操作无法撤销。",
     "confirmDelete_other": "删除选定的 {{count}} 个文档？此操作无法撤销。"

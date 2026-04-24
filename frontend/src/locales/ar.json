@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)"
+      "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)",
+      "confirmReplaceBson": "استيراد ملف BSON؟ (استبدال البيانات الموجودة؟)",
+      "title": "استيراد المستندات",
+      "subtitleJson": "الملف: {{filename}} — تم العثور على {{count}} مستند.",
+      "subtitleBson": "الملف: {{filename}}",
+      "replaceLabel": "استبدال البيانات الموجودة (حذف المجموعة قبل الاستيراد)",
+      "button": {
+        "import": "استيراد"
+      },
+      "error": "فشل الاستيراد:"
     },
     "confirmDelete": {
       "document": "حذف هذا المستند؟"
@@ -208,6 +217,8 @@
     "edit": "تعديل",
     "delete": "حذف",
     "export": "تصدير",
+    "exportJson": "تصدير المجموعة كـ JSON",
+    "exportBson": "تصدير المجموعة كـ BSON (تنسيق mongodump)",
     "import": "استيراد",
     "add": "إضافة",
     "refresh": "↻ تحديث",
@@ -308,7 +319,9 @@
     "button": {
       "export": "تصدير المحدد",
       "delete": "حذف المحدد",
-      "clear": "✕ مسح"
+      "clear": "✕ مسح",
+      "exportJson": "تصدير JSON",
+      "exportBson": "تصدير BSON"
     },
     "confirmDelete_one": "حذف {{count}} مستند محدد؟ لا يمكن التراجع عن هذا.",
     "confirmDelete_other": "حذف {{count}} مستندات محددة؟ لا يمكن التراجع عن هذا."

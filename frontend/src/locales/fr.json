@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)"
+      "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)",
+      "confirmReplaceBson": "Importer le fichier BSON ? (remplacer les données existantes ?)",
+      "title": "Importer des documents",
+      "subtitleJson": "Fichier : {{filename}} — {{count}} document(s) trouvé(s).",
+      "subtitleBson": "Fichier : {{filename}}",
+      "replaceLabel": "Remplacer les données existantes (supprimer la collection avant import)",
+      "button": {
+        "import": "Importer"
+      },
+      "error": "Échec de l'importation :"
     },
     "confirmDelete": {
       "document": "Supprimer ce document ?"
@@ -208,6 +217,8 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "export": "Exporter",
+    "exportJson": "Exporter la collection en JSON",
+    "exportBson": "Exporter la collection en BSON (format mongodump)",
     "import": "Importer",
     "add": "Ajouter",
     "refresh": "↻ Actualiser",
@@ -308,7 +319,9 @@
     "button": {
       "export": "Exporter la sélection",
       "delete": "Supprimer la sélection",
-      "clear": "✕ Effacer"
+      "clear": "✕ Effacer",
+      "exportJson": "Exporter JSON",
+      "exportBson": "Exporter BSON"
     },
     "confirmDelete_one": "Supprimer {{count}} document sélectionné ? Cette action est irréversible.",
     "confirmDelete_other": "Supprimer {{count}} documents sélectionnés ? Cette action est irréversible."

@@ -1,39 +1,96 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "Увійти",
       "subtitle": "Доступ до баз даних MongoDB",
       "footer": "Захищено Keycloak OAuth2",
-      "button": { "label": "Увійти", "loading": "Вхід…" },
-      "validation": { "fieldsRequired": "Необхідно вказати ім'я користувача та пароль" },
-      "error": { "invalidCredentials": "Помилка входу. Перевірте облікові дані." }
+      "button": {
+        "label": "Увійти",
+        "loading": "Вхід…"
+      },
+      "validation": {
+        "fieldsRequired": "Необхідно вказати ім'я користувача та пароль"
+      },
+      "error": {
+        "invalidCredentials": "Помилка входу. Перевірте облікові дані."
+      }
     }
   },
   "nav": {
     "signOut": "Вийти",
-    "section": { "databases": "БАЗИ ДАНИХ", "collections": "КОЛЕКЦІЇ" }
+    "section": {
+      "databases": "БАЗИ ДАНИХ",
+      "collections": "КОЛЕКЦІЇ"
+    }
   },
   "connection": {
-    "status": { "noInfo": "Немає інформації про підключення" },
-    "button": {
-      "reconnect": { "label": "↻ Перепідключитись", "title": "Перепідключитись з поточним URI" },
-      "change": { "label": "⚙ Змінити", "title": "Змінити підключення MongoDB" }
+    "status": {
+      "noInfo": "Немає інформації про підключення"
     },
-    "error": { "failed": "⚠ Помилка підключення MongoDB:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ Перепідключитись",
+        "title": "Перепідключитись з поточним URI"
+      },
+      "change": {
+        "label": "⚙ Змінити",
+        "title": "Змінити підключення MongoDB"
+      }
+    },
+    "error": {
+      "failed": "⚠ Помилка підключення MongoDB:"
+    }
   },
   "database": {
-    "search": { "placeholder": "Пошук баз даних…" },
-    "list": { "empty": "Бази даних не знайдено" },
-    "button": { "create": { "title": "Створити базу даних" }, "stats": { "title": "Статистика бази даних «{{db}}»" }, "drop": { "title": "Видалити базу даних «{{db}}»" } }
+    "search": {
+      "placeholder": "Пошук баз даних…"
+    },
+    "list": {
+      "empty": "Бази даних не знайдено"
+    },
+    "button": {
+      "create": {
+        "title": "Створити базу даних"
+      },
+      "stats": {
+        "title": "Статистика бази даних «{{db}}»"
+      },
+      "drop": {
+        "title": "Видалити базу даних «{{db}}»"
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "Пошук колекцій…" },
-    "list": { "empty": { "noCollections": "Немає колекцій.", "canCreate": "Натисніть ＋, щоб створити." } },
-    "button": { "create": { "title": "Створити колекцію" }, "drop": { "title": "Видалити колекцію «{{col}}»" } }
+    "search": {
+      "placeholder": "Пошук колекцій…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "Немає колекцій.",
+        "canCreate": "Натисніть ＋, щоб створити."
+      }
+    },
+    "button": {
+      "create": {
+        "title": "Створити колекцію"
+      },
+      "drop": {
+        "title": "Видалити колекцію «{{col}}»"
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "Закрити вкладку" }, "new": { "title": "Нова вкладка" } },
+    "button": {
+      "close": {
+        "title": "Закрити вкладку"
+      },
+      "new": {
+        "title": "Нова вкладка"
+      }
+    },
     "documents": "Документи",
     "aggregate": "Агрегація",
     "schema": "Схема",
@@ -45,14 +102,24 @@
     "createDatabase": {
       "title": "Створити базу даних",
       "subtitle": "MongoDB створює базу даних при створенні першої колекції.",
-      "label": { "dbName": "Назва бази даних", "collectionName": "Назва першої колекції" },
-      "placeholder": { "dbName": "напр. myapp", "collectionName": "напр. users" }
+      "label": {
+        "dbName": "Назва бази даних",
+        "collectionName": "Назва першої колекції"
+      },
+      "placeholder": {
+        "dbName": "напр. myapp",
+        "collectionName": "напр. users"
+      }
     },
     "createCollection": {
       "title": "Створити колекцію",
       "subtitle": "Додати нову колекцію до",
-      "label": { "name": "Назва колекції" },
-      "placeholder": { "name": "напр. products" }
+      "label": {
+        "name": "Назва колекції"
+      },
+      "placeholder": {
+        "name": "напр. products"
+      }
     },
     "dbStats": {
       "title": "База даних:",
@@ -76,28 +143,69 @@
         "tlsCertKeyFile": "напр. /certs/client.pem"
       },
       "optional": "(необов'язково, шлях на сервері)",
-      "warning": { "insecure": "⚠ небезпечно" }
+      "warning": {
+        "insecure": "⚠ небезпечно"
+      }
     },
     "confirmDrop": {
       "database": "Видалити всю базу даних «{{db}}»? Цю дію неможливо скасувати.",
       "collection": "Видалити колекцію «{{col}}»? Всі документи будуть видалені.",
       "index": "Видалити індекс «{{name}}»?"
     },
-    "editDocument": { "title": "Редагувати документ" },
-    "newDocument": { "title": "Новий документ" },
+    "editDocument": {
+      "title": "Редагувати документ"
+    },
+    "newDocument": {
+      "title": "Новий документ"
+    },
     "createIndex": {
       "title": "Створити індекс",
       "subtitle": "Визначте поля та параметри для нового індексу.",
-      "label": { "keys": "Ключі індексу", "name": "Назва індексу", "unique": "Унікальний", "sparse": "Розріджений", "background": "Фоновий", "ttl": "TTL" },
+      "label": {
+        "keys": "Ключі індексу",
+        "name": "Назва індексу",
+        "unique": "Унікальний",
+        "sparse": "Розріджений",
+        "background": "Фоновий",
+        "ttl": "TTL"
+      },
       "optional": "(необов'язково)",
-      "hint": { "background": "(без блокування)", "ttl": "(секунди, необов'язково)" },
-      "placeholder": { "fieldName": "назва поля", "name": "автогенерація якщо порожньо", "ttl": "напр. 3600" },
-      "option": { "ascending": "1 (за зростанням)", "descending": "-1 (за спаданням)" },
-      "button": { "addField": "+ Додати поле", "submit": "Створити індекс" },
-      "validation": { "fieldRequired": "Необхідне принаймні одне поле." }
+      "hint": {
+        "background": "(без блокування)",
+        "ttl": "(секунди, необов'язково)"
+      },
+      "placeholder": {
+        "fieldName": "назва поля",
+        "name": "автогенерація якщо порожньо",
+        "ttl": "напр. 3600"
+      },
+      "option": {
+        "ascending": "1 (за зростанням)",
+        "descending": "-1 (за спаданням)"
+      },
+      "button": {
+        "addField": "+ Додати поле",
+        "submit": "Створити індекс"
+      },
+      "validation": {
+        "fieldRequired": "Необхідне принаймні одне поле."
+      }
     },
-    "import": { "confirmReplace": "Імпортувати {{count}} документів? (замінити існуючі?)" },
-    "confirmDelete": { "document": "Видалити цей документ?" }
+    "import": {
+      "confirmReplace": "Імпортувати {{count}} документів? (замінити існуючі?)",
+      "confirmReplaceBson": "Імпортувати файл BSON? (замінити існуючі дані?)",
+      "title": "Імпорт документів",
+      "subtitleJson": "Файл: {{filename}} — знайдено {{count}} документів.",
+      "subtitleBson": "Файл: {{filename}}",
+      "replaceLabel": "Замінити існуючі дані (видалити колекцію перед імпортом)",
+      "button": {
+        "import": "Імпортувати"
+      },
+      "error": "Помилка імпорту:"
+    },
+    "confirmDelete": {
+      "document": "Видалити цей документ?"
+    }
   },
   "buttons": {
     "cancel": "Скасувати",
@@ -109,6 +217,8 @@
     "edit": "Редагувати",
     "delete": "Видалити",
     "export": "Експортувати",
+    "exportJson": "Експортувати колекцію як JSON",
+    "exportBson": "Експортувати колекцію як BSON (формат mongodump)",
     "import": "Імпортувати",
     "add": "Додати",
     "refresh": "↻ Оновити",
@@ -116,29 +226,83 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "Ім'я користувача", "password": "Пароль", "fieldName": "Назва поля" },
-    "button": { "removeField": { "title": "Видалити поле" }, "remove": "×", "setNull": "Встановити null:" },
-    "value": { "null": "null" },
-    "option": { "true": "істина", "false": "хибність" },
-    "label": { "utc": "UTC", "newFieldName": "Нова назва поля", "newFieldType": "Новий тип поля", "date": "Дата", "time": "Час", "type": "Тип" },
-    "placeholder": { "objectId": "24-символьний шістнадцятковий рядок", "jsonValue": "Значення JSON" },
-    "section": { "addField": "Додати поле" },
-    "validation": { "fieldExists": "Поле «{{key}}» вже існує.", "fieldNameRequired": "Назва поля обов'язкова." }
+    "labels": {
+      "username": "Ім'я користувача",
+      "password": "Пароль",
+      "fieldName": "Назва поля"
+    },
+    "button": {
+      "removeField": {
+        "title": "Видалити поле"
+      },
+      "remove": "×",
+      "setNull": "Встановити null:"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "істина",
+      "false": "хибність"
+    },
+    "label": {
+      "utc": "UTC",
+      "newFieldName": "Нова назва поля",
+      "newFieldType": "Новий тип поля",
+      "date": "Дата",
+      "time": "Час",
+      "type": "Тип"
+    },
+    "placeholder": {
+      "objectId": "24-символьний шістнадцятковий рядок",
+      "jsonValue": "Значення JSON"
+    },
+    "section": {
+      "addField": "Додати поле"
+    },
+    "validation": {
+      "fieldExists": "Поле «{{key}}» вже існує.",
+      "fieldNameRequired": "Назва поля обов'язкова."
+    }
   },
   "editor": {
-    "form": { "noSchema": "Схема недоступна. Використовуйте режим JSON для редагування документа." },
-    "mode": {
-      "form": { "subtitle": "Редагуйте поля за допомогою типо-чутливих полів введення. Перейдіть до JSON для прямого редагування." },
-      "json": { "subtitle": "Редагуйте необроблений документ JSON. Перейдіть до Форми для редагування з підказками." }
+    "form": {
+      "noSchema": "Схема недоступна. Використовуйте режим JSON для редагування документа."
     },
-    "error": { "saveFailure": "Недійсний JSON або помилка збереження:" }
+    "mode": {
+      "form": {
+        "subtitle": "Редагуйте поля за допомогою типо-чутливих полів введення. Перейдіть до JSON для прямого редагування."
+      },
+      "json": {
+        "subtitle": "Редагуйте необроблений документ JSON. Перейдіть до Форми для редагування з підказками."
+      }
+    },
+    "error": {
+      "saveFailure": "Недійсний JSON або помилка збереження:"
+    }
   },
   "query": {
-    "label": { "filter": "Фільтр", "sort": "Сортування", "projection": "Проекція", "limit": "Ліміт" },
-    "hint": { "ctrlEnter": "Ctrl+Enter для застосування" },
-    "badge": { "active": "активний", "invalidJson": "недійсний JSON" },
-    "button": { "apply": "Застосувати", "clear": "Очистити" },
-    "mode": { "label": "Режим запиту", "sqlHint": "Введіть SQL SELECT — Ctrl+Enter для застосування" },
+    "label": {
+      "filter": "Фільтр",
+      "sort": "Сортування",
+      "projection": "Проекція",
+      "limit": "Ліміт"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter для застосування"
+    },
+    "badge": {
+      "active": "активний",
+      "invalidJson": "недійсний JSON"
+    },
+    "button": {
+      "apply": "Застосувати",
+      "clear": "Очистити"
+    },
+    "mode": {
+      "label": "Режим запиту",
+      "sqlHint": "Введіть SQL SELECT — Ctrl+Enter для застосування"
+    },
     "sql": {
       "label": "SQL-запит",
       "parseError": "помилка розбору",
@@ -148,48 +312,107 @@
     }
   },
   "views": {
-    "table": { "title": "Табличний перегляд" },
-    "tree": { "title": "Деревовидний перегляд" }
+    "table": {
+      "title": "Табличний перегляд"
+    },
+    "tree": {
+      "title": "Деревовидний перегляд"
+    }
   },
   "selection": {
     "count_one": "{{count}} документ вибрано",
     "count_other": "{{count}} документів вибрано",
-    "button": { "export": "Експортувати вибране", "delete": "Видалити вибране", "clear": "✕ Очистити" },
+    "button": {
+      "export": "Експортувати вибране",
+      "delete": "Видалити вибране",
+      "clear": "✕ Очистити",
+      "exportJson": "Експорт JSON",
+      "exportBson": "Експорт BSON"
+    },
     "confirmDelete_one": "Видалити {{count}} вибраний документ? Цю дію неможливо скасувати.",
     "confirmDelete_other": "Видалити {{count}} вибраних документів? Цю дію неможливо скасувати."
   },
   "documents": {
-    "list": { "empty": "Документів не знайдено", "emptyWithFilter": "Спробуйте налаштувати фільтр або проекцію.", "emptyNoFilter": "Ця колекція порожня." },
-    "button": { "create": "+ Новий документ" },
+    "list": {
+      "empty": "Документів не знайдено",
+      "emptyWithFilter": "Спробуйте налаштувати фільтр або проекцію.",
+      "emptyNoFilter": "Ця колекція порожня."
+    },
+    "button": {
+      "create": "+ Новий документ"
+    },
     "fieldCount_one": "{{count}} поле",
     "fieldCount_other": "{{count}} полів"
   },
   "table": {
-    "header": { "id": "_id", "preview": "Попередній перегляд", "actions": "Дії", "name": "Ім'я", "keys": "Ключі", "unique": "Унікальний", "sparse": "Розріджений", "ttl": "TTL (s)", "index": "Індекс", "size": "Розмір", "fieldPath": "Шлях поля", "types": "Типи", "coverage": "Покриття", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "Попередній перегляд",
+      "actions": "Дії",
+      "name": "Ім'я",
+      "keys": "Ключі",
+      "unique": "Унікальний",
+      "sparse": "Розріджений",
+      "ttl": "TTL (s)",
+      "index": "Індекс",
+      "size": "Розмір",
+      "fieldPath": "Шлях поля",
+      "types": "Типи",
+      "coverage": "Покриття",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "Показано {{start}}–{{end}} з {{total}} документів",
     "label_page": "Сторінка {{page}}",
-    "button": { "prev": "← Назад", "next": "Вперед →" }
+    "button": {
+      "prev": "← Назад",
+      "next": "Вперед →"
+    }
   },
   "aggregate": {
     "prompt": "Введіть агрегаційний конвеєр (масив JSON):",
-    "button": { "run": "▶ Запустити" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}} документ", "count_other": "{{count}} документів" },
-    "placeholder": { "result": "// Запустіть команду щоб побачити результати" }
+    "button": {
+      "run": "▶ Запустити"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}} документ",
+      "count_other": "{{count}} документів"
+    },
+    "placeholder": {
+      "result": "// Запустіть команду щоб побачити результати"
+    }
   },
   "schema": {
-    "label": { "sampled": "Вибірка", "document": "документ", "field": "поле", "nullable": "nullable" },
-    "plural": { "documents": "ів", "fields": "ів" },
+    "label": {
+      "sampled": "Вибірка",
+      "document": "документ",
+      "field": "поле",
+      "nullable": "nullable"
+    },
+    "plural": {
+      "documents": "ів",
+      "fields": "ів"
+    },
     "inferring": "Виведення схеми…",
     "unavailable": "Дані схеми недоступні.",
     "summary": "Вибірка {{docCount}} документ{{docPlural}} · {{fieldCount}} пол{{fieldPlural}}"
   },
   "indexes": {
-    "list": { "empty": "Індекси не знайдено." },
-    "button": { "create": "+ Новий індекс" },
-    "label": { "count_one": "{{count}} індекс", "count_other": "{{count}} індексів", "loading": "Завантаження…" }
+    "list": {
+      "empty": "Індекси не знайдено."
+    },
+    "button": {
+      "create": "+ Новий індекс"
+    },
+    "label": {
+      "count_one": "{{count}} індекс",
+      "count_other": "{{count}} індексів",
+      "loading": "Завантаження…"
+    }
   },
   "stats": {
     "loading": "Завантаження статистики…",
@@ -205,11 +428,22 @@
       "indexSize": "Розмір індексу",
       "totalSize": "Загальний розмір"
     },
-    "section": { "indexSizes": "Розміри індексів" }
+    "section": {
+      "indexSizes": "Розміри індексів"
+    }
   },
   "commands": {
-    "search": { "placeholder": "Пошук команд…", "label": "Пошук команд" },
-    "category": { "server": "Сервер", "database": "База даних", "collection": "Колекція", "replication": "Реплікація", "administration": "Адміністрування" },
+    "search": {
+      "placeholder": "Пошук команд…",
+      "label": "Пошук команд"
+    },
+    "category": {
+      "server": "Сервер",
+      "database": "База даних",
+      "collection": "Колекція",
+      "replication": "Реплікація",
+      "administration": "Адміністрування"
+    },
     "description": {
       "ping": "Тест підключення до сервера",
       "buildInfo": "Версія сервера та інформація про збірку",
@@ -246,11 +480,23 @@
       "listIndexes": "Список індексів у колекції",
       "profile": "Отримати/встановити рівень профілювання бази даних"
     },
-    "context": { "runningOn": "Виконується на базі даних:" },
-    "checkbox": { "useAdminDb": "Використовувати базу даних admin" },
-    "button": { "run": "▶ Запустити  (Ctrl+Enter)", "running": "⏳ Виконання…" },
-    "label": { "command": "Команда", "result": "Результат" },
-    "error": { "invalidJson": "Недійсний JSON — виправте команду перед запуском." }
+    "context": {
+      "runningOn": "Виконується на базі даних:"
+    },
+    "checkbox": {
+      "useAdminDb": "Використовувати базу даних admin"
+    },
+    "button": {
+      "run": "▶ Запустити  (Ctrl+Enter)",
+      "running": "⏳ Виконання…"
+    },
+    "label": {
+      "command": "Команда",
+      "result": "Результат"
+    },
+    "error": {
+      "invalidJson": "Недійсний JSON — виправте команду перед запуском."
+    }
   },
   "badge": {
     "admin": "● Адміністратор",
@@ -259,13 +505,22 @@
     "success": "ОК"
   },
   "tree": {
-    "button": { "expandAll": "Розгорнути всі", "collapseAll": "Згорнути всі" },
-    "checkbox": { "selectAllLabel": "Вибрати всі на сторінці" }
+    "button": {
+      "expandAll": "Розгорнути всі",
+      "collapseAll": "Згорнути всі"
+    },
+    "checkbox": {
+      "selectAllLabel": "Вибрати всі на сторінці"
+    }
   },
   "ui": {
     "loading": "Завантаження…",
     "connecting": "Підключення…",
-    "sidebar": { "resize": { "title": "Перетягніть для зміни розміру бічної панелі" } }
+    "sidebar": {
+      "resize": {
+        "title": "Перетягніть для зміни розміру бічної панелі"
+      }
+    }
   },
   "empty": {
     "title": "Виберіть базу даних і колекцію",
@@ -274,7 +529,9 @@
       "databaseNeeded": "Виберіть базу даних з бічної панелі для початку роботи."
     }
   },
-  "language": { "label": "Мова" },
+  "language": {
+    "label": "Мова"
+  },
   "a11y": {
     "skipToContent": "Перейти до основного вмісту",
     "tabList": "Відкриті вкладки",

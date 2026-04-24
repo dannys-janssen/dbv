@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "Importar {{count}} documentos? (substituir existentes?)"
+      "confirmReplace": "Importar {{count}} documentos? (substituir existentes?)",
+      "confirmReplaceBson": "Importar arquivo BSON? (substituir dados existentes?)",
+      "title": "Importar documentos",
+      "subtitleJson": "Ficheiro: {{filename}} — {{count}} documentos encontrados.",
+      "subtitleBson": "Ficheiro: {{filename}}",
+      "replaceLabel": "Substituir dados existentes (eliminar coleção antes de importar)",
+      "button": {
+        "import": "Importar"
+      },
+      "error": "Falha na importação:"
     },
     "confirmDelete": {
       "document": "Excluir este documento?"
@@ -208,6 +217,8 @@
     "edit": "Editar",
     "delete": "Deletar",
     "export": "Exportar",
+    "exportJson": "Exportar coleção como JSON",
+    "exportBson": "Exportar coleção como BSON (formato mongodump)",
     "import": "Importar",
     "add": "Adicionar",
     "refresh": "↻ Atualizar",
@@ -308,7 +319,9 @@
     "button": {
       "export": "Exportar Selecionados",
       "delete": "Deletar Selecionados",
-      "clear": "✕ Limpar"
+      "clear": "✕ Limpar",
+      "exportJson": "Exportar JSON",
+      "exportBson": "Exportar BSON"
     },
     "confirmDelete_one": "Deletar {{count}} documento selecionado? Isso não pode ser desfeito.",
     "confirmDelete_other": "Deletar {{count}} documentos selecionados? Isso não pode ser desfeito."

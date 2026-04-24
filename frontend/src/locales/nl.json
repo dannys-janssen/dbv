@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)"
+      "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)",
+      "confirmReplaceBson": "BSON-bestand importeren? (bestaande gegevens vervangen?)",
+      "title": "Documenten importeren",
+      "subtitleJson": "Bestand: {{filename}} — {{count}} documenten gevonden.",
+      "subtitleBson": "Bestand: {{filename}}",
+      "replaceLabel": "Bestaande gegevens vervangen (collectie verwijderen vóór import)",
+      "button": {
+        "import": "Importeren"
+      },
+      "error": "Importeren mislukt:"
     },
     "confirmDelete": {
       "document": "Dit document verwijderen?"
@@ -208,6 +217,8 @@
     "edit": "Bewerken",
     "delete": "Verwijderen",
     "export": "Exporteren",
+    "exportJson": "Collectie exporteren als JSON",
+    "exportBson": "Collectie exporteren als BSON (mongodump-formaat)",
     "import": "Importeren",
     "add": "Toevoegen",
     "refresh": "↻ Vernieuwen",
@@ -308,7 +319,9 @@
     "button": {
       "export": "Selectie exporteren",
       "delete": "Selectie verwijderen",
-      "clear": "✕ Wissen"
+      "clear": "✕ Wissen",
+      "exportJson": "JSON exporteren",
+      "exportBson": "BSON exporteren"
     },
     "confirmDelete_one": "{{count}} geselecteerd document verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "confirmDelete_other": "{{count}} geselecteerde documenten verwijderen? Dit kan niet ongedaan worden gemaakt."

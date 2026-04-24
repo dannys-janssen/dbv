@@ -5,7 +5,9 @@ import {
   deleteDocument,
   bulkDeleteDocuments,
   exportCollection,
+  exportCollectionBson,
   importCollection,
+  importCollectionBson,
   aggregate,
   createDocument,
   updateDocument,
@@ -71,6 +73,14 @@ function getDocId(doc: Record<string, unknown>): string {
   if (typeof id === "object" && id !== null)
     return (id as Record<string, unknown>)["$oid"] as string;
   return String(id ?? "");
+}
+
+/** Build a MongoDB filter string that matches a set of document IDs. */
+function buildSelectionFilter(ids: Set<string>): string {
+  const filterIds = [...ids].map((id) =>
+    /^[0-9a-fA-F]{24}$/.test(id) ? { $oid: id } : id
+  );
+  return JSON.stringify({ _id: { $in: filterIds } });
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -213,6 +223,15 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [colStats, setColStats] = useState<Record<string, unknown> | null>(null);
   const [colStatsLoading, setColStatsLoading] = useState(false);
 
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importReplace, setImportReplace] = useState(false);
+  const [importPending, setImportPending] = useState<
+    | { kind: "bson"; buffer: ArrayBuffer; filename: string }
+    | { kind: "json"; docs: unknown[]; filename: string }
+    | null
+  >(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
   const loadSchema = useCallback(() => {
     if (!db || !col) return;
     setSchemaLoading(true);
@@ -336,11 +355,38 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    const docs = JSON.parse(text) as unknown[];
-    if (!confirm(t("modals.import.confirmReplace", { count: docs.length }))) return;
-    await importCollection(db, col, docs, true);
-    loadDocuments();
+    // Reset the input so the same file can be re-selected after cancel
+    if (importInputRef.current) importInputRef.current.value = "";
+    const isBson = file.name.endsWith(".bson");
+    if (isBson) {
+      const buffer = await file.arrayBuffer();
+      setImportPending({ kind: "bson", buffer, filename: file.name });
+    } else {
+      const text = await file.text();
+      const docs = JSON.parse(text) as unknown[];
+      setImportPending({ kind: "json", docs, filename: file.name });
+    }
+    setImportReplace(false);
+    setImportModalOpen(true);
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importPending) return;
+    try {
+      if (importPending.kind === "bson") {
+        await importCollectionBson(db, col, importPending.buffer, importReplace);
+      } else {
+        await importCollection(db, col, importPending.docs, importReplace);
+      }
+      setImportModalOpen(false);
+      setImportPending(null);
+      loadDocuments();
+    } catch (e: unknown) {
+      const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setError(t("modals.import.error") + " " + (axiosBody ?? (e as Error).message ?? "Unknown error"));
+      setImportModalOpen(false);
+      setImportPending(null);
+    }
   };
 
   const runAggregate = useCallback(async () => {
@@ -361,6 +407,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (importModalOpen) { setImportModalOpen(false); setImportPending(null); return; }
         if (editorOpen)   { setEditorOpen(false);   return; }
         if (newIndexOpen) { setNewIndexOpen(false);  return; }
       }
@@ -375,7 +422,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [editorOpen, newIndexOpen, view, handleSave, runAggregate]);
+  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
@@ -759,17 +806,27 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           ⊞
                         </button>
                       </div>
-                      <button
-                        onClick={() => exportCollection(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                        style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
-                      >
-                        {t("buttons.export")}
-                      </button>
+                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                        <button
+                          onClick={() => exportCollection(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                          title={t("buttons.exportJson")}
+                        >
+                          {t("buttons.export")} JSON
+                        </button>
+                        <button
+                          onClick={() => exportCollectionBson(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
+                          title={t("buttons.exportBson")}
+                        >
+                          {t("buttons.export")} BSON
+                        </button>
+                      </div>
                       {canWrite && (
                         <>
                           <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                             {t("buttons.import")}
-                            <input type="file" accept=".json" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
+                            <input ref={importInputRef} type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
                           <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
                             {t("documents.button.create")}
@@ -794,21 +851,26 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8", flex: 1 }}>
                     {t("selection.count", { count: selectedIds.size })}
                   </span>
-                  <button
-                    onClick={() => {
-                      const selected = documents.filter((d) => selectedIds.has(getDocId(d)));
-                      const blob = new Blob([JSON.stringify(selected, null, 2)], { type: "application/json" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${col}_selection.json`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    style={{ padding: "5px 14px", background: "#fff", border: "1px solid #bfdbfe", color: "#1d4ed8", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
-                  >
-                    {t("selection.button.export")}
-                  </button>
+                  <div style={{ display: "flex", border: "1px solid #bfdbfe", borderRadius: "6px", overflow: "hidden" }}>
+                    <button
+                      onClick={() => {
+                        const filter = buildSelectionFilter(selectedIds);
+                        exportCollection(db, col, filter).catch((e: unknown) => alert("Export failed: " + (e as Error).message));
+                      }}
+                      style={{ padding: "5px 12px", background: "#fff", border: "none", borderRight: "1px solid #bfdbfe", color: "#1d4ed8", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                    >
+                      {t("selection.button.exportJson")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const filter = buildSelectionFilter(selectedIds);
+                        exportCollectionBson(db, col, filter).catch((e: unknown) => alert("Export failed: " + (e as Error).message));
+                      }}
+                      style={{ padding: "5px 12px", background: "#fff", border: "none", color: "#1d4ed8", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                    >
+                      {t("selection.button.exportBson")}
+                    </button>
+                  </div>
                   {canWrite && (
                     <button
                       onClick={async () => {
@@ -1488,7 +1550,41 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
         </div>
       )}
 
-      {/* ── Create Index modal ── */}
+      {/* ── Import confirmation modal ── */}
+      {importModalOpen && importPending && (
+        <div style={overlayStyle} role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+          <div style={{ ...modalBaseStyle, width: "460px" }}>
+            <h3 id="import-modal-title" style={modalTitleStyle}>{t("modals.import.title")}</h3>
+            <p style={modalSubtitleStyle}>
+              {importPending.kind === "json"
+                ? t("modals.import.subtitleJson", { count: importPending.docs.length, filename: importPending.filename })
+                : t("modals.import.subtitleBson", { filename: importPending.filename })}
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#374151", cursor: "pointer", marginBottom: "20px" }}>
+              <input
+                type="checkbox"
+                checked={importReplace}
+                onChange={(e) => setImportReplace(e.target.checked)}
+              />
+              {t("modals.import.replaceLabel")}
+            </label>
+            <div style={modalFooterStyle}>
+              <button
+                onClick={() => { setImportModalOpen(false); setImportPending(null); }}
+                style={cancelBtnStyle}
+              >
+                {t("buttons.cancel")}
+              </button>
+              <button
+                onClick={() => void handleImportConfirm()}
+                style={primaryBtnStyle}
+              >
+                {t("modals.import.button.import")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {newIndexOpen && (
         <div style={overlayStyle}>
           <div style={{ ...modalBaseStyle, width: "560px" }}>

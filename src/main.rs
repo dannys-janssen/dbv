@@ -114,8 +114,16 @@ async fn main() -> anyhow::Result<()> {
             get(routes::transfer::export_collection),
         )
         .route(
+            "/databases/{db}/collections/{collection}/export/bson",
+            get(routes::transfer::export_collection_bson),
+        )
+        .route(
             "/databases/{db}/collections/{collection}/import",
             post(routes::transfer::import_collection),
+        )
+        .route(
+            "/databases/{db}/collections/{collection}/import/bson",
+            post(routes::transfer::import_collection_bson),
         )
         .route(
             "/databases/{db}/run_command",

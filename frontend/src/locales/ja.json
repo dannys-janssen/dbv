@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}}件のドキュメントをインポートしますか？(既存を置き換え?)"
+      "confirmReplace": "{{count}}件のドキュメントをインポートしますか？(既存を置き換え?)",
+      "confirmReplaceBson": "BSONファイルをインポートしますか？（既存データを置き換えますか？）",
+      "title": "ドキュメントをインポート",
+      "subtitleJson": "ファイル: {{filename}} — {{count}} 件のドキュメントが見つかりました。",
+      "subtitleBson": "ファイル: {{filename}}",
+      "replaceLabel": "既存データを置き換える（インポート前にコレクションを削除）",
+      "button": {
+        "import": "インポート"
+      },
+      "error": "インポート失敗:"
     },
     "confirmDelete": {
       "document": "このドキュメントを削除しますか？"
@@ -208,6 +217,8 @@
     "edit": "編集",
     "delete": "削除",
     "export": "エクスポート",
+    "exportJson": "コレクションをJSONとしてエクスポート",
+    "exportBson": "コレクションをBSONとしてエクスポート（mongodump形式）",
     "import": "インポート",
     "add": "追加",
     "refresh": "↻ 更新",
@@ -308,7 +319,9 @@
     "button": {
       "export": "選択をエクスポート",
       "delete": "選択を削除",
-      "clear": "✕ クリア"
+      "clear": "✕ クリア",
+      "exportJson": "JSONエクスポート",
+      "exportBson": "BSONエクスポート"
     },
     "confirmDelete_one": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。",
     "confirmDelete_other": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。"

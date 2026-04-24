@@ -96,7 +96,16 @@
       "button": { "addField": "+ Add field", "submit": "Create Index" },
       "validation": { "fieldRequired": "At least one field is required." }
     },
-    "import": { "confirmReplace": "Import {{count}} documents? (replace existing?)" },
+    "import": {
+      "title": "Import Documents",
+      "subtitleJson": "File: {{filename}} — {{count}} documents found.",
+      "subtitleBson": "File: {{filename}}",
+      "replaceLabel": "Replace existing data (drop collection before import)",
+      "button": { "import": "Import" },
+      "error": "Import failed:",
+      "confirmReplace": "Import {{count}} documents? (replace existing?)",
+      "confirmReplaceBson": "Import BSON file? (replace existing data?)"
+    },
     "confirmDelete": { "document": "Delete this document?" }
   },
   "buttons": {
@@ -109,6 +118,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "export": "Export",
+    "exportJson": "Export collection as JSON",
+    "exportBson": "Export collection as BSON (mongodump format)",
     "import": "Import",
     "add": "Add",
     "refresh": "↻ Refresh",
@@ -154,7 +165,7 @@
   "selection": {
     "count_one": "{{count}} document selected",
     "count_other": "{{count}} documents selected",
-    "button": { "export": "Export Selected", "delete": "Delete Selected", "clear": "✕ Clear" },
+    "button": { "export": "Export Selected", "exportJson": "Export JSON", "exportBson": "Export BSON", "delete": "Delete Selected", "clear": "✕ Clear" },
     "confirmDelete_one": "Delete {{count}} selected document? This cannot be undone.",
     "confirmDelete_other": "Delete {{count}} selected documents? This cannot be undone."
   },

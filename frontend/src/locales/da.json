@@ -192,7 +192,16 @@
       }
     },
     "import": {
-      "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)"
+      "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)",
+      "confirmReplaceBson": "Importer BSON-fil? (erstat eksisterende data?)",
+      "title": "Importer dokumenter",
+      "subtitleJson": "Fil: {{filename}} — {{count}} dokumenter fundet.",
+      "subtitleBson": "Fil: {{filename}}",
+      "replaceLabel": "Erstat eksisterende data (slet samling før import)",
+      "button": {
+        "import": "Importer"
+      },
+      "error": "Import mislykkedes:"
     },
     "confirmDelete": {
       "document": "Slet dette dokument?"
@@ -208,6 +217,8 @@
     "edit": "Rediger",
     "delete": "Slet",
     "export": "Eksporter",
+    "exportJson": "Eksporter samling som JSON",
+    "exportBson": "Eksporter samling som BSON (mongodump-format)",
     "import": "Importer",
     "add": "Tilføj",
     "refresh": "↻ Opdater",
@@ -308,7 +319,9 @@
     "button": {
       "export": "Eksporter valgte",
       "delete": "Slet valgte",
-      "clear": "✕ Ryd"
+      "clear": "✕ Ryd",
+      "exportJson": "Eksporter JSON",
+      "exportBson": "Eksporter BSON"
     },
     "confirmDelete_one": "Slet {{count}} valgt dokument? Dette kan ikke fortrydes.",
     "confirmDelete_other": "Slet {{count}} valgte dokumenter? Dette kan ikke fortrydes."

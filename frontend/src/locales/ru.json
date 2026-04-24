@@ -1,39 +1,96 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "Войти",
       "subtitle": "Доступ к базам данных MongoDB",
       "footer": "Защищено Keycloak OAuth2",
-      "button": { "label": "Войти", "loading": "Вход…" },
-      "validation": { "fieldsRequired": "Необходимо указать имя пользователя и пароль" },
-      "error": { "invalidCredentials": "Ошибка входа. Проверьте учётные данные." }
+      "button": {
+        "label": "Войти",
+        "loading": "Вход…"
+      },
+      "validation": {
+        "fieldsRequired": "Необходимо указать имя пользователя и пароль"
+      },
+      "error": {
+        "invalidCredentials": "Ошибка входа. Проверьте учётные данные."
+      }
     }
   },
   "nav": {
     "signOut": "Выйти",
-    "section": { "databases": "БАЗЫ ДАННЫХ", "collections": "КОЛЛЕКЦИИ" }
+    "section": {
+      "databases": "БАЗЫ ДАННЫХ",
+      "collections": "КОЛЛЕКЦИИ"
+    }
   },
   "connection": {
-    "status": { "noInfo": "Нет информации о подключении" },
-    "button": {
-      "reconnect": { "label": "↻ Переподключиться", "title": "Переподключиться с текущим URI" },
-      "change": { "label": "⚙ Изменить", "title": "Изменить подключение MongoDB" }
+    "status": {
+      "noInfo": "Нет информации о подключении"
     },
-    "error": { "failed": "⚠ Ошибка подключения MongoDB:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ Переподключиться",
+        "title": "Переподключиться с текущим URI"
+      },
+      "change": {
+        "label": "⚙ Изменить",
+        "title": "Изменить подключение MongoDB"
+      }
+    },
+    "error": {
+      "failed": "⚠ Ошибка подключения MongoDB:"
+    }
   },
   "database": {
-    "search": { "placeholder": "Поиск баз данных…" },
-    "list": { "empty": "Базы данных не найдены" },
-    "button": { "create": { "title": "Создать базу данных" }, "stats": { "title": "Статистика базы данных «{{db}}»" }, "drop": { "title": "Удалить базу данных «{{db}}»" } }
+    "search": {
+      "placeholder": "Поиск баз данных…"
+    },
+    "list": {
+      "empty": "Базы данных не найдены"
+    },
+    "button": {
+      "create": {
+        "title": "Создать базу данных"
+      },
+      "stats": {
+        "title": "Статистика базы данных «{{db}}»"
+      },
+      "drop": {
+        "title": "Удалить базу данных «{{db}}»"
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "Поиск коллекций…" },
-    "list": { "empty": { "noCollections": "Нет коллекций.", "canCreate": "Нажмите ＋ для создания." } },
-    "button": { "create": { "title": "Создать коллекцию" }, "drop": { "title": "Удалить коллекцию «{{col}}»" } }
+    "search": {
+      "placeholder": "Поиск коллекций…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "Нет коллекций.",
+        "canCreate": "Нажмите ＋ для создания."
+      }
+    },
+    "button": {
+      "create": {
+        "title": "Создать коллекцию"
+      },
+      "drop": {
+        "title": "Удалить коллекцию «{{col}}»"
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "Закрыть вкладку" }, "new": { "title": "Новая вкладка" } },
+    "button": {
+      "close": {
+        "title": "Закрыть вкладку"
+      },
+      "new": {
+        "title": "Новая вкладка"
+      }
+    },
     "documents": "Документы",
     "aggregate": "Агрегация",
     "schema": "Схема",
@@ -45,14 +102,24 @@
     "createDatabase": {
       "title": "Создать базу данных",
       "subtitle": "MongoDB создаёт базу данных при создании первой коллекции.",
-      "label": { "dbName": "Название базы данных", "collectionName": "Название первой коллекции" },
-      "placeholder": { "dbName": "напр. myapp", "collectionName": "напр. users" }
+      "label": {
+        "dbName": "Название базы данных",
+        "collectionName": "Название первой коллекции"
+      },
+      "placeholder": {
+        "dbName": "напр. myapp",
+        "collectionName": "напр. users"
+      }
     },
     "createCollection": {
       "title": "Создать коллекцию",
       "subtitle": "Добавить новую коллекцию в",
-      "label": { "name": "Название коллекции" },
-      "placeholder": { "name": "напр. products" }
+      "label": {
+        "name": "Название коллекции"
+      },
+      "placeholder": {
+        "name": "напр. products"
+      }
     },
     "dbStats": {
       "title": "База данных:",
@@ -76,28 +143,69 @@
         "tlsCertKeyFile": "напр. /certs/client.pem"
       },
       "optional": "(необязательно, путь на сервере)",
-      "warning": { "insecure": "⚠ небезопасно" }
+      "warning": {
+        "insecure": "⚠ небезопасно"
+      }
     },
     "confirmDrop": {
       "database": "Удалить всю базу данных «{{db}}»? Это действие нельзя отменить.",
       "collection": "Удалить коллекцию «{{col}}»? Все документы будут удалены.",
       "index": "Удалить индекс «{{name}}»?"
     },
-    "editDocument": { "title": "Редактировать документ" },
-    "newDocument": { "title": "Новый документ" },
+    "editDocument": {
+      "title": "Редактировать документ"
+    },
+    "newDocument": {
+      "title": "Новый документ"
+    },
     "createIndex": {
       "title": "Создать индекс",
       "subtitle": "Определите поля и параметры для нового индекса.",
-      "label": { "keys": "Ключи индекса", "name": "Название индекса", "unique": "Уникальный", "sparse": "Разреженный", "background": "Фоновый", "ttl": "TTL" },
+      "label": {
+        "keys": "Ключи индекса",
+        "name": "Название индекса",
+        "unique": "Уникальный",
+        "sparse": "Разреженный",
+        "background": "Фоновый",
+        "ttl": "TTL"
+      },
       "optional": "(необязательно)",
-      "hint": { "background": "(неблокирующий)", "ttl": "(секунды, необязательно)" },
-      "placeholder": { "fieldName": "название поля", "name": "авто-генерация если пусто", "ttl": "напр. 3600" },
-      "option": { "ascending": "1 (по возрастанию)", "descending": "-1 (по убыванию)" },
-      "button": { "addField": "+ Добавить поле", "submit": "Создать индекс" },
-      "validation": { "fieldRequired": "Требуется хотя бы одно поле." }
+      "hint": {
+        "background": "(неблокирующий)",
+        "ttl": "(секунды, необязательно)"
+      },
+      "placeholder": {
+        "fieldName": "название поля",
+        "name": "авто-генерация если пусто",
+        "ttl": "напр. 3600"
+      },
+      "option": {
+        "ascending": "1 (по возрастанию)",
+        "descending": "-1 (по убыванию)"
+      },
+      "button": {
+        "addField": "+ Добавить поле",
+        "submit": "Создать индекс"
+      },
+      "validation": {
+        "fieldRequired": "Требуется хотя бы одно поле."
+      }
     },
-    "import": { "confirmReplace": "Импортировать {{count}} документов? (заменить существующие?)" },
-    "confirmDelete": { "document": "Удалить этот документ?" }
+    "import": {
+      "confirmReplace": "Импортировать {{count}} документов? (заменить существующие?)",
+      "confirmReplaceBson": "Импортировать файл BSON? (заменить существующие данные?)",
+      "title": "Импорт документов",
+      "subtitleJson": "Файл: {{filename}} — найдено {{count}} документов.",
+      "subtitleBson": "Файл: {{filename}}",
+      "replaceLabel": "Заменить существующие данные (удалить коллекцию перед импортом)",
+      "button": {
+        "import": "Импортировать"
+      },
+      "error": "Ошибка импорта:"
+    },
+    "confirmDelete": {
+      "document": "Удалить этот документ?"
+    }
   },
   "buttons": {
     "cancel": "Отмена",
@@ -109,6 +217,8 @@
     "edit": "Редактировать",
     "delete": "Удалить",
     "export": "Экспортировать",
+    "exportJson": "Экспортировать коллекцию как JSON",
+    "exportBson": "Экспортировать коллекцию как BSON (формат mongodump)",
     "import": "Импортировать",
     "add": "Добавить",
     "refresh": "↻ Обновить",
@@ -116,29 +226,83 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "Имя пользователя", "password": "Пароль", "fieldName": "Название поля" },
-    "button": { "removeField": { "title": "Удалить поле" }, "remove": "×", "setNull": "Установить null:" },
-    "value": { "null": "null" },
-    "option": { "true": "истина", "false": "ложь" },
-    "label": { "utc": "UTC", "newFieldName": "Новое название поля", "newFieldType": "Новый тип поля", "date": "Дата", "time": "Время", "type": "Тип" },
-    "placeholder": { "objectId": "24-символьная шестнадцатеричная строка", "jsonValue": "Значение JSON" },
-    "section": { "addField": "Добавить поле" },
-    "validation": { "fieldExists": "Поле «{{key}}» уже существует.", "fieldNameRequired": "Название поля обязательно." }
+    "labels": {
+      "username": "Имя пользователя",
+      "password": "Пароль",
+      "fieldName": "Название поля"
+    },
+    "button": {
+      "removeField": {
+        "title": "Удалить поле"
+      },
+      "remove": "×",
+      "setNull": "Установить null:"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "истина",
+      "false": "ложь"
+    },
+    "label": {
+      "utc": "UTC",
+      "newFieldName": "Новое название поля",
+      "newFieldType": "Новый тип поля",
+      "date": "Дата",
+      "time": "Время",
+      "type": "Тип"
+    },
+    "placeholder": {
+      "objectId": "24-символьная шестнадцатеричная строка",
+      "jsonValue": "Значение JSON"
+    },
+    "section": {
+      "addField": "Добавить поле"
+    },
+    "validation": {
+      "fieldExists": "Поле «{{key}}» уже существует.",
+      "fieldNameRequired": "Название поля обязательно."
+    }
   },
   "editor": {
-    "form": { "noSchema": "Схема недоступна. Используйте режим JSON для редактирования документа." },
-    "mode": {
-      "form": { "subtitle": "Редактируйте поля с помощью типо-зависимых полей ввода. Перейдите в JSON для прямого редактирования." },
-      "json": { "subtitle": "Редактируйте необработанный документ JSON. Перейдите в Форму для редактирования с подсказками." }
+    "form": {
+      "noSchema": "Схема недоступна. Используйте режим JSON для редактирования документа."
     },
-    "error": { "saveFailure": "Недействительный JSON или ошибка сохранения:" }
+    "mode": {
+      "form": {
+        "subtitle": "Редактируйте поля с помощью типо-зависимых полей ввода. Перейдите в JSON для прямого редактирования."
+      },
+      "json": {
+        "subtitle": "Редактируйте необработанный документ JSON. Перейдите в Форму для редактирования с подсказками."
+      }
+    },
+    "error": {
+      "saveFailure": "Недействительный JSON или ошибка сохранения:"
+    }
   },
   "query": {
-    "label": { "filter": "Фильтр", "sort": "Сортировка", "projection": "Проекция", "limit": "Лимит" },
-    "hint": { "ctrlEnter": "Ctrl+Enter для применения" },
-    "badge": { "active": "активный", "invalidJson": "недействительный JSON" },
-    "button": { "apply": "Применить", "clear": "Очистить" },
-    "mode": { "label": "Режим запроса", "sqlHint": "Введите SQL SELECT — Ctrl+Enter для применения" },
+    "label": {
+      "filter": "Фильтр",
+      "sort": "Сортировка",
+      "projection": "Проекция",
+      "limit": "Лимит"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter для применения"
+    },
+    "badge": {
+      "active": "активный",
+      "invalidJson": "недействительный JSON"
+    },
+    "button": {
+      "apply": "Применить",
+      "clear": "Очистить"
+    },
+    "mode": {
+      "label": "Режим запроса",
+      "sqlHint": "Введите SQL SELECT — Ctrl+Enter для применения"
+    },
     "sql": {
       "label": "SQL-запрос",
       "parseError": "ошибка разбора",
@@ -148,48 +312,107 @@
     }
   },
   "views": {
-    "table": { "title": "Табличный вид" },
-    "tree": { "title": "Древовидный вид" }
+    "table": {
+      "title": "Табличный вид"
+    },
+    "tree": {
+      "title": "Древовидный вид"
+    }
   },
   "selection": {
     "count_one": "{{count}} документ выбран",
     "count_other": "{{count}} документов выбрано",
-    "button": { "export": "Экспортировать выбранные", "delete": "Удалить выбранные", "clear": "✕ Очистить" },
+    "button": {
+      "export": "Экспортировать выбранные",
+      "delete": "Удалить выбранные",
+      "clear": "✕ Очистить",
+      "exportJson": "Экспорт JSON",
+      "exportBson": "Экспорт BSON"
+    },
     "confirmDelete_one": "Удалить {{count}} выбранный документ? Это действие нельзя отменить.",
     "confirmDelete_other": "Удалить {{count}} выбранных документов? Это действие нельзя отменить."
   },
   "documents": {
-    "list": { "empty": "Документы не найдены", "emptyWithFilter": "Попробуйте изменить фильтр или проекцию.", "emptyNoFilter": "Эта коллекция пуста." },
-    "button": { "create": "+ Новый документ" },
+    "list": {
+      "empty": "Документы не найдены",
+      "emptyWithFilter": "Попробуйте изменить фильтр или проекцию.",
+      "emptyNoFilter": "Эта коллекция пуста."
+    },
+    "button": {
+      "create": "+ Новый документ"
+    },
     "fieldCount_one": "{{count}} поле",
     "fieldCount_other": "{{count}} полей"
   },
   "table": {
-    "header": { "id": "_id", "preview": "Предпросмотр", "actions": "Действия", "name": "Название", "keys": "Ключи", "unique": "Уникальный", "sparse": "Разреженный", "ttl": "TTL (s)", "index": "Индекс", "size": "Размер", "fieldPath": "Путь поля", "types": "Типы", "coverage": "Покрытие", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "Предпросмотр",
+      "actions": "Действия",
+      "name": "Название",
+      "keys": "Ключи",
+      "unique": "Уникальный",
+      "sparse": "Разреженный",
+      "ttl": "TTL (s)",
+      "index": "Индекс",
+      "size": "Размер",
+      "fieldPath": "Путь поля",
+      "types": "Типы",
+      "coverage": "Покрытие",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "Показано {{start}}–{{end}} из {{total}} документов",
     "label_page": "Страница {{page}}",
-    "button": { "prev": "← Назад", "next": "Вперёд →" }
+    "button": {
+      "prev": "← Назад",
+      "next": "Вперёд →"
+    }
   },
   "aggregate": {
     "prompt": "Введите агрегационный конвейер (массив JSON):",
-    "button": { "run": "▶ Запустить" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}} документ", "count_other": "{{count}} документов" },
-    "placeholder": { "result": "// Запустите команду для просмотра результатов" }
+    "button": {
+      "run": "▶ Запустить"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}} документ",
+      "count_other": "{{count}} документов"
+    },
+    "placeholder": {
+      "result": "// Запустите команду для просмотра результатов"
+    }
   },
   "schema": {
-    "label": { "sampled": "Выборка", "document": "документ", "field": "поле", "nullable": "nullable" },
-    "plural": { "documents": "ов", "fields": "ей" },
+    "label": {
+      "sampled": "Выборка",
+      "document": "документ",
+      "field": "поле",
+      "nullable": "nullable"
+    },
+    "plural": {
+      "documents": "ов",
+      "fields": "ей"
+    },
     "inferring": "Определение схемы…",
     "unavailable": "Данные схемы недоступны.",
     "summary": "Выборка {{docCount}} документ{{docPlural}} · {{fieldCount}} пол{{fieldPlural}}"
   },
   "indexes": {
-    "list": { "empty": "Индексы не найдены." },
-    "button": { "create": "+ Новый индекс" },
-    "label": { "count_one": "{{count}} индекс", "count_other": "{{count}} индексов", "loading": "Загрузка…" }
+    "list": {
+      "empty": "Индексы не найдены."
+    },
+    "button": {
+      "create": "+ Новый индекс"
+    },
+    "label": {
+      "count_one": "{{count}} индекс",
+      "count_other": "{{count}} индексов",
+      "loading": "Загрузка…"
+    }
   },
   "stats": {
     "loading": "Загрузка статистики…",
@@ -205,11 +428,22 @@
       "indexSize": "Размер индекса",
       "totalSize": "Общий размер"
     },
-    "section": { "indexSizes": "Размеры индексов" }
+    "section": {
+      "indexSizes": "Размеры индексов"
+    }
   },
   "commands": {
-    "search": { "placeholder": "Поиск команд…", "label": "Поиск команд" },
-    "category": { "server": "Сервер", "database": "База данных", "collection": "Коллекция", "replication": "Репликация", "administration": "Администрирование" },
+    "search": {
+      "placeholder": "Поиск команд…",
+      "label": "Поиск команд"
+    },
+    "category": {
+      "server": "Сервер",
+      "database": "База данных",
+      "collection": "Коллекция",
+      "replication": "Репликация",
+      "administration": "Администрирование"
+    },
     "description": {
       "ping": "Тест подключения к серверу",
       "buildInfo": "Версия сервера и информация о сборке",
@@ -246,11 +480,23 @@
       "listIndexes": "Список индексов в коллекции",
       "profile": "Получить/установить уровень профилировщика базы данных"
     },
-    "context": { "runningOn": "Выполняется на базе данных:" },
-    "checkbox": { "useAdminDb": "Использовать базу данных admin" },
-    "button": { "run": "▶ Запустить  (Ctrl+Enter)", "running": "⏳ Выполнение…" },
-    "label": { "command": "Команда", "result": "Результат" },
-    "error": { "invalidJson": "Недействительный JSON — исправьте команду перед запуском." }
+    "context": {
+      "runningOn": "Выполняется на базе данных:"
+    },
+    "checkbox": {
+      "useAdminDb": "Использовать базу данных admin"
+    },
+    "button": {
+      "run": "▶ Запустить  (Ctrl+Enter)",
+      "running": "⏳ Выполнение…"
+    },
+    "label": {
+      "command": "Команда",
+      "result": "Результат"
+    },
+    "error": {
+      "invalidJson": "Недействительный JSON — исправьте команду перед запуском."
+    }
   },
   "badge": {
     "admin": "● Администратор",
@@ -259,13 +505,22 @@
     "success": "ОК"
   },
   "tree": {
-    "button": { "expandAll": "Развернуть всё", "collapseAll": "Свернуть всё" },
-    "checkbox": { "selectAllLabel": "Выбрать всё на странице" }
+    "button": {
+      "expandAll": "Развернуть всё",
+      "collapseAll": "Свернуть всё"
+    },
+    "checkbox": {
+      "selectAllLabel": "Выбрать всё на странице"
+    }
   },
   "ui": {
     "loading": "Загрузка…",
     "connecting": "Подключение…",
-    "sidebar": { "resize": { "title": "Перетащите для изменения размера боковой панели" } }
+    "sidebar": {
+      "resize": {
+        "title": "Перетащите для изменения размера боковой панели"
+      }
+    }
   },
   "empty": {
     "title": "Выберите базу данных и коллекцию",
@@ -274,7 +529,9 @@
       "databaseNeeded": "Выберите базу данных на боковой панели для начала работы."
     }
   },
-  "language": { "label": "Язык" },
+  "language": {
+    "label": "Язык"
+  },
   "a11y": {
     "skipToContent": "Перейти к основному содержимому",
     "tabList": "Открытые вкладки",
