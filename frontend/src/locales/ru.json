@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "Импортировать {{count}} документов? (заменить существующие?)"
+      "confirmReplace": "Импортировать {{count}} документов? (заменить существующие?)",
+      "confirmReplaceBson": "Импортировать файл BSON? (заменить существующие данные?)"
     },
     "confirmDelete": {
       "document": "Удалить этот документ?"
@@ -208,8 +209,8 @@
     "edit": "Редактировать",
     "delete": "Удалить",
     "export": "Экспортировать",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "Экспортировать коллекцию как JSON",
+    "exportBson": "Экспортировать коллекцию как BSON (формат mongodump)",
     "import": "Импортировать",
     "add": "Добавить",
     "refresh": "↻ Обновить",

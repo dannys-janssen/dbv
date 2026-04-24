@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)"
+      "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)",
+      "confirmReplaceBson": "Importer le fichier BSON ? (remplacer les données existantes ?)"
     },
     "confirmDelete": {
       "document": "Supprimer ce document ?"
@@ -208,8 +209,8 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "export": "Exporter",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "Exporter la collection en JSON",
+    "exportBson": "Exporter la collection en BSON (format mongodump)",
     "import": "Importer",
     "add": "Ajouter",
     "refresh": "↻ Actualiser",

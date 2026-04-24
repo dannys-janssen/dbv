@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "Εισαγωγή {{count}} εγγράφων; (αντικατάσταση υπαρχόντων;)"
+      "confirmReplace": "Εισαγωγή {{count}} εγγράφων; (αντικατάσταση υπαρχόντων;)",
+      "confirmReplaceBson": "Εισαγωγή αρχείου BSON; (αντικατάσταση υπαρχόντων δεδομένων;)"
     },
     "confirmDelete": {
       "document": "Διαγραφή αυτού του εγγράφου;"
@@ -208,8 +209,8 @@
     "edit": "Επεξεργασία",
     "delete": "Διαγραφή",
     "export": "Εξαγωγή",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "Εξαγωγή συλλογής ως JSON",
+    "exportBson": "Εξαγωγή συλλογής ως BSON (μορφή mongodump)",
     "import": "Εισαγωγή",
     "add": "Προσθήκη",
     "refresh": "↻ Ανανέωση",

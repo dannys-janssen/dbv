@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）"
+      "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）",
+      "confirmReplaceBson": "导入BSON文件？（替换现有数据？）"
     },
     "confirmDelete": {
       "document": "删除此文档？"
@@ -208,8 +209,8 @@
     "edit": "编辑",
     "delete": "删除",
     "export": "导出",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "将集合导出为JSON",
+    "exportBson": "将集合导出为BSON（mongodump格式）",
     "import": "导入",
     "add": "添加",
     "refresh": "↻ 刷新",

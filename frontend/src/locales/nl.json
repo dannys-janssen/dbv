@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)"
+      "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)",
+      "confirmReplaceBson": "BSON-bestand importeren? (bestaande gegevens vervangen?)"
     },
     "confirmDelete": {
       "document": "Dit document verwijderen?"
@@ -208,8 +209,8 @@
     "edit": "Bewerken",
     "delete": "Verwijderen",
     "export": "Exporteren",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "Collectie exporteren als JSON",
+    "exportBson": "Collectie exporteren als BSON (mongodump-formaat)",
     "import": "Importeren",
     "add": "Toevoegen",
     "refresh": "↻ Vernieuwen",

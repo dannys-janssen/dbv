@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}} दस्तावेज़ आयात करें? (मौजूदा प्रतिस्थापित करें?)"
+      "confirmReplace": "{{count}} दस्तावेज़ आयात करें? (मौजूदा प्रतिस्थापित करें?)",
+      "confirmReplaceBson": "BSON फ़ाइल आयात करें? (मौजूदा डेटा बदलें?)"
     },
     "confirmDelete": {
       "document": "यह दस्तावेज़ हटाएँ?"
@@ -208,8 +209,8 @@
     "edit": "संपादित करें",
     "delete": "मिटाएँ",
     "export": "निर्यात करें",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "संग्रह को JSON के रूप में निर्यात करें",
+    "exportBson": "संग्रह को BSON के रूप में निर्यात करें (mongodump प्रारूप)",
     "import": "आयात करें",
     "add": "जोड़ें",
     "refresh": "↻ ताज़ा करें",

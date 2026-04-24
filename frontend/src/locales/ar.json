@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)"
+      "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)",
+      "confirmReplaceBson": "استيراد ملف BSON؟ (استبدال البيانات الموجودة؟)"
     },
     "confirmDelete": {
       "document": "حذف هذا المستند؟"
@@ -208,8 +209,8 @@
     "edit": "تعديل",
     "delete": "حذف",
     "export": "تصدير",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "تصدير المجموعة كـ JSON",
+    "exportBson": "تصدير المجموعة كـ BSON (تنسيق mongodump)",
     "import": "استيراد",
     "add": "إضافة",
     "refresh": "↻ تحديث",

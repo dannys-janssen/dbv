@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)"
+      "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)",
+      "confirmReplaceBson": "Importer BSON-fil? (erstat eksisterende data?)"
     },
     "confirmDelete": {
       "document": "Slet dette dokument?"
@@ -208,8 +209,8 @@
     "edit": "Rediger",
     "delete": "Slet",
     "export": "Eksporter",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "Eksporter samling som JSON",
+    "exportBson": "Eksporter samling som BSON (mongodump-format)",
     "import": "Importer",
     "add": "Tilføj",
     "refresh": "↻ Opdater",

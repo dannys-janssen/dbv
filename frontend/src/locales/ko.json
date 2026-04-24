@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}}개의 문서를 가져오시겠습니까? (기존 항목을 교체하시겠습니까?)"
+      "confirmReplace": "{{count}}개의 문서를 가져오시겠습니까? (기존 항목을 교체하시겠습니까?)",
+      "confirmReplaceBson": "BSON 파일을 가져올까요? (기존 데이터를 교체할까요?)"
     },
     "confirmDelete": {
       "document": "이 문서를 삭제하시겠습니까?"
@@ -208,8 +209,8 @@
     "edit": "편집",
     "delete": "삭제",
     "export": "내보내기",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "컬렉션을 JSON으로 내보내기",
+    "exportBson": "컬렉션을 BSON으로 내보내기 (mongodump 형식)",
     "import": "가져오기",
     "add": "추가",
     "refresh": "↻ 새로고침",

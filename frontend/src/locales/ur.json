@@ -192,7 +192,8 @@
       }
     },
     "import": {
-      "confirmReplace": "{{count}} دستاویزات درآمد کریں؟ (موجودہ کو تبدیل کریں؟)"
+      "confirmReplace": "{{count}} دستاویزات درآمد کریں؟ (موجودہ کو تبدیل کریں؟)",
+      "confirmReplaceBson": "BSON فائل درآمد کریں؟ (موجودہ ڈیٹا کو تبدیل کریں؟)"
     },
     "confirmDelete": {
       "document": "یہ دستاویز حذف کریں؟"
@@ -208,8 +209,8 @@
     "edit": "ترمیم",
     "delete": "حذف کریں",
     "export": "برآمد کریں",
-    "exportJson": "Export collection as JSON",
-    "exportBson": "Export collection as BSON (mongodump format)",
+    "exportJson": "مجموعہ کو JSON کے طور پر برآمد کریں",
+    "exportBson": "مجموعہ کو BSON کے طور پر برآمد کریں (mongodump فارمیٹ)",
     "import": "درآمد کریں",
     "add": "شامل کریں",
     "refresh": "↻ تازہ کریں",

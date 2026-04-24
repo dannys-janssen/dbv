@@ -96,7 +96,10 @@
       "button": { "addField": "+ Add field", "submit": "Create Index" },
       "validation": { "fieldRequired": "At least one field is required." }
     },
-    "import": { "confirmReplace": "Import {{count}} documents? (replace existing?)" },
+    "import": {
+      "confirmReplace": "Import {{count}} documents? (replace existing?)",
+      "confirmReplaceBson": "Import BSON file? (replace existing data?)"
+    },
     "confirmDelete": { "document": "Delete this document?" }
   },
   "buttons": {
