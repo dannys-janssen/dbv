@@ -72,7 +72,7 @@ describe("exportCollectionBson", () => {
       expect.objectContaining({ headers: {} })
     );
     expect(anchor.download).toBe("mycol.bson");
-    expect((anchor as { click: ReturnType<typeof vi.fn> }).click).toHaveBeenCalled();
+    expect((anchor as unknown as { click: ReturnType<typeof vi.fn> }).click).toHaveBeenCalled();
   });
 
   it("appends ?filter= when filter is provided", async () => {
