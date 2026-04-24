@@ -311,7 +311,9 @@
     "button": {
       "export": "Exporter la sélection",
       "delete": "Supprimer la sélection",
-      "clear": "✕ Effacer"
+      "clear": "✕ Effacer",
+      "exportJson": "Exporter JSON",
+      "exportBson": "Exporter BSON"
     },
     "confirmDelete_one": "Supprimer {{count}} document sélectionné ? Cette action est irréversible.",
     "confirmDelete_other": "Supprimer {{count}} documents sélectionnés ? Cette action est irréversible."

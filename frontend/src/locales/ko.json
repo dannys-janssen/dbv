@@ -317,7 +317,9 @@
     "button": {
       "export": "선택 항목 내보내기",
       "delete": "선택 항목 삭제",
-      "clear": "✕ 지우기"
+      "clear": "✕ 지우기",
+      "exportJson": "JSON 내보내기",
+      "exportBson": "BSON 내보내기"
     },
     "confirmDelete_one": "선택한 {{count}}개의 문서를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
     "confirmDelete_other": "선택한 {{count}}개의 문서를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다."

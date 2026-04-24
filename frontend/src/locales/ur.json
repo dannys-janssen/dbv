@@ -317,7 +317,9 @@
     "button": {
       "export": "منتخب برآمد کریں",
       "delete": "منتخب حذف کریں",
-      "clear": "✕ صاف کریں"
+      "clear": "✕ صاف کریں",
+      "exportJson": "JSON برآمد کریں",
+      "exportBson": "BSON برآمد کریں"
     },
     "confirmDelete_one": "{{count}} منتخب دستاویز حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔",
     "confirmDelete_other": "{{count}} منتخب دستاویزات حذف کریں؟ یہ عمل واپس نہیں ہو سکتا۔"

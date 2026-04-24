@@ -311,7 +311,9 @@
     "button": {
       "export": "選択をエクスポート",
       "delete": "選択を削除",
-      "clear": "✕ クリア"
+      "clear": "✕ クリア",
+      "exportJson": "JSONエクスポート",
+      "exportBson": "BSONエクスポート"
     },
     "confirmDelete_one": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。",
     "confirmDelete_other": "選択した{{count}}件のドキュメントを削除しますか？この操作は元に戻せません。"

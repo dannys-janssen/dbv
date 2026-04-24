@@ -291,9 +291,10 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 
 **Export / Import** *(import requires dbv-admin)*
 
-- **Export JSON** — downloads the entire collection as a pretty-printed JSON file
-- **Export BSON** — downloads the entire collection as a binary BSON file (compatible with `mongodump` format)
+- **Export JSON** — downloads matching documents as a pretty-printed JSON file; respects the active filter
+- **Export BSON** — downloads matching documents as a binary BSON file (compatible with `mongodump` format); respects the active filter
 - **Import** — uploads a JSON (`.json`) or BSON (`.bson`) file; format is auto-detected from the file extension; you will be asked whether to replace the existing data
+- **Export JSON / Export BSON** (selection bar) — when documents are selected, the selection bar shows both export options; selection is translated into an `_id` filter so the server returns exactly those documents
 
 ---
 
@@ -309,6 +310,7 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | Export collection to JSON | ✅ | ✅ |
 | Export collection to BSON | ✅ | ✅ |
 | Export selected documents to JSON | ✅ | ✅ |
+| Export selected documents to BSON | ✅ | ✅ |
 | Create database | ❌ | ✅ |
 | Drop database | ❌ | ✅ |
 | Create collection | ❌ | ✅ |
@@ -549,8 +551,8 @@ All endpoints are under `/api`.
 
 | Method | Path | Role | Description |
 |---|---|---|---|
-| GET | `/api/databases/:db/collections/:col/export` | viewer+ | Download collection as JSON |
-| GET | `/api/databases/:db/collections/:col/export/bson` | viewer+ | Download collection as BSON (mongodump format) |
+| GET | `/api/databases/:db/collections/:col/export` | viewer+ | Download matching documents as JSON. Optional `?filter=<JSON>` |
+| GET | `/api/databases/:db/collections/:col/export/bson` | viewer+ | Download matching documents as BSON (mongodump format). Optional `?filter=<JSON>` |
 | POST | `/api/databases/:db/collections/:col/import` | admin | Import `{ "documents": [...], "replace": false }` |
 | POST | `/api/databases/:db/collections/:col/import/bson` | admin | Import raw BSON binary body (mongodump format); pass `?replace=true` to drop collection first |
 

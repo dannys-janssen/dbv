@@ -311,7 +311,9 @@
     "button": {
       "export": "تصدير المحدد",
       "delete": "حذف المحدد",
-      "clear": "✕ مسح"
+      "clear": "✕ مسح",
+      "exportJson": "تصدير JSON",
+      "exportBson": "تصدير BSON"
     },
     "confirmDelete_one": "حذف {{count}} مستند محدد؟ لا يمكن التراجع عن هذا.",
     "confirmDelete_other": "حذف {{count}} مستندات محددة؟ لا يمكن التراجع عن هذا."

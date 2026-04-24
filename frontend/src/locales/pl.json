@@ -317,7 +317,9 @@
     "button": {
       "export": "Eksportuj wybrane",
       "delete": "Usuń wybrane",
-      "clear": "✕ Wyczyść"
+      "clear": "✕ Wyczyść",
+      "exportJson": "Eksportuj JSON",
+      "exportBson": "Eksportuj BSON"
     },
     "confirmDelete_one": "Usunąć {{count}} wybrany dokument? Tej operacji nie można cofnąć.",
     "confirmDelete_other": "Usunąć {{count}} wybrane dokumenty? Tej operacji nie można cofnąć."

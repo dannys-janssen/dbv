@@ -159,7 +159,7 @@
   "selection": {
     "count_one": "{{count}} document selected",
     "count_other": "{{count}} documents selected",
-    "button": { "export": "Export Selected", "delete": "Delete Selected", "clear": "✕ Clear" },
+    "button": { "export": "Export Selected", "exportJson": "Export JSON", "exportBson": "Export BSON", "delete": "Delete Selected", "clear": "✕ Clear" },
     "confirmDelete_one": "Delete {{count}} selected document? This cannot be undone.",
     "confirmDelete_other": "Delete {{count}} selected documents? This cannot be undone."
   },

@@ -75,6 +75,14 @@ function getDocId(doc: Record<string, unknown>): string {
   return String(id ?? "");
 }
 
+/** Build a MongoDB filter string that matches a set of document IDs. */
+function buildSelectionFilter(ids: Set<string>): string {
+  const filterIds = [...ids].map((id) =>
+    /^[0-9a-fA-F]{24}$/.test(id) ? { $oid: id } : id
+  );
+  return JSON.stringify({ _id: { $in: filterIds } });
+}
+
 const overlayStyle: React.CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -770,14 +778,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       </div>
                       <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
                         <button
-                          onClick={() => exportCollection(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          onClick={() => exportCollection(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
                           style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportJson")}
                         >
                           {t("buttons.export")} JSON
                         </button>
                         <button
-                          onClick={() => exportCollectionBson(db, col).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
+                          onClick={() => exportCollectionBson(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
                           style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportBson")}
                         >
@@ -813,21 +821,26 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   <span style={{ fontSize: "13px", fontWeight: 600, color: "#1d4ed8", flex: 1 }}>
                     {t("selection.count", { count: selectedIds.size })}
                   </span>
-                  <button
-                    onClick={() => {
-                      const selected = documents.filter((d) => selectedIds.has(getDocId(d)));
-                      const blob = new Blob([JSON.stringify(selected, null, 2)], { type: "application/json" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${col}_selection.json`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    style={{ padding: "5px 14px", background: "#fff", border: "1px solid #bfdbfe", color: "#1d4ed8", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
-                  >
-                    {t("selection.button.export")}
-                  </button>
+                  <div style={{ display: "flex", border: "1px solid #bfdbfe", borderRadius: "6px", overflow: "hidden" }}>
+                    <button
+                      onClick={() => {
+                        const filter = buildSelectionFilter(selectedIds);
+                        exportCollection(db, col, filter).catch((e: unknown) => alert("Export failed: " + (e as Error).message));
+                      }}
+                      style={{ padding: "5px 12px", background: "#fff", border: "none", borderRight: "1px solid #bfdbfe", color: "#1d4ed8", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                    >
+                      {t("selection.button.exportJson")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const filter = buildSelectionFilter(selectedIds);
+                        exportCollectionBson(db, col, filter).catch((e: unknown) => alert("Export failed: " + (e as Error).message));
+                      }}
+                      style={{ padding: "5px 12px", background: "#fff", border: "none", color: "#1d4ed8", cursor: "pointer", fontSize: "13px", fontFamily: FONT, fontWeight: 500 }}
+                    >
+                      {t("selection.button.exportBson")}
+                    </button>
+                  </div>
                   {canWrite && (
                     <button
                       onClick={async () => {

@@ -311,7 +311,9 @@
     "button": {
       "export": "Esporta selezionati",
       "delete": "Elimina selezionati",
-      "clear": "✕ Cancella"
+      "clear": "✕ Cancella",
+      "exportJson": "Esporta JSON",
+      "exportBson": "Esporta BSON"
     },
     "confirmDelete_one": "Eliminare {{count}} documento selezionato? Questa azione non può essere annullata.",
     "confirmDelete_other": "Eliminare {{count}} documenti selezionati? Questa azione non può essere annullata."

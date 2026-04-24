@@ -16,14 +16,36 @@ use crate::{
     state::AppState,
 };
 
-/// Export all documents in a collection as a JSON array (newline-delimited).
+/// Query parameters for export endpoints.
+#[derive(Deserialize)]
+pub struct ExportParams {
+    /// Optional MongoDB query filter as a JSON string.
+    pub filter: Option<String>,
+}
+
+fn parse_export_filter(filter: Option<&str>) -> Document {
+    filter
+        .and_then(|f| serde_json::from_str::<Value>(f).ok())
+        .and_then(|v| {
+            use std::convert::TryFrom;
+            match bson::Bson::try_from(v) {
+                Ok(bson::Bson::Document(d)) => Some(d),
+                _ => None,
+            }
+        })
+        .unwrap_or_default()
+}
+
+/// Export documents in a collection as a JSON array, with optional filter.
 pub async fn export_collection(
     _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
+    Query(params): Query<ExportParams>,
 ) -> Result<Response, AppError> {
+    let filter = parse_export_filter(params.filter.as_deref());
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let mut cursor = coll.find(bson::doc! {}).await?;
+    let mut cursor = coll.find(filter).await?;
     let mut docs: Vec<Value> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
         docs.push(serde_json::to_value(doc).unwrap_or(Value::Null));
@@ -43,15 +65,17 @@ pub async fn export_collection(
         .unwrap())
 }
 
-/// Export all documents in a collection as a concatenated BSON binary stream
+/// Export documents in a collection as a concatenated BSON binary stream, with optional filter.
 /// (compatible with the `mongodump` `.bson` file format).
 pub async fn export_collection_bson(
     _claims: ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
+    Query(params): Query<ExportParams>,
 ) -> Result<Response, AppError> {
+    let filter = parse_export_filter(params.filter.as_deref());
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let mut cursor = coll.find(bson::doc! {}).await?;
+    let mut cursor = coll.find(filter).await?;
     let mut buf: Vec<u8> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
         let bytes = bson::to_vec(&doc).map_err(AppError::BsonSer)?;
@@ -167,6 +191,34 @@ pub fn parse_bson_bytes(data: &[u8]) -> Result<Vec<Document>, AppError> {
 mod tests {
     use super::*;
     use bson::doc;
+
+    // ── parse_export_filter ──────────────────────────────────────────────────
+
+    #[test]
+    fn parse_export_filter_none_returns_empty_doc() {
+        let doc = parse_export_filter(None);
+        assert!(doc.is_empty());
+    }
+
+    #[test]
+    fn parse_export_filter_valid_json_returns_document() {
+        let doc = parse_export_filter(Some(r#"{"status":"active"}"#));
+        assert_eq!(doc.get_str("status").unwrap(), "active");
+    }
+
+    #[test]
+    fn parse_export_filter_invalid_json_returns_empty_doc() {
+        let doc = parse_export_filter(Some("not json"));
+        assert!(doc.is_empty());
+    }
+
+    #[test]
+    fn parse_export_filter_non_object_returns_empty_doc() {
+        let doc = parse_export_filter(Some("[1,2,3]"));
+        assert!(doc.is_empty());
+    }
+
+    // ── parse_bson_bytes ─────────────────────────────────────────────────────
 
     #[test]
     fn round_trip_single_document() {

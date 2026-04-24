@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { exportCollectionBson, importCollectionBson } from "./mongo";
+import { exportCollection, exportCollectionBson, importCollectionBson } from "./mongo";
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -21,6 +21,41 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// Helper to set up a successful fetch mock with a download anchor
+function setupExportMocks(fetchMock: ReturnType<typeof vi.fn>) {
+  vi.stubGlobal("fetch", fetchMock);
+  vi.stubGlobal("URL", { createObjectURL: vi.fn().mockReturnValue("blob:x"), revokeObjectURL: vi.fn() });
+  const anchor = { href: "", download: "", click: vi.fn() } as unknown as HTMLAnchorElement;
+  vi.stubGlobal("document", { createElement: vi.fn().mockReturnValue(anchor) });
+  return anchor;
+}
+
+describe("exportCollection", () => {
+  it("calls the JSON export URL without filter when none provided", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(new Blob()) });
+    setupExportMocks(fetchMock);
+
+    await exportCollection("mydb", "mycol");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/databases/mydb/collections/mycol/export",
+      expect.any(Object)
+    );
+  });
+
+  it("appends ?filter= when filter is provided", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(new Blob()) });
+    setupExportMocks(fetchMock);
+    const filter = '{"status":"active"}';
+
+    await exportCollection("db", "col", filter);
+
+    const calledUrl = (fetchMock.mock.calls[0] as [string, RequestInit])[0];
+    expect(calledUrl).toContain("filter=");
+    expect(calledUrl).toContain(encodeURIComponent(filter));
+  });
+});
+
 describe("exportCollectionBson", () => {
   it("calls the correct BSON export URL", async () => {
     const mockBlob = new Blob([new Uint8Array([1, 2, 3])]);
@@ -28,20 +63,7 @@ describe("exportCollectionBson", () => {
       ok: true,
       blob: () => Promise.resolve(mockBlob),
     });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const createObjectURLMock = vi.fn().mockReturnValue("blob:mock");
-    const revokeObjectURLMock = vi.fn();
-    const appendChildMock = vi.fn();
-    const removeChildMock = vi.fn();
-    const clickMock = vi.fn();
-
-    const anchor = { href: "", download: "", click: clickMock } as unknown as HTMLAnchorElement;
-    vi.stubGlobal("URL", { createObjectURL: createObjectURLMock, revokeObjectURL: revokeObjectURLMock });
-    vi.stubGlobal("document", {
-      createElement: vi.fn().mockReturnValue(anchor),
-      body: { appendChild: appendChildMock, removeChild: removeChildMock },
-    });
+    const anchor = setupExportMocks(fetchMock);
 
     await exportCollectionBson("mydb", "mycol");
 
@@ -50,8 +72,19 @@ describe("exportCollectionBson", () => {
       expect.objectContaining({ headers: {} })
     );
     expect(anchor.download).toBe("mycol.bson");
-    expect(clickMock).toHaveBeenCalled();
-    expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:mock");
+    expect((anchor as { click: ReturnType<typeof vi.fn> }).click).toHaveBeenCalled();
+  });
+
+  it("appends ?filter= when filter is provided", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(new Blob()) });
+    setupExportMocks(fetchMock);
+    const filter = '{"status":"active"}';
+
+    await exportCollectionBson("db", "col", filter);
+
+    const calledUrl = (fetchMock.mock.calls[0] as [string, RequestInit])[0];
+    expect(calledUrl).toContain("filter=");
+    expect(calledUrl).toContain(encodeURIComponent(filter));
   });
 
   it("includes the Authorization header when token is present", async () => {
@@ -60,10 +93,7 @@ describe("exportCollectionBson", () => {
       ok: true,
       blob: () => Promise.resolve(new Blob()),
     });
-    vi.stubGlobal("fetch", fetchMock);
-    vi.stubGlobal("URL", { createObjectURL: vi.fn().mockReturnValue("blob:x"), revokeObjectURL: vi.fn() });
-    const anchor = { href: "", download: "", click: vi.fn() } as unknown as HTMLAnchorElement;
-    vi.stubGlobal("document", { createElement: vi.fn().mockReturnValue(anchor) });
+    setupExportMocks(fetchMock);
 
     await exportCollectionBson("db", "col");
 

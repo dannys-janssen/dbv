@@ -311,7 +311,9 @@
     "button": {
       "export": "Exportar Selecionados",
       "delete": "Deletar Selecionados",
-      "clear": "✕ Limpar"
+      "clear": "✕ Limpar",
+      "exportJson": "Exportar JSON",
+      "exportBson": "Exportar BSON"
     },
     "confirmDelete_one": "Deletar {{count}} documento selecionado? Isso não pode ser desfeito.",
     "confirmDelete_other": "Deletar {{count}} documentos selecionados? Isso não pode ser desfeito."

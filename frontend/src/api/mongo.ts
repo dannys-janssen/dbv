@@ -100,9 +100,10 @@ export const aggregate = (
     )
     .then((r) => r.data);
 
-export const exportCollection = async (db: string, collection: string): Promise<void> => {
+export const exportCollection = async (db: string, collection: string, filter?: string): Promise<void> => {
   const token = localStorage.getItem("access_token");
-  const url = `/api/databases/${db}/collections/${collection}/export`;
+  const params = filter ? `?filter=${encodeURIComponent(filter)}` : "";
+  const url = `/api/databases/${db}/collections/${collection}/export${params}`;
   const resp = await fetch(url, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
@@ -119,9 +120,10 @@ export const exportCollection = async (db: string, collection: string): Promise<
   URL.revokeObjectURL(objectUrl);
 };
 
-export const exportCollectionBson = async (db: string, collection: string): Promise<void> => {
+export const exportCollectionBson = async (db: string, collection: string, filter?: string): Promise<void> => {
   const token = localStorage.getItem("access_token");
-  const url = `/api/databases/${db}/collections/${collection}/export/bson`;
+  const params = filter ? `?filter=${encodeURIComponent(filter)}` : "";
+  const url = `/api/databases/${db}/collections/${collection}/export/bson${params}`;
   const resp = await fetch(url, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });

@@ -311,7 +311,9 @@
     "button": {
       "export": "Selectie exporteren",
       "delete": "Selectie verwijderen",
-      "clear": "✕ Wissen"
+      "clear": "✕ Wissen",
+      "exportJson": "JSON exporteren",
+      "exportBson": "BSON exporteren"
     },
     "confirmDelete_one": "{{count}} geselecteerd document verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "confirmDelete_other": "{{count}} geselecteerde documenten verwijderen? Dit kan niet ongedaan worden gemaakt."

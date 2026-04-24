@@ -311,7 +311,9 @@
     "button": {
       "export": "Auswahl exportieren",
       "delete": "Auswahl löschen",
-      "clear": "✕ Löschen"
+      "clear": "✕ Löschen",
+      "exportJson": "JSON exportieren",
+      "exportBson": "BSON exportieren"
     },
     "confirmDelete_one": "{{count}} ausgewähltes Dokument löschen? Dies kann nicht rückgängig gemacht werden.",
     "confirmDelete_other": "{{count}} ausgewählte Dokumente löschen? Dies kann nicht rückgängig gemacht werden."

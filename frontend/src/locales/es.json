@@ -311,7 +311,9 @@
     "button": {
       "export": "Exportar selección",
       "delete": "Eliminar selección",
-      "clear": "✕ Limpiar"
+      "clear": "✕ Limpiar",
+      "exportJson": "Exportar JSON",
+      "exportBson": "Exportar BSON"
     },
     "confirmDelete_one": "¿Eliminar {{count}} documento seleccionado? Esta acción no se puede deshacer.",
     "confirmDelete_other": "¿Eliminar {{count}} documentos seleccionados? Esta acción no se puede deshacer."

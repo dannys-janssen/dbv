@@ -311,7 +311,9 @@
     "button": {
       "export": "导出所选",
       "delete": "删除所选",
-      "clear": "✕ 清除"
+      "clear": "✕ 清除",
+      "exportJson": "导出JSON",
+      "exportBson": "导出BSON"
     },
     "confirmDelete_one": "删除选定的 {{count}} 个文档？此操作无法撤销。",
     "confirmDelete_other": "删除选定的 {{count}} 个文档？此操作无法撤销。"
