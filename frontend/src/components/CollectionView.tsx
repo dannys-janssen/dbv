@@ -382,7 +382,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       setImportPending(null);
       loadDocuments();
     } catch (e: unknown) {
-      setError(t("modals.import.error") + " " + (e as Error).message);
+      const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setError(t("modals.import.error") + " " + (axiosBody ?? (e as Error).message ?? "Unknown error"));
       setImportModalOpen(false);
       setImportPending(null);
     }
