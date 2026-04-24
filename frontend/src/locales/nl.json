@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "{{count}} documenten importeren? (bestaande vervangen?)",
-      "confirmReplaceBson": "BSON-bestand importeren? (bestaande gegevens vervangen?)"
+      "confirmReplaceBson": "BSON-bestand importeren? (bestaande gegevens vervangen?)",
+      "title": "Documenten importeren",
+      "subtitleJson": "Bestand: {{filename}} — {{count}} documenten gevonden.",
+      "subtitleBson": "Bestand: {{filename}}",
+      "replaceLabel": "Bestaande gegevens vervangen (collectie verwijderen vóór import)",
+      "button": {
+        "import": "Importeren"
+      },
+      "error": "Importeren mislukt:"
     },
     "confirmDelete": {
       "document": "Dit document verwijderen?"

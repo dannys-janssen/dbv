@@ -223,6 +223,15 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [colStats, setColStats] = useState<Record<string, unknown> | null>(null);
   const [colStatsLoading, setColStatsLoading] = useState(false);
 
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importReplace, setImportReplace] = useState(false);
+  const [importPending, setImportPending] = useState<
+    | { kind: "bson"; buffer: ArrayBuffer; filename: string }
+    | { kind: "json"; docs: unknown[]; filename: string }
+    | null
+  >(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
   const loadSchema = useCallback(() => {
     if (!db || !col) return;
     setSchemaLoading(true);
@@ -346,18 +355,37 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Reset the input so the same file can be re-selected after cancel
+    if (importInputRef.current) importInputRef.current.value = "";
     const isBson = file.name.endsWith(".bson");
     if (isBson) {
       const buffer = await file.arrayBuffer();
-      if (!confirm(t("modals.import.confirmReplace", { count: "?" }))) return;
-      await importCollectionBson(db, col, buffer, true);
+      setImportPending({ kind: "bson", buffer, filename: file.name });
     } else {
       const text = await file.text();
       const docs = JSON.parse(text) as unknown[];
-      if (!confirm(t("modals.import.confirmReplace", { count: docs.length }))) return;
-      await importCollection(db, col, docs, true);
+      setImportPending({ kind: "json", docs, filename: file.name });
     }
-    loadDocuments();
+    setImportReplace(false);
+    setImportModalOpen(true);
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importPending) return;
+    try {
+      if (importPending.kind === "bson") {
+        await importCollectionBson(db, col, importPending.buffer, importReplace);
+      } else {
+        await importCollection(db, col, importPending.docs, importReplace);
+      }
+      setImportModalOpen(false);
+      setImportPending(null);
+      loadDocuments();
+    } catch (e: unknown) {
+      setError(t("modals.import.error") + " " + (e as Error).message);
+      setImportModalOpen(false);
+      setImportPending(null);
+    }
   };
 
   const runAggregate = useCallback(async () => {
@@ -378,6 +406,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (importModalOpen) { setImportModalOpen(false); setImportPending(null); return; }
         if (editorOpen)   { setEditorOpen(false);   return; }
         if (newIndexOpen) { setNewIndexOpen(false);  return; }
       }
@@ -392,7 +421,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [editorOpen, newIndexOpen, view, handleSave, runAggregate]);
+  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
@@ -796,7 +825,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         <>
                           <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                             {t("buttons.import")}
-                            <input type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
+                            <input ref={importInputRef} type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
                           <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
                             {t("documents.button.create")}
@@ -1520,7 +1549,41 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
         </div>
       )}
 
-      {/* ── Create Index modal ── */}
+      {/* ── Import confirmation modal ── */}
+      {importModalOpen && importPending && (
+        <div style={overlayStyle} role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+          <div style={{ ...modalBaseStyle, width: "460px" }}>
+            <h3 id="import-modal-title" style={modalTitleStyle}>{t("modals.import.title")}</h3>
+            <p style={modalSubtitleStyle}>
+              {importPending.kind === "json"
+                ? t("modals.import.subtitleJson", { count: importPending.docs.length, filename: importPending.filename })
+                : t("modals.import.subtitleBson", { filename: importPending.filename })}
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#374151", cursor: "pointer", marginBottom: "20px" }}>
+              <input
+                type="checkbox"
+                checked={importReplace}
+                onChange={(e) => setImportReplace(e.target.checked)}
+              />
+              {t("modals.import.replaceLabel")}
+            </label>
+            <div style={modalFooterStyle}>
+              <button
+                onClick={() => { setImportModalOpen(false); setImportPending(null); }}
+                style={cancelBtnStyle}
+              >
+                {t("buttons.cancel")}
+              </button>
+              <button
+                onClick={() => void handleImportConfirm()}
+                style={primaryBtnStyle}
+              >
+                {t("modals.import.button.import")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {newIndexOpen && (
         <div style={overlayStyle}>
           <div style={{ ...modalBaseStyle, width: "560px" }}>

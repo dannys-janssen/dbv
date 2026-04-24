@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "{{count}}件のドキュメントをインポートしますか？(既存を置き換え?)",
-      "confirmReplaceBson": "BSONファイルをインポートしますか？（既存データを置き換えますか？）"
+      "confirmReplaceBson": "BSONファイルをインポートしますか？（既存データを置き換えますか？）",
+      "title": "ドキュメントをインポート",
+      "subtitleJson": "ファイル: {{filename}} — {{count}} 件のドキュメントが見つかりました。",
+      "subtitleBson": "ファイル: {{filename}}",
+      "replaceLabel": "既存データを置き換える（インポート前にコレクションを削除）",
+      "button": {
+        "import": "インポート"
+      },
+      "error": "インポート失敗:"
     },
     "confirmDelete": {
       "document": "このドキュメントを削除しますか？"

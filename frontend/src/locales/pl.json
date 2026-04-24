@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "Zaimportować {{count}} dokumentów? (zastąpić istniejące?)",
-      "confirmReplaceBson": "Importować plik BSON? (zastąpić istniejące dane?)"
+      "confirmReplaceBson": "Importować plik BSON? (zastąpić istniejące dane?)",
+      "title": "Importuj dokumenty",
+      "subtitleJson": "Plik: {{filename}} — znaleziono {{count}} dokumentów.",
+      "subtitleBson": "Plik: {{filename}}",
+      "replaceLabel": "Zastąp istniejące dane (usuń kolekcję przed importem)",
+      "button": {
+        "import": "Importuj"
+      },
+      "error": "Import nie powiódł się:"
     },
     "confirmDelete": {
       "document": "Usunąć ten dokument?"

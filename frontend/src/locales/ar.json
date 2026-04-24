@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "استيراد {{count}} مستندات؟ (استبدال الموجودة؟)",
-      "confirmReplaceBson": "استيراد ملف BSON؟ (استبدال البيانات الموجودة؟)"
+      "confirmReplaceBson": "استيراد ملف BSON؟ (استبدال البيانات الموجودة؟)",
+      "title": "استيراد المستندات",
+      "subtitleJson": "الملف: {{filename}} — تم العثور على {{count}} مستند.",
+      "subtitleBson": "الملف: {{filename}}",
+      "replaceLabel": "استبدال البيانات الموجودة (حذف المجموعة قبل الاستيراد)",
+      "button": {
+        "import": "استيراد"
+      },
+      "error": "فشل الاستيراد:"
     },
     "confirmDelete": {
       "document": "حذف هذا المستند؟"

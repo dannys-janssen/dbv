@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "{{count}} دستاویزات درآمد کریں؟ (موجودہ کو تبدیل کریں؟)",
-      "confirmReplaceBson": "BSON فائل درآمد کریں؟ (موجودہ ڈیٹا کو تبدیل کریں؟)"
+      "confirmReplaceBson": "BSON فائل درآمد کریں؟ (موجودہ ڈیٹا کو تبدیل کریں؟)",
+      "title": "دستاویزات درآمد کریں",
+      "subtitleJson": "فائل: {{filename}} — {{count}} دستاویزات ملی۔",
+      "subtitleBson": "فائل: {{filename}}",
+      "replaceLabel": "موجودہ ڈیٹا تبدیل کریں (درآمد سے پہلے مجموعہ حذف کریں)",
+      "button": {
+        "import": "درآمد کریں"
+      },
+      "error": "درآمد ناکام:"
     },
     "confirmDelete": {
       "document": "یہ دستاویز حذف کریں؟"

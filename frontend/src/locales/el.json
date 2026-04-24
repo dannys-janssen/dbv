@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "Εισαγωγή {{count}} εγγράφων; (αντικατάσταση υπαρχόντων;)",
-      "confirmReplaceBson": "Εισαγωγή αρχείου BSON; (αντικατάσταση υπαρχόντων δεδομένων;)"
+      "confirmReplaceBson": "Εισαγωγή αρχείου BSON; (αντικατάσταση υπαρχόντων δεδομένων;)",
+      "title": "Εισαγωγή εγγράφων",
+      "subtitleJson": "Αρχείο: {{filename}} — βρέθηκαν {{count}} έγγραφα.",
+      "subtitleBson": "Αρχείο: {{filename}}",
+      "replaceLabel": "Αντικατάσταση υπαρχόντων δεδομένων (διαγραφή collection πριν την εισαγωγή)",
+      "button": {
+        "import": "Εισαγωγή"
+      },
+      "error": "Η εισαγωγή απέτυχε:"
     },
     "confirmDelete": {
       "document": "Διαγραφή αυτού του εγγράφου;"

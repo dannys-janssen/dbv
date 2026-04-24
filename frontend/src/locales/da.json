@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "Importér {{count}} dokumenter? (erstat eksisterende?)",
-      "confirmReplaceBson": "Importer BSON-fil? (erstat eksisterende data?)"
+      "confirmReplaceBson": "Importer BSON-fil? (erstat eksisterende data?)",
+      "title": "Importer dokumenter",
+      "subtitleJson": "Fil: {{filename}} — {{count}} dokumenter fundet.",
+      "subtitleBson": "Fil: {{filename}}",
+      "replaceLabel": "Erstat eksisterende data (slet samling før import)",
+      "button": {
+        "import": "Importer"
+      },
+      "error": "Import mislykkedes:"
     },
     "confirmDelete": {
       "document": "Slet dette dokument?"

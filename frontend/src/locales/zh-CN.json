@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "导入 {{count}} 个文档？（替换现有文档？）",
-      "confirmReplaceBson": "导入BSON文件？（替换现有数据？）"
+      "confirmReplaceBson": "导入BSON文件？（替换现有数据？）",
+      "title": "导入文档",
+      "subtitleJson": "文件：{{filename}} — 找到 {{count}} 个文档。",
+      "subtitleBson": "文件：{{filename}}",
+      "replaceLabel": "替换现有数据（导入前删除集合）",
+      "button": {
+        "import": "导入"
+      },
+      "error": "导入失败："
     },
     "confirmDelete": {
       "document": "删除此文档？"

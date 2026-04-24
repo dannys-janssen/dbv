@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "{{count}} दस्तावेज़ आयात करें? (मौजूदा प्रतिस्थापित करें?)",
-      "confirmReplaceBson": "BSON फ़ाइल आयात करें? (मौजूदा डेटा बदलें?)"
+      "confirmReplaceBson": "BSON फ़ाइल आयात करें? (मौजूदा डेटा बदलें?)",
+      "title": "दस्तावेज़ आयात करें",
+      "subtitleJson": "फ़ाइल: {{filename}} — {{count}} दस्तावेज़ मिले।",
+      "subtitleBson": "फ़ाइल: {{filename}}",
+      "replaceLabel": "मौजूदा डेटा बदलें (आयात से पहले संग्रह हटाएं)",
+      "button": {
+        "import": "आयात करें"
+      },
+      "error": "आयात विफल:"
     },
     "confirmDelete": {
       "document": "यह दस्तावेज़ हटाएँ?"

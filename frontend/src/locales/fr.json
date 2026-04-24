@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "Importer {{count}} documents ? (remplacer l'existant ?)",
-      "confirmReplaceBson": "Importer le fichier BSON ? (remplacer les données existantes ?)"
+      "confirmReplaceBson": "Importer le fichier BSON ? (remplacer les données existantes ?)",
+      "title": "Importer des documents",
+      "subtitleJson": "Fichier : {{filename}} — {{count}} document(s) trouvé(s).",
+      "subtitleBson": "Fichier : {{filename}}",
+      "replaceLabel": "Remplacer les données existantes (supprimer la collection avant import)",
+      "button": {
+        "import": "Importer"
+      },
+      "error": "Échec de l'importation :"
     },
     "confirmDelete": {
       "document": "Supprimer ce document ?"

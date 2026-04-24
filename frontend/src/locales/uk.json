@@ -193,7 +193,15 @@
     },
     "import": {
       "confirmReplace": "Імпортувати {{count}} документів? (замінити існуючі?)",
-      "confirmReplaceBson": "Імпортувати файл BSON? (замінити існуючі дані?)"
+      "confirmReplaceBson": "Імпортувати файл BSON? (замінити існуючі дані?)",
+      "title": "Імпорт документів",
+      "subtitleJson": "Файл: {{filename}} — знайдено {{count}} документів.",
+      "subtitleBson": "Файл: {{filename}}",
+      "replaceLabel": "Замінити існуючі дані (видалити колекцію перед імпортом)",
+      "button": {
+        "import": "Імпортувати"
+      },
+      "error": "Помилка імпорту:"
     },
     "confirmDelete": {
       "document": "Видалити цей документ?"

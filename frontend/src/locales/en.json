@@ -97,6 +97,12 @@
       "validation": { "fieldRequired": "At least one field is required." }
     },
     "import": {
+      "title": "Import Documents",
+      "subtitleJson": "File: {{filename}} — {{count}} documents found.",
+      "subtitleBson": "File: {{filename}}",
+      "replaceLabel": "Replace existing data (drop collection before import)",
+      "button": { "import": "Import" },
+      "error": "Import failed:",
       "confirmReplace": "Import {{count}} documents? (replace existing?)",
       "confirmReplaceBson": "Import BSON file? (replace existing data?)"
     },
