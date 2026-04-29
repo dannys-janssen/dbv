@@ -46,6 +46,7 @@ pub struct CreateIndexParams {
     pub sparse: Option<bool>,
     pub ttl: Option<u64>,
     pub background: Option<bool>,
+    pub partial_filter_expression: Option<bson::Document>,
 }
 
 impl DbClient {
@@ -188,6 +189,12 @@ impl DbClient {
                 if let Some(expire) = opts.expire_after {
                     map.insert("ttl".to_string(), serde_json::json!(expire.as_secs()));
                 }
+                if let Some(pfe) = &opts.partial_filter_expression {
+                    map.insert(
+                        "partialFilterExpression".to_string(),
+                        serde_json::to_value(pfe)?,
+                    );
+                }
             }
             result.push(Value::Object(map));
         }
@@ -207,6 +214,7 @@ impl DbClient {
         opts.sparse = params.sparse;
         opts.expire_after = params.ttl.map(std::time::Duration::from_secs);
         opts.background = params.background;
+        opts.partial_filter_expression = params.partial_filter_expression;
         let model = IndexModel::builder()
             .keys(params.keys)
             .options(opts)

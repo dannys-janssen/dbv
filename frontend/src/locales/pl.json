@@ -96,7 +96,11 @@
     "schema": "Schemat",
     "indexes": "Indeksy",
     "stats": "Statystyki",
-    "commands": "Polecenia"
+    "commands": "Polecenia",
+    "contextMenu": {
+      "closeOthers": "Zamknij inne karty",
+      "closeAll": "Zamknij wszystkie karty"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Unikalny",
         "sparse": "Rzadki",
         "background": "W tle",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Wyrażenie filtru cząstkowego"
       },
       "optional": "(opcjonalne)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "nazwa pola",
         "name": "auto-generowane jeśli puste",
-        "ttl": "np. 3600"
+        "ttl": "np. 3600",
+        "partialFilter": "np. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (rosnąco)",
@@ -188,7 +194,8 @@
         "submit": "Utwórz indeks"
       },
       "validation": {
-        "fieldRequired": "Wymagane jest co najmniej jedno pole."
+        "fieldRequired": "Wymagane jest co najmniej jedno pole.",
+        "partialFilterInvalid": "Nieprawidłowy JSON dla wyrażenia filtru cząstkowego."
       }
     },
     "import": {
@@ -297,7 +304,8 @@
     },
     "button": {
       "apply": "Zastosuj",
-      "clear": "Wyczyść"
+      "clear": "Wyczyść",
+      "loading": "Ładowanie…"
     },
     "mode": {
       "label": "Tryb zapytania",
@@ -309,7 +317,11 @@
       "mqlPreview": "Odpowiednik MQL",
       "noConstraints": "Brak filtra, sortowania ani projekcji — zwraca wszystkie dokumenty",
       "example": "np. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Przeciągnij, aby zmienić rozmiar"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -359,7 +371,8 @@
       "fieldPath": "Ścieżka pola",
       "types": "Typy",
       "coverage": "Pokrycie",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Filtr cząstkowy"
     }
   },
   "pagination": {
@@ -373,7 +386,8 @@
   "aggregate": {
     "prompt": "Wprowadź potok agregacji (tablica JSON):",
     "button": {
-      "run": "▶ Uruchom"
+      "run": "▶ Uruchom",
+      "running": "Uruchamianie…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -478,7 +492,9 @@
       "fsync": "Opróżnij i opcjonalnie zablokuj",
       "rotateCertificates": "Rotacja certyfikatów TLS",
       "listIndexes": "Lista indeksów w kolekcji",
-      "profile": "Pobierz/ustaw poziom profilera bazy danych"
+      "profile": "Pobierz/ustaw poziom profilera bazy danych",
+      "explain": "Plan wyjaśnienia dla zapytania find",
+      "explainAggregate": "Plan wyjaśnienia dla agregacji"
     },
     "context": {
       "runningOn": "Uruchomione na bazie danych:"

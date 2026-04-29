@@ -96,7 +96,11 @@
     "schema": "スキーマ",
     "indexes": "インデックス",
     "stats": "統計",
-    "commands": "コマンド"
+    "commands": "コマンド",
+    "contextMenu": {
+      "closeOthers": "他のタブを閉じる",
+      "closeAll": "すべてのタブを閉じる"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "ユニーク",
         "sparse": "スパース",
         "background": "バックグラウンド",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "部分フィルター式"
       },
       "optional": "(オプション)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "フィールド名",
         "name": "空の場合は自動生成",
-        "ttl": "例: 3600"
+        "ttl": "例: 3600",
+        "partialFilter": "例: { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (昇順)",
@@ -188,7 +194,8 @@
         "submit": "インデックスを作成"
       },
       "validation": {
-        "fieldRequired": "少なくとも1つのフィールドが必要です。"
+        "fieldRequired": "少なくとも1つのフィールドが必要です。",
+        "partialFilterInvalid": "部分フィルター式のJSONが無効です。"
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "適用",
-      "clear": "クリア"
+      "clear": "クリア",
+      "loading": "読み込み中…"
     },
     "mode": {
       "label": "クエリモード",
@@ -303,7 +311,11 @@
       "mqlPreview": "同等のMQL",
       "noConstraints": "フィルター・ソート・プロジェクションなし — すべてのドキュメントを返します",
       "example": "例: SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "ドラッグしてサイズ変更"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "フィールドパス",
       "types": "タイプ",
       "coverage": "カバレッジ",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "部分フィルター"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "集約パイプラインを入力してください (JSON配列):",
     "button": {
-      "run": "▶ 実行"
+      "run": "▶ 実行",
+      "running": "実行中…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "フラッシュとオプションロック",
       "rotateCertificates": "TLS証明書をローテート",
       "listIndexes": "コレクションのインデックスを一覧表示",
-      "profile": "データベースプロファイラーレベルの取得/設定"
+      "profile": "データベースプロファイラーレベルの取得/設定",
+      "explain": "findクエリの実行プラン",
+      "explainAggregate": "集約の実行プラン"
     },
     "context": {
       "runningOn": "実行中のデータベース:"

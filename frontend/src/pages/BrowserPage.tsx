@@ -211,6 +211,7 @@ export default function BrowserPage() {
   // ── Tab state ──
   const [tabs, setTabs] = useState<Tab[]>([{ id: "tab-0", db: "", col: "" }]);
   const [activeTabId, setActiveTabId] = useState("tab-0");
+  const [tabContextMenu, setTabContextMenu] = useState<{ tabId: string; x: number; y: number } | null>(null);
 
   // ── Sidebar state ──
   const [databases, setDatabases] = useState<string[]>([]);
@@ -264,6 +265,25 @@ export default function BrowserPage() {
       return next;
     });
   }, [activeTabId]);
+
+  const closeOtherTabs = useCallback((id: string) => {
+    setTabs((prev) => {
+      const kept = prev.filter((t) => t.id === id);
+      if (kept.length === 0) {
+        const fresh = { id: `tab-${Date.now()}`, db: "", col: "" };
+        setActiveTabId(fresh.id);
+        return [fresh];
+      }
+      setActiveTabId(id);
+      return kept;
+    });
+  }, []);
+
+  const closeAllTabs = useCallback(() => {
+    const fresh = { id: `tab-${Date.now()}`, db: "", col: "" };
+    setActiveTabId(fresh.id);
+    setTabs([fresh]);
+  }, []);
 
   const reloadDatabases = useCallback(() => {
     getDatabases()
@@ -1019,6 +1039,10 @@ export default function BrowserPage() {
                 aria-controls={`panel-${tab.id}`}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTabId(tab.id)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setTabContextMenu({ tabId: tab.id, x: e.clientX, y: e.clientY });
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1092,6 +1116,52 @@ export default function BrowserPage() {
             +
           </button>
         </div>
+
+        {/* ── Tab context menu ── */}
+        {tabContextMenu && (
+          <>
+            <div
+              style={{ position: "fixed", inset: 0, zIndex: 199 }}
+              onClick={() => setTabContextMenu(null)}
+              onContextMenu={(e) => { e.preventDefault(); setTabContextMenu(null); }}
+            />
+            <div
+              role="menu"
+              style={{
+                position: "fixed",
+                top: tabContextMenu.y,
+                left: tabContextMenu.x,
+                zIndex: 200,
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                padding: "4px 0",
+                minWidth: "180px",
+                fontFamily: FONT,
+              }}
+            >
+              <button
+                role="menuitem"
+                onClick={() => { closeOtherTabs(tabContextMenu.tabId); setTabContextMenu(null); }}
+                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: "#374151", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                {t("tabs.contextMenu.closeOthers")}
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => { closeAllTabs(); setTabContextMenu(null); }}
+                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: "#374151", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                {t("tabs.contextMenu.closeAll")}
+              </button>
+            </div>
+          </>
+        )}
 
         {/* ── Content area (all tabs rendered, shown/hidden via tabpanel) ── */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>

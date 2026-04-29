@@ -96,7 +96,11 @@
     "schema": "Esquema",
     "indexes": "Índices",
     "stats": "Estadísticas",
-    "commands": "Comandos"
+    "commands": "Comandos",
+    "contextMenu": {
+      "closeOthers": "Cerrar otras pestañas",
+      "closeAll": "Cerrar todas las pestañas"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Único",
         "sparse": "Disperso",
         "background": "Segundo plano",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Expresión de filtro parcial"
       },
       "optional": "(opcional)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "nombre del campo",
         "name": "auto-generado si vacío",
-        "ttl": "ej. 3600"
+        "ttl": "ej. 3600",
+        "partialFilter": "ej. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (asc)",
@@ -188,7 +194,8 @@
         "submit": "Crear índice"
       },
       "validation": {
-        "fieldRequired": "Se requiere al menos un campo."
+        "fieldRequired": "Se requiere al menos un campo.",
+        "partialFilterInvalid": "JSON inválido para la expresión de filtro parcial."
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "Aplicar",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "loading": "Cargando…"
     },
     "mode": {
       "label": "Modo de consulta",
@@ -303,7 +311,11 @@
       "mqlPreview": "MQL equivalente",
       "noConstraints": "Sin filtro, orden o proyección — devuelve todos los documentos",
       "example": "ej. SELECT name, age FROM {{col}} WHERE status = 'activo' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Arrastrar para redimensionar"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "Ruta del campo",
       "types": "Tipos",
       "coverage": "Cobertura",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Filtro parcial"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "Introduce un pipeline de agregación (array JSON):",
     "button": {
-      "run": "▶ Ejecutar"
+      "run": "▶ Ejecutar",
+      "running": "Ejecutando…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "Vaciar y opcionalmente bloquear",
       "rotateCertificates": "Rotar certificados TLS",
       "listIndexes": "Listar índices de una colección",
-      "profile": "Obtener/establecer nivel del perfilador"
+      "profile": "Obtener/establecer nivel del perfilador",
+      "explain": "Plan de explicación para una consulta find",
+      "explainAggregate": "Plan de explicación para una agregación"
     },
     "context": {
       "runningOn": "Ejecutando en base de datos:"

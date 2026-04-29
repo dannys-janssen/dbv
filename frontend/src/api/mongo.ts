@@ -204,6 +204,7 @@ export interface IndexInfo {
   unique: boolean;
   sparse: boolean;
   ttl?: number;
+  partialFilterExpression?: Record<string, unknown>;
 }
 
 export interface IndexList {
@@ -224,7 +225,7 @@ export const createIndex = (
   db: string,
   collection: string,
   keys: Record<string, 1 | -1>,
-  options?: { name?: string; unique?: boolean; sparse?: boolean; ttl?: number; background?: boolean }
+  options?: { name?: string; unique?: boolean; sparse?: boolean; ttl?: number; background?: boolean; partial_filter_expression?: Record<string, unknown> }
 ) =>
   api
     .post(`/databases/${db}/collections/${collection}/indexes`, { keys, ...options })

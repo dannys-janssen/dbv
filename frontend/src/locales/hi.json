@@ -96,7 +96,11 @@
     "schema": "स्कीमा",
     "indexes": "अनुक्रमणिका",
     "stats": "आँकड़े",
-    "commands": "आदेश"
+    "commands": "आदेश",
+    "contextMenu": {
+      "closeOthers": "अन्य टैब बंद करें",
+      "closeAll": "सभी टैब बंद करें"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "अद्वितीय",
         "sparse": "विरल",
         "background": "पृष्ठभूमि",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "आंशिक फ़िल्टर अभिव्यक्ति"
       },
       "optional": "(वैकल्पिक)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "फ़ील्ड नाम",
         "name": "खाली छोड़ने पर स्वतः उत्पन्न",
-        "ttl": "जैसे: 3600"
+        "ttl": "जैसे: 3600",
+        "partialFilter": "जैसे: { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (आरोही)",
@@ -188,7 +194,8 @@
         "submit": "अनुक्रमणिका बनाएँ"
       },
       "validation": {
-        "fieldRequired": "कम से कम एक फ़ील्ड आवश्यक है।"
+        "fieldRequired": "कम से कम एक फ़ील्ड आवश्यक है।",
+        "partialFilterInvalid": "आंशिक फ़िल्टर अभिव्यक्ति के लिए अमान्य JSON।"
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "लागू करें",
-      "clear": "साफ़ करें"
+      "clear": "साफ़ करें",
+      "loading": "लोड हो रहा है…"
     },
     "mode": {
       "label": "क्वेरी मोड",
@@ -303,7 +311,11 @@
       "mqlPreview": "समकक्ष MQL",
       "noConstraints": "कोई फ़िल्टर, क्रम या प्रोजेक्शन नहीं — सभी दस्तावेज़ लौटाता है",
       "example": "जैसे SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "आकार बदलने के लिए ड्रैग करें"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "फ़ील्ड पथ",
       "types": "प्रकार",
       "coverage": "कवरेज",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "आंशिक फ़िल्टर"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "एकत्रीकरण पाइपलाइन दर्ज करें (JSON सरणी):",
     "button": {
-      "run": "▶ चलाएँ"
+      "run": "▶ चलाएँ",
+      "running": "चल रहा है…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "फ्लश और वैकल्पिक रूप से लॉक करें",
       "rotateCertificates": "TLS प्रमाणपत्र रोटेट करें",
       "listIndexes": "संग्रह पर अनुक्रमणिकाएँ सूचीबद्ध करें",
-      "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें"
+      "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें",
+      "explain": "खोज क्वेरी के लिए व्याख्या योजना",
+      "explainAggregate": "एकत्रीकरण के लिए व्याख्या योजना"
     },
     "context": {
       "runningOn": "डेटाबेस पर चल रहा है:"

@@ -150,6 +150,9 @@ Each collection opens in its own **tab** so you can work with multiple collectio
 - **Clicking a collection** in the sidebar always opens it in a new tab. Multiple tabs for the same collection are allowed and are distinguished by a *(1)*, *(2)*, … suffix.
 - **`+` button** (right side of the tab bar) opens a new empty tab.
 - **`×` button** on each tab closes it. At least one tab is always kept open.
+- **Right-click any tab** to open a context menu with:
+  - **Close Other Tabs** — closes all tabs except the one you right-clicked
+  - **Close All Tabs** — closes every open tab (a new empty tab is created automatically)
 - Each tab independently preserves its filter, projection, sort, pagination, view mode (table/tree), aggregate pipeline, and all other per-collection state.
 - Dropping a database or collection automatically closes any tabs that reference it.
 
@@ -170,6 +173,8 @@ The query bar supports two modes, toggled with the **MQL / SQL** button group:
   - Exclude a field: `{"password": 0}`
 - Filter, Sort, and Projection fields validate JSON in real time — blue border + `active` badge when set and valid, red on invalid JSON; Apply is disabled when any field contains invalid JSON
 - Press **Ctrl+Enter** (inside any editor) or **Apply** to run; **Clear** resets all three fields
+- While a query is running the **Apply** button shows **Loading…** and is disabled; an ⏳ status label is displayed alongside. On completion, the elapsed time is shown (e.g. `42 ms` or `1.23 s`)
+- All three editors (Filter, Sort, Projection) share a linked **resizable height** — drag the handle below any one of them to resize all three together
 
 **SQL mode** — query with familiar SQL SELECT syntax:
 - Write a standard SQL `SELECT` statement; the translator converts it to the equivalent MQL filter, sort, projection, and limit automatically
@@ -192,6 +197,7 @@ The query bar supports two modes, toggled with the **MQL / SQL** button group:
   | `LIMIT n` | limit |
 
 - Example: `SELECT name, age FROM users WHERE status = 'active' ORDER BY age DESC LIMIT 20`
+- The SQL editor is **resizable** — drag the handle below it to adjust the editor height independently
 - The Documents tab badge shows the total matching count
 - Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
 - BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in both views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`
@@ -250,7 +256,7 @@ Run an aggregation pipeline against the selected collection. The Monaco editor p
 ]
 ```
 
-Press **Ctrl+Enter** or **▶ Run** to execute. The pipeline editor occupies the top portion of the tab; results fill the remaining height in a read-only Monaco viewer (syntax-highlighted JSON, line numbers, code folding). A document count badge is shown on success; pipeline errors from MongoDB are displayed inline in red below the Run button.
+Press **Ctrl+Enter** or **▶ Run** to execute. While running, the **▶ Run** button is disabled and shows ⏳; on completion the elapsed time is displayed. The pipeline editor is **resizable** — drag the handle below it to adjust the editor height. Results fill the remaining height in a read-only Monaco viewer (syntax-highlighted JSON, line numbers, code folding). A document count badge is shown on success; pipeline errors from MongoDB are displayed inline in red below the Run button.
 
 **Schema**
 
@@ -267,27 +273,29 @@ Inspect the inferred schema of a collection — sampled from up to 100 documents
 
 View, create, and drop indexes on a collection from the **Indexes** tab:
 
-- The table shows name, key fields and directions, unique/sparse flags, and TTL
-- **+ New Index** opens the index builder: add key fields (ascending `1` or descending `-1`), set optional name, Unique, Sparse, TTL (seconds), and **Create in background**
+- The table shows name, key fields and directions, unique/sparse flags, TTL, and partial filter expression (when set)
+- **+ New Index** opens the index builder: add key fields (ascending `1` or descending `-1`), set optional name, Unique, Sparse, TTL (seconds), **Create in background**, and an optional **Partial Filter Expression** (a MongoDB query document that limits which documents the index covers, e.g. `{"status": "active"}`)
 - Click **Drop** to delete an index (`_id_` is protected and cannot be dropped)
 
 **Commands** *(dbv-admin only)*
 
 The **Commands** tab provides a split-panel MongoDB command runner:
 
-- **Left palette** — searchable list of 35 common commands grouped into five categories:
+- **Left palette** — searchable list of common commands grouped into five categories:
 
   | Category | Examples |
   |---|---|
   | Server | `ping`, `serverStatus`, `buildInfo`, `currentOp`, `getLog` |
   | Database | `dbStats`, `listCollections`, `createUser`, `dropUser` |
-  | Collection | `collStats`, `validate`, `compact`, `reIndex` |
+  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate` |
   | Replication | `replSetGetStatus`, `replSetGetConfig` |
   | Administration | `renameCollection`, `fsync`, `profile` |
 
 - Click any palette entry to pre-fill the Monaco editor with a ready-to-run template (collection-name placeholders are replaced with the currently selected collection)
+- **Explain plan** templates (`explain` and `explainAggregate`) default to `"verbosity": "executionStats"` — useful for diagnosing query performance
 - **Use admin database** toggle — when enabled the command runs against the `admin` database (required for server-wide and replication commands; indicated by a yellow `admin` badge in the palette)
-- Press **▶ Run** or **Ctrl+Enter** to execute — results appear in a read-only Monaco viewer; errors are highlighted in red
+- The command editor is **resizable** — drag the handle below it to adjust the editor height independently
+- Press **▶ Run** or **Ctrl+Enter** to execute — while running the button is disabled and shows ⏳; on completion the elapsed time is shown. Results appear in a read-only Monaco viewer; errors are highlighted in red
 
 **Export / Import** *(import requires dbv-admin)*
 

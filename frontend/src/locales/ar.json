@@ -96,7 +96,11 @@
     "schema": "المخطط",
     "indexes": "الفهارس",
     "stats": "الإحصائيات",
-    "commands": "الأوامر"
+    "commands": "الأوامر",
+    "contextMenu": {
+      "closeOthers": "إغلاق التبويبات الأخرى",
+      "closeAll": "إغلاق جميع التبويبات"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "فريد",
         "sparse": "متفرق",
         "background": "خلفية",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "تعبير التصفية الجزئية"
       },
       "optional": "(اختياري)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "اسم الحقل",
         "name": "يُنشأ تلقائيًا إذا كان فارغًا",
-        "ttl": "مثال: 3600"
+        "ttl": "مثال: 3600",
+        "partialFilter": "مثال: { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (تصاعدي)",
@@ -188,7 +194,8 @@
         "submit": "إنشاء فهرس"
       },
       "validation": {
-        "fieldRequired": "مطلوب حقل واحد على الأقل."
+        "fieldRequired": "مطلوب حقل واحد على الأقل.",
+        "partialFilterInvalid": "JSON غير صحيح لتعبير التصفية الجزئية."
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "تطبيق",
-      "clear": "مسح"
+      "clear": "مسح",
+      "loading": "جارٍ التحميل…"
     },
     "mode": {
       "label": "وضع الاستعلام",
@@ -303,7 +311,11 @@
       "mqlPreview": "MQL المكافئ",
       "noConstraints": "لا يوجد تصفية أو ترتيب أو إسقاط — يعيد جميع المستندات",
       "example": "مثال: SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "اسحب لتغيير الحجم"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "مسار الحقل",
       "types": "الأنواع",
       "coverage": "التغطية",
-      "nullable": "قابل للإهمال"
+      "nullable": "قابل للإهمال",
+      "partialFilter": "تصفية جزئية"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "أدخل خط أنابيب التجميع (مصفوفة JSON):",
     "button": {
-      "run": "▶ تشغيل"
+      "run": "▶ تشغيل",
+      "running": "جارٍ التنفيذ…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "مسح وقفل اختياري",
       "rotateCertificates": "تدوير شهادات TLS",
       "listIndexes": "سرد الفهارس على مجموعة",
-      "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات"
+      "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات",
+      "explain": "خطة شرح لاستعلام البحث",
+      "explainAggregate": "خطة شرح للتجميع"
     },
     "context": {
       "runningOn": "يعمل على قاعدة البيانات:"

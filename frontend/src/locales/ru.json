@@ -96,7 +96,11 @@
     "schema": "Схема",
     "indexes": "Индексы",
     "stats": "Статистика",
-    "commands": "Команды"
+    "commands": "Команды",
+    "contextMenu": {
+      "closeOthers": "Закрыть другие вкладки",
+      "closeAll": "Закрыть все вкладки"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Уникальный",
         "sparse": "Разреженный",
         "background": "Фоновый",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Выражение частичного фильтра"
       },
       "optional": "(необязательно)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "название поля",
         "name": "авто-генерация если пусто",
-        "ttl": "напр. 3600"
+        "ttl": "напр. 3600",
+        "partialFilter": "напр. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (по возрастанию)",
@@ -188,7 +194,8 @@
         "submit": "Создать индекс"
       },
       "validation": {
-        "fieldRequired": "Требуется хотя бы одно поле."
+        "fieldRequired": "Требуется хотя бы одно поле.",
+        "partialFilterInvalid": "Недействительный JSON для выражения частичного фильтра."
       }
     },
     "import": {
@@ -297,7 +304,8 @@
     },
     "button": {
       "apply": "Применить",
-      "clear": "Очистить"
+      "clear": "Очистить",
+      "loading": "Загрузка…"
     },
     "mode": {
       "label": "Режим запроса",
@@ -309,7 +317,11 @@
       "mqlPreview": "Эквивалент MQL",
       "noConstraints": "Без фильтра, сортировки или проекции — возвращает все документы",
       "example": "напр. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Перетащите для изменения размера"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -359,7 +371,8 @@
       "fieldPath": "Путь поля",
       "types": "Типы",
       "coverage": "Покрытие",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Частичный фильтр"
     }
   },
   "pagination": {
@@ -373,7 +386,8 @@
   "aggregate": {
     "prompt": "Введите агрегационный конвейер (массив JSON):",
     "button": {
-      "run": "▶ Запустить"
+      "run": "▶ Запустить",
+      "running": "Выполнение…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -478,7 +492,9 @@
       "fsync": "Сбросить и опционально заблокировать",
       "rotateCertificates": "Ротация сертификатов TLS",
       "listIndexes": "Список индексов в коллекции",
-      "profile": "Получить/установить уровень профилировщика базы данных"
+      "profile": "Получить/установить уровень профилировщика базы данных",
+      "explain": "План объяснения для запроса find",
+      "explainAggregate": "План объяснения для агрегации"
     },
     "context": {
       "runningOn": "Выполняется на базе данных:"

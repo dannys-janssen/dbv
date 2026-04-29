@@ -34,6 +34,7 @@
   },
   "tabs": {
     "button": { "close": { "title": "Close tab" }, "new": { "title": "New tab" } },
+    "contextMenu": { "closeOthers": "Close other tabs", "closeAll": "Close all tabs" },
     "documents": "Documents",
     "aggregate": "Aggregate",
     "schema": "Schema",
@@ -88,13 +89,13 @@
     "createIndex": {
       "title": "Create Index",
       "subtitle": "Define the fields and options for the new index.",
-      "label": { "keys": "Index Keys", "name": "Index Name", "unique": "Unique", "sparse": "Sparse", "background": "Background", "ttl": "TTL" },
+      "label": { "keys": "Index Keys", "name": "Index Name", "unique": "Unique", "sparse": "Sparse", "background": "Background", "ttl": "TTL", "partialFilter": "Partial Filter Expression" },
       "optional": "(optional)",
       "hint": { "background": "(non-blocking)", "ttl": "(seconds, optional)" },
-      "placeholder": { "fieldName": "field name", "name": "auto-generated if empty", "ttl": "e.g. 3600" },
+      "placeholder": { "fieldName": "field name", "name": "auto-generated if empty", "ttl": "e.g. 3600", "partialFilter": "e.g. { \"status\": { \"$exists\": true } }" },
       "option": { "ascending": "1 (asc)", "descending": "-1 (desc)" },
       "button": { "addField": "+ Add field", "submit": "Create Index" },
-      "validation": { "fieldRequired": "At least one field is required." }
+      "validation": { "fieldRequired": "At least one field is required.", "partialFilterInvalid": "Invalid JSON for partial filter expression." }
     },
     "import": {
       "title": "Import Documents",
@@ -148,7 +149,7 @@
     "label": { "filter": "Filter", "sort": "Sort", "projection": "Projection", "limit": "Limit" },
     "hint": { "ctrlEnter": "Ctrl+Enter to apply" },
     "badge": { "active": "active", "invalidJson": "invalid JSON" },
-    "button": { "apply": "Apply", "clear": "Clear" },
+    "button": { "apply": "Apply", "clear": "Clear", "loading": "Loading…" },
     "mode": { "label": "Query mode", "sqlHint": "Type a SQL SELECT — Ctrl+Enter to apply" },
     "sql": {
       "label": "SQL Query",
@@ -156,7 +157,9 @@
       "mqlPreview": "Equivalent MQL",
       "noConstraints": "No filter, sort or projection — returns all documents",
       "example": "e.g. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": { "title": "Drag to resize" },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": { "title": "Table view" },
@@ -176,7 +179,7 @@
     "fieldCount_other": "{{count}} fields"
   },
   "table": {
-    "header": { "id": "_id", "preview": "Preview", "actions": "Actions", "name": "Name", "keys": "Keys", "unique": "Unique", "sparse": "Sparse", "ttl": "TTL (s)", "index": "Index", "size": "Size", "fieldPath": "Field path", "types": "Types", "coverage": "Coverage", "nullable": "Nullable" }
+    "header": { "id": "_id", "preview": "Preview", "actions": "Actions", "name": "Name", "keys": "Keys", "unique": "Unique", "sparse": "Sparse", "ttl": "TTL (s)", "partialFilter": "Partial Filter", "index": "Index", "size": "Size", "fieldPath": "Field path", "types": "Types", "coverage": "Coverage", "nullable": "Nullable" }
   },
   "pagination": {
     "label": "Showing {{start}}–{{end}} of {{total}} documents",
@@ -185,7 +188,7 @@
   },
   "aggregate": {
     "prompt": "Enter an aggregation pipeline (JSON array):",
-    "button": { "run": "▶ Run" },
+    "button": { "run": "▶ Run", "running": "Running…" },
     "hint": { "ctrlEnter": "Ctrl+Enter" },
     "results": { "count_one": "{{count}} document", "count_other": "{{count}} documents" },
     "placeholder": { "result": "// Run a command to see results" }
@@ -247,6 +250,8 @@
       "compact": "Compact/defragment a collection",
       "reIndex": "Rebuild all indexes",
       "convertToCapped": "Convert to a capped collection",
+      "explain": "Explain plan for a find query",
+      "explainAggregate": "Explain plan for an aggregation",
       "replSetGetStatus": "Replica set status",
       "replSetGetConfig": "Replica set configuration",
       "isMaster": "Server role check (legacy)",
