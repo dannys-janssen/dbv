@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Editor from "@monaco-editor/react";
 import { runDbCommand } from "../api/mongo";

@@ -847,7 +847,6 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           </div>
                           <div style={{ border: sqlError && sqlText.trim() ? "1px solid #fca5a5" : sqlText.trim() && sqlValid ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
                             <Editor
-                              id="sql-editor"
                               height={`${sqlHeight}px`}
                               language="sql"
                               path="dbv://sql"
