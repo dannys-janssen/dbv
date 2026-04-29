@@ -96,7 +96,11 @@
     "schema": "模式",
     "indexes": "索引",
     "stats": "统计",
-    "commands": "命令"
+    "commands": "命令",
+    "contextMenu": {
+      "closeOthers": "关闭其他标签页",
+      "closeAll": "关闭所有标签页"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "唯一",
         "sparse": "稀疏",
         "background": "后台",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "部分过滤表达式"
       },
       "optional": "（可选）",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "字段名",
         "name": "空时自动生成",
-        "ttl": "例如 3600"
+        "ttl": "例如 3600",
+        "partialFilter": "例如 { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1（升序）",
@@ -188,7 +194,8 @@
         "submit": "创建索引"
       },
       "validation": {
-        "fieldRequired": "至少需要一个字段。"
+        "fieldRequired": "至少需要一个字段。",
+        "partialFilterInvalid": "部分过滤表达式的JSON无效。"
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "应用",
-      "clear": "清除"
+      "clear": "清除",
+      "loading": "加载中…"
     },
     "mode": {
       "label": "查询模式",
@@ -303,7 +311,11 @@
       "mqlPreview": "等效 MQL",
       "noConstraints": "无过滤、排序或投影 — 返回所有文档",
       "example": "例如 SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "拖拽以调整大小"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "字段路径",
       "types": "类型",
       "coverage": "覆盖率",
-      "nullable": "可为空"
+      "nullable": "可为空",
+      "partialFilter": "部分过滤"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "输入聚合管道（JSON 数组）：",
     "button": {
-      "run": "▶ 运行"
+      "run": "▶ 运行",
+      "running": "运行中…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "刷新并可选锁定",
       "rotateCertificates": "轮换 TLS 证书",
       "listIndexes": "列出集合上的索引",
-      "profile": "获取/设置数据库分析器级别"
+      "profile": "获取/设置数据库分析器级别",
+      "explain": "查询find的执行计划",
+      "explainAggregate": "聚合的执行计划"
     },
     "context": {
       "runningOn": "运行在数据库："

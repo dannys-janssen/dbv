@@ -96,7 +96,11 @@
     "schema": "Schema",
     "indexes": "Indizes",
     "stats": "Statistiken",
-    "commands": "Befehle"
+    "commands": "Befehle",
+    "contextMenu": {
+      "closeOthers": "Andere Tabs schließen",
+      "closeAll": "Alle Tabs schließen"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Eindeutig",
         "sparse": "Dünn besetzt",
         "background": "Hintergrund",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Teilfilter-Ausdruck"
       },
       "optional": "(optional)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "Feldname",
         "name": "automatisch generiert wenn leer",
-        "ttl": "z.B. 3600"
+        "ttl": "z.B. 3600",
+        "partialFilter": "z.B. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (aufst.)",
@@ -188,7 +194,8 @@
         "submit": "Index erstellen"
       },
       "validation": {
-        "fieldRequired": "Mindestens ein Feld ist erforderlich."
+        "fieldRequired": "Mindestens ein Feld ist erforderlich.",
+        "partialFilterInvalid": "Ungültiges JSON für Teilfilter-Ausdruck."
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "Anwenden",
-      "clear": "Löschen"
+      "clear": "Löschen",
+      "loading": "Wird geladen…"
     },
     "mode": {
       "label": "Abfragemodus",
@@ -303,7 +311,11 @@
       "mqlPreview": "Äquivalentes MQL",
       "noConstraints": "Kein Filter, keine Sortierung oder Projektion — gibt alle Dokumente zurück",
       "example": "z.B. SELECT name, age FROM {{col}} WHERE status = 'aktiv' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Zum Ändern der Größe ziehen"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "Feldpfad",
       "types": "Typen",
       "coverage": "Abdeckung",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Teilfilter"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "Aggregations-Pipeline eingeben (JSON-Array):",
     "button": {
-      "run": "▶ Ausführen"
+      "run": "▶ Ausführen",
+      "running": "Wird ausgeführt…"
     },
     "hint": {
       "ctrlEnter": "Strg+Enter"
@@ -470,7 +484,9 @@
       "fsync": "Spülen und optional sperren",
       "rotateCertificates": "TLS-Zertifikate rotieren",
       "listIndexes": "Indizes einer Sammlung auflisten",
-      "profile": "Datenbank-Profiler-Level abrufen/setzen"
+      "profile": "Datenbank-Profiler-Level abrufen/setzen",
+      "explain": "Erklärplan für eine Find-Abfrage",
+      "explainAggregate": "Erklärplan für eine Aggregation"
     },
     "context": {
       "runningOn": "Wird auf Datenbank ausgeführt:"

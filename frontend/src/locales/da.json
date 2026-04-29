@@ -96,7 +96,11 @@
     "schema": "Skema",
     "indexes": "Indekser",
     "stats": "Statistikker",
-    "commands": "Kommandoer"
+    "commands": "Kommandoer",
+    "contextMenu": {
+      "closeOthers": "Luk andre faner",
+      "closeAll": "Luk alle faner"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Unikt",
         "sparse": "Sparsomt",
         "background": "Baggrund",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Delvis filterudtryk"
       },
       "optional": "(valgfrit)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "feltnavn",
         "name": "auto-genereret hvis tom",
-        "ttl": "f.eks. 3600"
+        "ttl": "f.eks. 3600",
+        "partialFilter": "f.eks. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (stg.)",
@@ -188,7 +194,8 @@
         "submit": "Opret indeks"
       },
       "validation": {
-        "fieldRequired": "Mindst ét felt er påkrævet."
+        "fieldRequired": "Mindst ét felt er påkrævet.",
+        "partialFilterInvalid": "Ugyldigt JSON til delvis filterudtryk."
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "Anvend",
-      "clear": "Ryd"
+      "clear": "Ryd",
+      "loading": "Indlæser…"
     },
     "mode": {
       "label": "Forespørgselstilstand",
@@ -303,7 +311,11 @@
       "mqlPreview": "Tilsvarende MQL",
       "noConstraints": "Ingen filter, sortering eller projektion — returnerer alle dokumenter",
       "example": "f.eks. SELECT name, age FROM {{col}} WHERE status = 'aktiv' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Træk for at ændre størrelse"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "Feltsti",
       "types": "Typer",
       "coverage": "Dækning",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Delvis filter"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "Indtast en aggregeringspipeline (JSON-array):",
     "button": {
-      "run": "▶ Kør"
+      "run": "▶ Kør",
+      "running": "Kører…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "Tøm og lås valgfrit",
       "rotateCertificates": "Roter TLS-certifikater",
       "listIndexes": "List indekser på en samling",
-      "profile": "Hent/indstil database-profilerniveau"
+      "profile": "Hent/indstil database-profilerniveau",
+      "explain": "Forklaringsplan for en find-forespørgsel",
+      "explainAggregate": "Forklaringsplan for en aggregering"
     },
     "context": {
       "runningOn": "Kører på database:"

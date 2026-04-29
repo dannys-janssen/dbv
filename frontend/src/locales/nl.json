@@ -96,7 +96,11 @@
     "schema": "Schema",
     "indexes": "Indexen",
     "stats": "Statistieken",
-    "commands": "Opdrachten"
+    "commands": "Opdrachten",
+    "contextMenu": {
+      "closeOthers": "Andere tabbladen sluiten",
+      "closeAll": "Alle tabbladen sluiten"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Uniek",
         "sparse": "Spaarzaam",
         "background": "Achtergrond",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Uitdrukking gedeeltelijk filter"
       },
       "optional": "(optioneel)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "veldnaam",
         "name": "automatisch gegenereerd als leeg",
-        "ttl": "bijv. 3600"
+        "ttl": "bijv. 3600",
+        "partialFilter": "bijv. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (oplopend)",
@@ -188,7 +194,8 @@
         "submit": "Index aanmaken"
       },
       "validation": {
-        "fieldRequired": "Minimaal één veld is vereist."
+        "fieldRequired": "Minimaal één veld is vereist.",
+        "partialFilterInvalid": "Ongeldige JSON voor gedeeltelijk filteruitdrukking."
       }
     },
     "import": {
@@ -291,7 +298,8 @@
     },
     "button": {
       "apply": "Toepassen",
-      "clear": "Wissen"
+      "clear": "Wissen",
+      "loading": "Laden…"
     },
     "mode": {
       "label": "Querymodus",
@@ -303,7 +311,11 @@
       "mqlPreview": "Equivalent MQL",
       "noConstraints": "Geen filter, sortering of projectie — geeft alle documenten terug",
       "example": "bijv. SELECT name, age FROM {{col}} WHERE status = 'actief' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Slepen om grootte aan te passen"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -353,7 +365,8 @@
       "fieldPath": "Veldpad",
       "types": "Typen",
       "coverage": "Dekking",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Gedeeltelijk filter"
     }
   },
   "pagination": {
@@ -367,7 +380,8 @@
   "aggregate": {
     "prompt": "Voer een aggregatiepipeline in (JSON-array):",
     "button": {
-      "run": "▶ Uitvoeren"
+      "run": "▶ Uitvoeren",
+      "running": "Bezig…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -470,7 +484,9 @@
       "fsync": "Leegmaken en optioneel vergrendelen",
       "rotateCertificates": "TLS-certificaten roteren",
       "listIndexes": "Indexen op een collectie weergeven",
-      "profile": "Databaseprofilerniveau opvragen/instellen"
+      "profile": "Databaseprofilerniveau opvragen/instellen",
+      "explain": "Verklaringsplan voor een zoekquery",
+      "explainAggregate": "Verklaringsplan voor een aggregatie"
     },
     "context": {
       "runningOn": "Uitvoeren op database:"

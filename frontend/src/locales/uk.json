@@ -96,7 +96,11 @@
     "schema": "Схема",
     "indexes": "Індекси",
     "stats": "Статистика",
-    "commands": "Команди"
+    "commands": "Команди",
+    "contextMenu": {
+      "closeOthers": "Закрити інші вкладки",
+      "closeAll": "Закрити все вкладки"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "Унікальний",
         "sparse": "Розріджений",
         "background": "Фоновий",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "Вираз часткового фільтра"
       },
       "optional": "(необов'язково)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "назва поля",
         "name": "автогенерація якщо порожньо",
-        "ttl": "напр. 3600"
+        "ttl": "напр. 3600",
+        "partialFilter": "напр. { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (за зростанням)",
@@ -188,7 +194,8 @@
         "submit": "Створити індекс"
       },
       "validation": {
-        "fieldRequired": "Необхідне принаймні одне поле."
+        "fieldRequired": "Необхідне принаймні одне поле.",
+        "partialFilterInvalid": "Недійсний JSON для виразу часткового фільтра."
       }
     },
     "import": {
@@ -297,7 +304,8 @@
     },
     "button": {
       "apply": "Застосувати",
-      "clear": "Очистити"
+      "clear": "Очистити",
+      "loading": "Завантаження…"
     },
     "mode": {
       "label": "Режим запиту",
@@ -309,7 +317,11 @@
       "mqlPreview": "Еквівалент MQL",
       "noConstraints": "Без фільтра, сортування або проекції — повертає всі документи",
       "example": "напр. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "Перетягніть для зміни розміру"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -359,7 +371,8 @@
       "fieldPath": "Шлях поля",
       "types": "Типи",
       "coverage": "Покриття",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "Частковий фільтр"
     }
   },
   "pagination": {
@@ -373,7 +386,8 @@
   "aggregate": {
     "prompt": "Введіть агрегаційний конвеєр (масив JSON):",
     "button": {
-      "run": "▶ Запустити"
+      "run": "▶ Запустити",
+      "running": "Виконання…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -478,7 +492,9 @@
       "fsync": "Скинути та за бажанням заблокувати",
       "rotateCertificates": "Ротація сертифікатів TLS",
       "listIndexes": "Список індексів у колекції",
-      "profile": "Отримати/встановити рівень профілювання бази даних"
+      "profile": "Отримати/встановити рівень профілювання бази даних",
+      "explain": "План пояснення для запиту find",
+      "explainAggregate": "План пояснення для агрегації"
     },
     "context": {
       "runningOn": "Виконується на базі даних:"

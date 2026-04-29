@@ -331,6 +331,7 @@ pub struct CreateIndexBody {
     pub sparse: Option<bool>,
     pub ttl: Option<u64>,
     pub background: Option<bool>,
+    pub partial_filter_expression: Option<Value>,
 }
 
 pub async fn create_index(
@@ -344,6 +345,10 @@ pub async fn create_index(
     if keys.is_empty() {
         return Err(AppError::BadRequest("Index keys cannot be empty".into()));
     }
+    let partial_filter_expression = body
+        .partial_filter_expression
+        .map(|v| json_to_doc(v).map_err(|_| AppError::BadRequest("Invalid partialFilterExpression document".into())))
+        .transpose()?;
     let index_name = state
         .db
         .read()
@@ -358,6 +363,7 @@ pub async fn create_index(
                 sparse: body.sparse,
                 ttl: body.ttl,
                 background: body.background,
+                partial_filter_expression,
             },
         )
         .await?;

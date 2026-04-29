@@ -58,6 +58,8 @@ const PALETTE: Category[] = [
       { name: "compact",          description: "Compact/defragment a collection",  template: '{\n  "compact": "collectionName"\n}',                                  admin: false },
       { name: "reIndex",          description: "Rebuild all indexes",              template: '{\n  "reIndex": "collectionName"\n}',                                  admin: false },
       { name: "convertToCapped",  description: "Convert to a capped collection",  template: '{\n  "convertToCapped": "collectionName",\n  "size": 1048576\n}',      admin: false },
+      { name: "explain",          description: "Explain plan for a find query",   template: '{\n  "explain": {\n    "find": "collectionName",\n    "filter": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
+      { name: "explainAggregate", description: "Explain plan for an aggregation", template: '{\n  "explain": {\n    "aggregate": "collectionName",\n    "pipeline": [],\n    "cursor": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
     ],
   },
   {
@@ -95,6 +97,9 @@ export default function CommandsView({ db, collection }: Props) {
   const [result, setResult]           = useState<string | null>(null);
   const [error, setError]             = useState<string | null>(null);
   const [search, setSearch]           = useState("");
+  const [duration, setDuration]       = useState<number | null>(null);
+  const [cmdHeight, setCmdHeight]     = useState(180);
+  const cmdResizing = useRef(false);
   const { t } = useTranslation();
 
   const applyTemplate = useCallback((cmd: PaletteCommand) => {
@@ -119,13 +124,17 @@ export default function CommandsView({ db, collection }: Props) {
     setRunning(true);
     setResult(null);
     setError(null);
+    setDuration(null);
+    const t0 = Date.now();
     try {
       const res = await runDbCommand(db, parsed, adminFlag);
       setResult(JSON.stringify(res, null, 2));
+      setDuration(Date.now() - t0);
     } catch (e: unknown) {
       const axiosErr = e as { response?: { data?: { error?: string } }; message?: string };
       const msg = axiosErr.response?.data?.error ?? (e instanceof Error ? e.message : String(e));
       setError(msg);
+      setDuration(null);
     } finally {
       setRunning(false);
     }
@@ -145,6 +154,36 @@ export default function CommandsView({ db, collection }: Props) {
   const commandValid = (() => {
     try { JSON.parse(commandText); return true; } catch { return false; }
   })();
+
+  const resizeHandleStyle: React.CSSProperties = {
+    height: "6px",
+    cursor: "row-resize",
+    background: "linear-gradient(to bottom, #e2e8f0, #f1f5f9)",
+    borderTop: "1px solid #e2e8f0",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    userSelect: "none",
+    flexShrink: 0,
+  };
+
+  const startCmdResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    cmdResizing.current = true;
+    const startY = e.clientY;
+    const startH = cmdHeight;
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!cmdResizing.current) return;
+      setCmdHeight(Math.min(600, Math.max(80, startH + ev.clientY - startY)));
+    };
+    const onMouseUp = () => {
+      cmdResizing.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   return (
     <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
@@ -266,7 +305,7 @@ export default function CommandsView({ db, collection }: Props) {
             borderRadius: "6px", overflow: "hidden",
           }}>
             <Editor
-              height="180px"
+              height={`${cmdHeight}px`}
               defaultLanguage="json"
               path="dbv://command"
               value={commandText}
@@ -286,6 +325,7 @@ export default function CommandsView({ db, collection }: Props) {
                 );
               }}
             />
+            <div title={t("query.resize.title")} style={resizeHandleStyle} onMouseDown={startCmdResize} />
           </div>
         </div>
 
@@ -303,6 +343,11 @@ export default function CommandsView({ db, collection }: Props) {
             {result && !error && (
               <span role="status" aria-live="polite" style={{ fontSize: "11px", background: "#dcfce7", color: "#166534", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.success")}
+              </span>
+            )}
+            {duration !== null && !error && (
+              <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT, marginLeft: "auto" }}>
+                {t("query.duration", { duration: duration < 1000 ? `${duration} ms` : `${(duration / 1000).toFixed(2)} s` })}
               </span>
             )}
           </div>

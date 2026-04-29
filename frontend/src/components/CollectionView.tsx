@@ -206,6 +206,17 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [pipeline, setPipeline] = useState("[]");
   const [aggResults, setAggResults] = useState<Record<string, unknown>[]>([]);
   const [aggError, setAggError] = useState("");
+  const [aggLoading, setAggLoading] = useState(false);
+  const [queryDuration, setQueryDuration] = useState<number | null>(null);
+  const [aggDuration, setAggDuration] = useState<number | null>(null);
+
+  // Editor heights for resizable panels
+  const [filterHeight, setFilterHeight] = useState(68);
+  const [aggHeight, setAggHeight] = useState(180);
+  const [sqlHeight, setSqlHeight] = useState(68);
+  const filterResizing = useRef(false);
+  const aggResizing = useRef(false);
+  const sqlResizing = useRef(false);
 
   const [schema, setSchema] = useState<CollectionSchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
@@ -219,6 +230,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const [indexSparse, setIndexSparse] = useState(false);
   const [indexBackground, setIndexBackground] = useState(true);
   const [indexTtl, setIndexTtl] = useState("");
+  const [indexPartialFilter, setIndexPartialFilter] = useState("");
 
   const [colStats, setColStats] = useState<Record<string, unknown> | null>(null);
   const [colStatsLoading, setColStatsLoading] = useState(false);
@@ -298,12 +310,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
     setLoading(true);
     setError("");
     setSelectedIds(new Set());
+    const t0 = Date.now();
     getDocuments(db, col, page, limitVal, filterText || undefined, sortText || undefined, projectionText || undefined)
       .then((r) => {
         setDocuments(r.documents);
         setTotal(r.total);
+        setQueryDuration(Date.now() - t0);
       })
-      .catch((e) => setError((e as Error).message))
+      .catch((e) => { setError((e as Error).message); setQueryDuration(null); })
       .finally(() => setLoading(false));
   }, [db, col, page, limitVal, filterText, sortText, projectionText]);
 
@@ -392,15 +406,23 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
   const runAggregate = useCallback(async () => {
     try {
       const p = JSON.parse(pipeline) as unknown[];
+      setAggLoading(true);
+      setAggError("");
+      setAggResults([]);
+      const t0 = Date.now();
       const r = await aggregate(db, col, p);
       setAggResults(r.results);
       setAggError("");
+      setAggDuration(Date.now() - t0);
     } catch (e: unknown) {
       setAggResults([]);
+      setAggDuration(null);
       // Prefer the descriptive message from the backend response body over
       // the generic axios "Request failed with status code 5xx" message.
       const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
       setAggError(axiosBody ?? (e as Error).message ?? "Unknown error");
+    } finally {
+      setAggLoading(false);
     }
   }, [pipeline, db, col]);
 
@@ -426,6 +448,77 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
+
+  const startFilterResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    filterResizing.current = true;
+    const startY = e.clientY;
+    const startH = filterHeight;
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!filterResizing.current) return;
+      setFilterHeight(Math.min(600, Math.max(48, startH + ev.clientY - startY)));
+    };
+    const onMouseUp = () => {
+      filterResizing.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [filterHeight]);
+
+  const startSqlResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    sqlResizing.current = true;
+    const startY = e.clientY;
+    const startH = sqlHeight;
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!sqlResizing.current) return;
+      setSqlHeight(Math.min(600, Math.max(48, startH + ev.clientY - startY)));
+    };
+    const onMouseUp = () => {
+      sqlResizing.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [sqlHeight]);
+
+  const startAggResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    aggResizing.current = true;
+    const startY = e.clientY;
+    const startH = aggHeight;
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!aggResizing.current) return;
+      setAggHeight(Math.min(600, Math.max(48, startH + ev.clientY - startY)));
+    };
+    const onMouseUp = () => {
+      aggResizing.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [aggHeight]);
+
+  const formatDuration = (ms: number): string => {
+    if (ms < 1000) return `${ms} ms`;
+    return `${(ms / 1000).toFixed(2)} s`;
+  };
+
+  const resizeHandleStyle: React.CSSProperties = {
+    height: "6px",
+    cursor: "row-resize",
+    background: "linear-gradient(to bottom, #e2e8f0, #f1f5f9)",
+    borderTop: "1px solid #e2e8f0",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    userSelect: "none",
+    flexShrink: 0,
+  };
 
   return (
     <div style={{ display: visible ? "flex" : "none", flex: 1, flexDirection: "column", overflow: "hidden" }}>
@@ -644,7 +737,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     {queryMode === "mql" ? (
                       <>
                         {/* MQL Row 1: filter + sort + projection + limit */}
-                        <div style={{ display: "flex", gap: "8px", alignItems: "flex-end", marginBottom: "8px" }}>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
                           {/* Filter */}
                           <div style={{ flex: 2 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
@@ -657,9 +750,11 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height="68px" language="json" path="dbv://filter" value={filterText}
+                              <Editor height={`${filterHeight}px`} language="json" path="dbv://filter" value={filterText}
                                 onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                              <div title={t("query.resize.title")} style={resizeHandleStyle}
+                                onMouseDown={startFilterResize} />
                             </div>
                           </div>
 
@@ -672,9 +767,11 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height="68px" language="json" path="dbv://sort" value={sortText}
+                              <Editor height={`${filterHeight}px`} language="json" path="dbv://sort" value={sortText}
                                 onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                              <div title={t("query.resize.title")} style={resizeHandleStyle}
+                                onMouseDown={startFilterResize} />
                             </div>
                           </div>
 
@@ -690,9 +787,11 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height="68px" language="json" path="dbv://projection" value={projectionText}
+                              <Editor height={`${filterHeight}px`} language="json" path="dbv://projection" value={projectionText}
                                 onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                              <div title={t("query.resize.title")} style={resizeHandleStyle}
+                                onMouseDown={startFilterResize} />
                             </div>
                           </div>
 
@@ -706,17 +805,27 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           </div>
                         </div>
 
-                        {/* MQL Row 2: action buttons */}
+                        {/* MQL Row 2: action buttons + status */}
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <button onClick={loadDocuments} disabled={!filterValid || !sortValid || !projValid}
                             style={{ background: filterValid && sortValid && projValid ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: filterValid && sortValid && projValid ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}>
-                            {t("query.button.apply")}
+                            {loading ? t("query.button.loading") : t("query.button.apply")}
                           </button>
                           {(hasFilter || hasSort || hasProj) && (
                             <button onClick={() => { setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
                               style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                               {t("query.button.clear")}
                             </button>
+                          )}
+                          {loading && (
+                            <span role="status" aria-live="polite" style={{ fontSize: "12px", color: "#2563eb", fontFamily: FONT }}>
+                              ⏳ {t("ui.loading")}
+                            </span>
+                          )}
+                          {!loading && queryDuration !== null && (
+                            <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT }}>
+                              {t("query.duration", { duration: formatDuration(queryDuration) })}
+                            </span>
                           )}
                         </div>
                       </>
@@ -737,7 +846,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           </div>
                           <div style={{ border: sqlError && sqlText.trim() ? "1px solid #fca5a5" : sqlText.trim() && sqlValid ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
                             <Editor
-                              height="68px"
+                              id="sql-editor"
+                              height={`${sqlHeight}px`}
                               language="sql"
                               path="dbv://sql"
                               value={sqlText}
@@ -747,6 +857,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                                 editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, applySql);
                               }}
                             />
+                            <div title={t("query.resize.title")} style={resizeHandleStyle}
+                              onMouseDown={startSqlResize} />
                           </div>
                           {sqlError && sqlText.trim() && (
                             <div style={{ marginTop: "4px", fontSize: "12px", color: "#dc2626", fontFamily: FONT }}>{sqlError}</div>
@@ -773,13 +885,23 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <button onClick={applySql} disabled={!sqlValid || !sqlText.trim() || !sqlResult?.mql}
                             style={{ background: sqlValid && sqlText.trim() && sqlResult?.mql ? "#2563eb" : "#94a3b8", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: sqlValid && sqlText.trim() && sqlResult?.mql ? "pointer" : "default", fontFamily: FONT, fontWeight: 600 }}>
-                            {t("query.button.apply")}
+                            {loading ? t("query.button.loading") : t("query.button.apply")}
                           </button>
                           {sqlText.trim() && (
                             <button onClick={() => { setSqlText(""); setFilterText(""); setSortText(""); setProjectionText(""); setPage(1); }}
                               style={{ background: "#fff", color: "#64748b", padding: "6px 12px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                               {t("query.button.clear")}
                             </button>
+                          )}
+                          {loading && (
+                            <span role="status" aria-live="polite" style={{ fontSize: "12px", color: "#2563eb", fontFamily: FONT }}>
+                              ⏳ {t("ui.loading")}
+                            </span>
+                          )}
+                          {!loading && queryDuration !== null && (
+                            <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT }}>
+                              {t("query.duration", { duration: formatDuration(queryDuration) })}
+                            </span>
                           )}
                           <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("query.sql.example", { col })}</span>
                         </div>
@@ -1250,7 +1372,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                 </p>
                 <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
                   <Editor
-                    height="180px"
+                    height={`${aggHeight}px`}
                     defaultLanguage="json"
                     path="dbv://pipeline"
                     value={pipeline}
@@ -1273,18 +1395,27 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                       );
                     }}
                   />
+                  <div title={t("query.resize.title")} style={resizeHandleStyle}
+                    onMouseDown={startAggResize} />
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", marginBottom: "12px" }}>
                   <button
                     onClick={() => void runAggregate()}
-                    style={{ background: "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}
+                    disabled={aggLoading}
+                    aria-busy={aggLoading}
+                    style={{ background: aggLoading ? "#94a3b8" : "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: aggLoading ? "not-allowed" : "pointer", fontFamily: FONT, fontWeight: 600 }}
                   >
-                    {t("aggregate.button.run")}
+                    {aggLoading ? `⏳ ${t("aggregate.button.running")}` : t("aggregate.button.run")}
                   </button>
                   <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("aggregate.hint.ctrlEnter")}</span>
-                  {aggResults.length > 0 && !aggError && (
-                    <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 600, marginLeft: "auto" }}>
+                  {aggResults.length > 0 && !aggError && !aggLoading && (
+                    <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 600 }}>
                       {t("aggregate.results.count", { count: aggResults.length })}
+                    </span>
+                  )}
+                  {!aggLoading && aggDuration !== null && !aggError && (
+                    <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT, marginLeft: "auto" }}>
+                      {t("query.duration", { duration: formatDuration(aggDuration) })}
                     </span>
                   )}
                 </div>
@@ -1348,7 +1479,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   {indexesLoading ? t("indexes.label.loading") : t("indexes.label.count", { count: indexes.length })}
                 </span>
                 <button
-                  onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexBackground(true); setIndexTtl(""); setNewIndexOpen(true); }}
+                  onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexBackground(true); setIndexTtl(""); setIndexPartialFilter(""); setNewIndexOpen(true); }}
                   style={{ padding: "6px 14px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
                 >
                   {t("indexes.button.create")}
@@ -1362,7 +1493,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                     <thead>
                       <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                        {[t("table.header.name"), t("table.header.keys"), t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl"), ""].map((h) => (
+                        {[t("table.header.name"), t("table.header.keys"), t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl"), t("table.header.partialFilter"), ""].map((h) => (
                           <th key={h} style={{ padding: "8px 12px", textAlign: [t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl")].includes(h) ? "center" : "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
@@ -1384,6 +1515,15 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                           </td>
                           <td style={{ padding: "8px 12px", textAlign: "center", color: "#64748b" }}>
                             {idx.ttl !== undefined ? idx.ttl : "—"}
+                          </td>
+                          <td style={{ padding: "8px 12px", textAlign: "left", maxWidth: "200px" }}>
+                            {idx.partialFilterExpression ? (
+                              <code style={{ background: "#f0f9ff", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#0369a1", wordBreak: "break-word" }}>
+                                {JSON.stringify(idx.partialFilterExpression)}
+                              </code>
+                            ) : (
+                              <span style={{ color: "#94a3b8" }}>—</span>
+                            )}
                           </td>
                           <td style={{ padding: "8px 12px", textAlign: "center" }}>
                             {idx.name !== "_id_" && (
@@ -1668,6 +1808,14 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               onChange={(e) => setIndexTtl(e.target.value)}
             />
 
+            <label style={modalLabelStyle}>{t("modals.createIndex.label.partialFilter")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.createIndex.optional")}</span></label>
+            <textarea
+              style={{ ...modalInputStyle, fontFamily: "monospace", fontSize: "12px", resize: "vertical", minHeight: "60px" }}
+              placeholder={t("modals.createIndex.placeholder.partialFilter")}
+              value={indexPartialFilter}
+              onChange={(e) => setIndexPartialFilter(e.target.value)}
+            />
+
             <div style={modalFooterStyle}>
               <button onClick={() => setNewIndexOpen(false)} style={cancelBtnStyle}>{t("buttons.cancel")}</button>
               <button
@@ -1676,12 +1824,22 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                     indexKeys.filter((k) => k.field.trim()).map((k) => [k.field.trim(), k.direction])
                   ) as Record<string, 1 | -1>;
                   if (Object.keys(keys).length === 0) { alert(t("modals.createIndex.validation.fieldRequired")); return; }
+                  let partialFilterExpr: Record<string, unknown> | undefined;
+                  if (indexPartialFilter.trim()) {
+                    try {
+                      partialFilterExpr = JSON.parse(indexPartialFilter) as Record<string, unknown>;
+                    } catch {
+                      alert(t("modals.createIndex.validation.partialFilterInvalid"));
+                      return;
+                    }
+                  }
                   createIndex(db, col, keys, {
                     name: indexName.trim() || undefined,
                     unique: indexUnique || undefined,
                     sparse: indexSparse || undefined,
                     background: indexBackground,
                     ttl: indexTtl ? Number(indexTtl) : undefined,
+                    partial_filter_expression: partialFilterExpr,
                   })
                     .then(() => { setNewIndexOpen(false); loadIndexes(); })
                     .catch((e: unknown) => alert("Error: " + (e as Error).message));

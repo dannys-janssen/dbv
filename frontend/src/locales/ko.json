@@ -96,7 +96,11 @@
     "schema": "스키마",
     "indexes": "인덱스",
     "stats": "통계",
-    "commands": "명령"
+    "commands": "명령",
+    "contextMenu": {
+      "closeOthers": "다른 탭 닫기",
+      "closeAll": "모든 탭 닫기"
+    }
   },
   "modals": {
     "createDatabase": {
@@ -167,7 +171,8 @@
         "unique": "고유",
         "sparse": "희소",
         "background": "백그라운드",
-        "ttl": "TTL"
+        "ttl": "TTL",
+        "partialFilter": "부분 필터 식"
       },
       "optional": "(선택 사항)",
       "hint": {
@@ -177,7 +182,8 @@
       "placeholder": {
         "fieldName": "필드 이름",
         "name": "비어 있으면 자동 생성",
-        "ttl": "예: 3600"
+        "ttl": "예: 3600",
+        "partialFilter": "예: { \"status\": { \"$exists\": true } }"
       },
       "option": {
         "ascending": "1 (오름차순)",
@@ -188,7 +194,8 @@
         "submit": "인덱스 생성"
       },
       "validation": {
-        "fieldRequired": "필드가 하나 이상 필요합니다."
+        "fieldRequired": "필드가 하나 이상 필요합니다.",
+        "partialFilterInvalid": "부분 필터 식의 JSON이 유효하지 않습니다."
       }
     },
     "import": {
@@ -297,7 +304,8 @@
     },
     "button": {
       "apply": "적용",
-      "clear": "지우기"
+      "clear": "지우기",
+      "loading": "로드 중…"
     },
     "mode": {
       "label": "쿼리 모드",
@@ -309,7 +317,11 @@
       "mqlPreview": "동등한 MQL",
       "noConstraints": "필터, 정렬 또는 프로젝션 없음 — 모든 문서 반환",
       "example": "예: SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
-    }
+    },
+    "resize": {
+      "title": "드래그하여 크기 조정"
+    },
+    "duration": "⏱ {{duration}}"
   },
   "views": {
     "table": {
@@ -359,7 +371,8 @@
       "fieldPath": "필드 경로",
       "types": "유형",
       "coverage": "커버리지",
-      "nullable": "Nullable"
+      "nullable": "Nullable",
+      "partialFilter": "부분 필터"
     }
   },
   "pagination": {
@@ -373,7 +386,8 @@
   "aggregate": {
     "prompt": "집계 파이프라인을 입력하세요 (JSON 배열):",
     "button": {
-      "run": "▶ 실행"
+      "run": "▶ 실행",
+      "running": "실행 중…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
@@ -478,7 +492,9 @@
       "fsync": "플러시 및 선택적 잠금",
       "rotateCertificates": "TLS 인증서 교체",
       "listIndexes": "컬렉션의 인덱스 목록",
-      "profile": "데이터베이스 프로파일러 레벨 가져오기/설정"
+      "profile": "데이터베이스 프로파일러 레벨 가져오기/설정",
+      "explain": "find 쿼리의 실행 계획",
+      "explainAggregate": "집계의 실행 계획"
     },
     "context": {
       "runningOn": "실행 중인 데이터베이스:"
