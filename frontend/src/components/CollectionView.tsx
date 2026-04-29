@@ -736,7 +736,8 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
 
                     {queryMode === "mql" ? (
                       <>
-                        {/* MQL Row 1: filter + sort + projection + limit */}
+                        {/* MQL Row 1: filter + sort + projection + limit
+                            All three editors share filterHeight — dragging any handle resizes all three together */}
                         <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
                           {/* Filter */}
                           <div style={{ flex: 2 }}>
