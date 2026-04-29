@@ -347,7 +347,11 @@ pub async fn create_index(
     }
     let partial_filter_expression = body
         .partial_filter_expression
-        .map(|v| json_to_doc(v).map_err(|_| AppError::BadRequest("Invalid partialFilterExpression document".into())))
+        .map(|v| {
+            json_to_doc(v).map_err(|_| {
+                AppError::BadRequest("Invalid partialFilterExpression document".into())
+            })
+        })
         .transpose()?;
     let index_name = state
         .db

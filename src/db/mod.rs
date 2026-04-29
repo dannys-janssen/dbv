@@ -190,7 +190,10 @@ impl DbClient {
                     map.insert("ttl".to_string(), serde_json::json!(expire.as_secs()));
                 }
                 if let Some(pfe) = &opts.partial_filter_expression {
-                    map.insert("partialFilterExpression".to_string(), serde_json::to_value(pfe)?);
+                    map.insert(
+                        "partialFilterExpression".to_string(),
+                        serde_json::to_value(pfe)?,
+                    );
                 }
             }
             result.push(Value::Object(map));
