@@ -1178,6 +1178,7 @@ export default function BrowserPage() {
                 db={tab.db}
                 col={tab.col}
                 visible={tab.id === activeTabId}
+                tabId={tab.id}
               />
             </div>
           ))}

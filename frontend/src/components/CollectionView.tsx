@@ -175,9 +175,10 @@ interface CollectionViewProps {
   db: string;
   col: string;
   visible: boolean;
+  tabId: string;
 }
 
-export default function CollectionView({ db, col, visible }: CollectionViewProps) {
+export default function CollectionView({ db, col, visible, tabId }: CollectionViewProps) {
   const { canWrite } = useAuth();
   const { t } = useTranslation();
 
@@ -267,15 +268,15 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
         schemas: [
-          { uri: "http://dbv/document-schema.json",   fileMatch: ["dbv://document"],   schema: docSchema },
-          { uri: "http://dbv/filter-schema.json",     fileMatch: ["dbv://filter"],     schema: filtSchema },
-          { uri: "http://dbv/sort-schema.json",       fileMatch: ["dbv://sort"],       schema: sortSchema },
-          { uri: "http://dbv/projection-schema.json", fileMatch: ["dbv://projection"], schema: projSchema },
-          { uri: "http://dbv/pipeline-schema.json",   fileMatch: ["dbv://pipeline"],   schema: PIPELINE_SCHEMA },
+          { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
+          { uri: `http://dbv/filter-schema-${tabId}.json`,     fileMatch: [`dbv://filter/${tabId}`],     schema: filtSchema },
+          { uri: `http://dbv/sort-schema-${tabId}.json`,       fileMatch: [`dbv://sort/${tabId}`],       schema: sortSchema },
+          { uri: `http://dbv/projection-schema-${tabId}.json`, fileMatch: [`dbv://projection/${tabId}`], schema: projSchema },
+          { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
         ],
       });
     });
-  }, [schema]);
+  }, [schema, tabId, visible]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
@@ -751,7 +752,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path="dbv://filter" value={filterText}
+                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://filter/${tabId}`} value={filterText}
                                 onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -768,7 +769,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path="dbv://sort" value={sortText}
+                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://sort/${tabId}`} value={sortText}
                                 onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -788,7 +789,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                               )}
                             </div>
                             <div style={{ border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path="dbv://projection" value={projectionText}
+                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://projection/${tabId}`} value={projectionText}
                                 onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -849,7 +850,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                             <Editor
                               height={`${sqlHeight}px`}
                               language="sql"
-                              path="dbv://sql"
+                              path={`dbv://sql/${tabId}`}
                               value={sqlText}
                               onChange={(v) => { setSqlText(v ?? ""); setPage(1); }}
                               options={{ ...monoOpts, suggest: { showSnippets: true, showWords: true } }}
@@ -1374,7 +1375,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
                   <Editor
                     height={`${aggHeight}px`}
                     defaultLanguage="json"
-                    path="dbv://pipeline"
+                    path={`dbv://pipeline/${tabId}`}
                     value={pipeline}
                     onChange={(v) => setPipeline(v ?? "[]")}
                     options={{
@@ -1616,7 +1617,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
           {/* ── Commands tab ── */}
           {view === "commands" && (
             <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <CommandsView db={db} collection={col} />
+              <CommandsView db={db} collection={col} tabId={tabId} />
             </div>
           )}
         </div>
@@ -1669,7 +1670,7 @@ export default function CollectionView({ db, col, visible }: CollectionViewProps
               <Editor
                 height="500px"
                 defaultLanguage="json"
-                path="dbv://document"
+                path={`dbv://document/${tabId}`}
                 value={editorValue}
                 onChange={(v) => setEditorValue(v ?? "{}")}
               />
