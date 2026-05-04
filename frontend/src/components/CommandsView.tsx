@@ -88,9 +88,10 @@ const PALETTE: Category[] = [
 interface Props {
   db: string;
   collection: string; // used to pre-fill collection name in templates
+  tabId: string;
 }
 
-export default function CommandsView({ db, collection }: Props) {
+export default function CommandsView({ db, collection, tabId }: Props) {
   const [commandText, setCommandText] = useState('{\n  "ping": 1\n}');
   const [adminFlag, setAdminFlag]     = useState(false);
   const [running, setRunning]         = useState(false);
@@ -307,7 +308,7 @@ export default function CommandsView({ db, collection }: Props) {
             <Editor
               height={`${cmdHeight}px`}
               defaultLanguage="json"
-              path="dbv://command"
+              path={`dbv://command/${tabId}`}
               value={commandText}
               onChange={(v) => setCommandText(v ?? "{}")}
               options={{
