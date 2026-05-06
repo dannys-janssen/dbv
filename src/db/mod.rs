@@ -16,6 +16,11 @@ pub(crate) fn mask_uri_password(uri: &str) -> String {
     uri.to_string()
 }
 
+fn sort_names(mut names: Vec<String>) -> Vec<String> {
+    names.sort_by_cached_key(|name| name.to_lowercase());
+    names
+}
+
 use futures::TryStreamExt;
 use mongodb::{
     Client, Collection, Database, IndexModel,
@@ -134,12 +139,12 @@ impl DbClient {
 
     pub async fn list_databases(&self) -> Result<Vec<String>, AppError> {
         let names = self.client.list_database_names().await?;
-        Ok(names)
+        Ok(sort_names(names))
     }
 
     pub async fn list_collections(&self, db: &str) -> Result<Vec<String>, AppError> {
         let names = self.client.database(db).list_collection_names().await?;
-        Ok(names)
+        Ok(sort_names(names))
     }
 
     pub async fn create_collection(&self, db: &str, collection: &str) -> Result<(), AppError> {
@@ -247,7 +252,7 @@ impl DbClient {
 
 #[cfg(test)]
 mod tests {
-    use super::mask_uri_password;
+    use super::{mask_uri_password, sort_names};
 
     #[test]
     fn masked_uri_replaces_password() {
@@ -290,5 +295,28 @@ mod tests {
         // No colon in userinfo means no password to mask
         let uri = "mongodb://useronly@host:27017";
         assert_eq!(mask_uri_password(uri), uri);
+    }
+
+    #[test]
+    fn sort_names_orders_values_case_insensitively() {
+        let sorted = sort_names(vec![
+            "zeta".to_string(),
+            "Alpha".to_string(),
+            "beta".to_string(),
+            "aardvark".to_string(),
+        ]);
+
+        assert_eq!(sorted, vec!["aardvark", "Alpha", "beta", "zeta"]);
+    }
+
+    #[test]
+    fn sort_names_keeps_same_spelling_grouped() {
+        let sorted = sort_names(vec![
+            "users".to_string(),
+            "Users".to_string(),
+            "accounts".to_string(),
+        ]);
+
+        assert_eq!(sorted, vec!["accounts", "users", "Users"]);
     }
 }
