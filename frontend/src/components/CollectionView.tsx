@@ -931,7 +931,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           title={t("views.json.title")}
                           aria-label={t("views.json.title")}
                           onClick={() => setDocLayout("json")}
-                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1", fontFamily: "monospace" }}
                         >
                           {"{}"}
                         </button>
@@ -1076,119 +1076,93 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   />
                 ) : docLayout === "json" ? (
                   documents.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "40px 20px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "32px",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        📭
-                      </div>
-                      <p
-                        style={{
-                          color: "#374151",
-                          margin: "0 0 4px 0",
-                          fontWeight: 500,
-                          fontFamily: FONT,
-                        }}
-                      >
+                    <div style={{ textAlign: "center", padding: "40px 20px" }}>
+                      <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
+                      <p style={{ color: "#374151", margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
                         {t("documents.list.empty")}
                       </p>
-                      <p
-                        style={{
-                          color: "#94a3b8",
-                          fontSize: "12px",
-                          margin: 0,
-                          fontFamily: FONT,
-                        }}
-                      >
-                        {filterText || projectionText
-                          ? t("documents.list.emptyWithFilter")
-                          : t("documents.list.emptyNoFilter")}
+                      <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0, fontFamily: FONT }}>
+                        {filterText || projectionText ? t("documents.list.emptyWithFilter") : t("documents.list.emptyNoFilter")}
                       </p>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {documents.map((doc, index) => {
-                        const id = getDocId(doc);
-                        const isSelected = selectedIds.has(id);
-                        const readonlyDocumentJson = JSON.stringify(normalizeBsonForReadonlyJson(doc), null, 2);
-                        return (
-                          <div
-                            key={id || `doc-${index}`}
-                            style={{
-                              border: "1px solid #e2e8f0",
-                              borderRadius: "8px",
-                              background: isSelected ? "#eff6ff" : "#fff",
-                              overflow: "hidden",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                padding: "8px 12px",
-                                background: isSelected ? "#dbeafe" : "#f8fafc",
-                                borderBottom: "1px solid #e2e8f0",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                aria-label={`Select document ${id}`}
-                                onChange={(e) => {
-                                  setSelectedIds((prev) => {
-                                    const next = new Set(prev);
-                                    if (e.target.checked) next.add(id);
-                                    else next.delete(id);
-                                    return next;
-                                  });
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
+                        <input
+                          type="checkbox"
+                          checked={documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)))}
+                          ref={(el) => {
+                            if (el) {
+                              const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)));
+                              el.indeterminate = selectedIds.size > 0 && !allSelected;
+                            }
+                          }}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedIds(new Set(documents.map((d) => getDocId(d))));
+                            else setSelectedIds(new Set());
+                          }}
+                          style={{ cursor: "pointer" }}
+                        />
+                        <span style={{ fontSize: "12px", color: "#64748b", fontFamily: FONT }}>
+                          {t("tree.checkbox.selectAllLabel")}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {documents.map((doc) => {
+                          const id = getDocId(doc);
+                          return (
+                            <div key={id} style={{ border: `1px solid ${selectedIds.has(id) ? "#93c5fd" : "#e2e8f0"}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? "#eff6ff" : "#ffffff" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? "#dbeafe" : "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.has(id)}
+                                  aria-label={`Select document ${id}`}
+                                  onChange={(e) =>
+                                    setSelectedIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (e.target.checked) next.add(id);
+                                      else next.delete(id);
+                                      return next;
+                                    })
+                                  }
+                                  style={{ cursor: "pointer" }}
+                                />
+                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {formatBsonValue(doc["_id"])}
+                                </span>
+                                <button
+                                  onClick={() => openEdit(doc)}
+                                  style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                >
+                                  {t("buttons.edit")}
+                                </button>
+                                {canWrite && (
+                                  <button
+                                    onClick={() => void handleDelete(id)}
+                                    style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                  >
+                                    {t("buttons.delete")}
+                                  </button>
+                                )}
+                              </div>
+                              <Editor
+                                height="250px"
+                                defaultLanguage="json"
+                                path={`dbv://documents-readonly/${tabId}/${encodeURIComponent(id)}`}
+                                value={JSON.stringify(normalizeBsonForReadonlyJson(doc), null, 2)}
+                                options={{
+                                  readOnly: true,
+                                  minimap: { enabled: false },
+                                  scrollBeyondLastLine: false,
+                                  lineNumbers: "on",
+                                  wordWrap: "on",
+                                  automaticLayout: true,
                                 }}
                               />
-                              <span
-                                style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                              >
-                                {id}
-                              </span>
-                              <button
-                                onClick={() => openEdit(doc)}
-                                style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
-                              >
-                                {t("buttons.edit")}
-                              </button>
-                              {canWrite && (
-                                <button
-                                  onClick={() => void handleDelete(id)}
-                                  style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
-                                >
-                                  {t("buttons.delete")}
-                                </button>
-                              )}
                             </div>
-                            <Editor
-                              height="250px"
-                              defaultLanguage="json"
-                              path={`dbv://documents-readonly/${tabId}/${index}`}
-                              value={readonlyDocumentJson}
-                              options={{
-                                readOnly: true,
-                                minimap: { enabled: false },
-                                scrollBeyondLastLine: false,
-                                lineNumbers: "on",
-                                wordWrap: "on",
-                                automaticLayout: true,
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   )
                 ) : (
