@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "Trævisning"
+    },
+    "json": {
+      "title": "JSON-visning"
     }
   },
   "selection": {

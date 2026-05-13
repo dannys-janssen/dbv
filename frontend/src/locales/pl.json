@@ -329,6 +329,9 @@
     },
     "tree": {
       "title": "Widok drzewa"
+    },
+    "json": {
+      "title": "Widok JSON"
     }
   },
   "selection": {

@@ -329,6 +329,9 @@
     },
     "tree": {
       "title": "Προβολή δέντρου"
+    },
+    "json": {
+      "title": "Προβολή JSON"
     }
   },
   "selection": {

@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "Vue arborescente"
+    },
+    "json": {
+      "title": "Vue JSON"
     }
   },
   "selection": {

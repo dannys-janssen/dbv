@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "वृक्ष दृश्य"
+    },
+    "json": {
+      "title": "JSON दृश्य"
     }
   },
   "selection": {

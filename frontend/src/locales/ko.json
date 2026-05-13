@@ -329,6 +329,9 @@
     },
     "tree": {
       "title": "트리 보기"
+    },
+    "json": {
+      "title": "JSON 보기"
     }
   },
   "selection": {

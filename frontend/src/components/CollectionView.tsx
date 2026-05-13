@@ -449,12 +449,6 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
-  const readonlyDocumentsJson = JSON.stringify(
-    normalizeBsonForReadonlyJson(documents),
-    null,
-    2
-  );
-
   const startFilterResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     filterResizing.current = true;
@@ -939,7 +933,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           onClick={() => setDocLayout("json")}
                           style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
-                          📄
+                          {"{}"}
                         </button>
                       </div>
                       <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
@@ -1081,22 +1075,119 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     filterText={filterText}
                   />
                 ) : docLayout === "json" ? (
-                  <div style={{ border: "1px solid #e2e8f0", borderRadius: "8px", overflow: "hidden" }}>
-                    <Editor
-                      height="500px"
-                      defaultLanguage="json"
-                      path={`dbv://documents-readonly/${tabId}`}
-                      value={readonlyDocumentsJson}
-                      options={{
-                        readOnly: true,
-                        minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        lineNumbers: "on",
-                        wordWrap: "on",
-                        automaticLayout: true,
+                  documents.length === 0 ? (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "40px 20px",
                       }}
-                    />
-                  </div>
+                    >
+                      <div
+                        style={{
+                          fontSize: "32px",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        📭
+                      </div>
+                      <p
+                        style={{
+                          color: "#374151",
+                          margin: "0 0 4px 0",
+                          fontWeight: 500,
+                          fontFamily: FONT,
+                        }}
+                      >
+                        {t("documents.list.empty")}
+                      </p>
+                      <p
+                        style={{
+                          color: "#94a3b8",
+                          fontSize: "12px",
+                          margin: 0,
+                          fontFamily: FONT,
+                        }}
+                      >
+                        {filterText || projectionText
+                          ? t("documents.list.emptyWithFilter")
+                          : t("documents.list.emptyNoFilter")}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {documents.map((doc, index) => {
+                        const id = getDocId(doc);
+                        const isSelected = selectedIds.has(id);
+                        const readonlyDocumentJson = JSON.stringify(normalizeBsonForReadonlyJson(doc), null, 2);
+                        return (
+                          <div
+                            key={id || `doc-${index}`}
+                            style={{
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "8px",
+                              background: isSelected ? "#eff6ff" : "#fff",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                padding: "8px 12px",
+                                background: isSelected ? "#dbeafe" : "#f8fafc",
+                                borderBottom: "1px solid #e2e8f0",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  setSelectedIds((prev) => {
+                                    const next = new Set(prev);
+                                    if (e.target.checked) next.add(id);
+                                    else next.delete(id);
+                                    return next;
+                                  });
+                                }}
+                              />
+                              <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {id}
+                              </span>
+                              <button
+                                onClick={() => openEdit(doc)}
+                                style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                              >
+                                {t("buttons.edit")}
+                              </button>
+                              {canWrite && (
+                                <button
+                                  onClick={() => void handleDelete(id)}
+                                  style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                >
+                                  {t("buttons.delete")}
+                                </button>
+                              )}
+                            </div>
+                            <Editor
+                              height="250px"
+                              defaultLanguage="json"
+                              path={`dbv://documents-readonly/${tabId}/${index}`}
+                              value={readonlyDocumentJson}
+                              options={{
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                                lineNumbers: "on",
+                                wordWrap: "on",
+                                automaticLayout: true,
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )
                 ) : (
                   <table
                     style={{
