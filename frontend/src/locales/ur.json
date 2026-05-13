@@ -93,7 +93,7 @@
     },
     "documents": "دستاویزات",
     "aggregate": "مجموعی",
-    "update": "Update",
+    "update": "تازہ کاری",
     "schema": "اسکیما",
     "indexes": "اشاریے",
     "stats": "اعداد و شمار",
@@ -405,19 +405,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "اس کلیکشن کے لیے updateMany آرگیومنٹس کو (filter, update) کی صورت میں درج کریں:",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ چلائیں",
+      "running": "چل رہا ہے…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// نتائج دیکھنے کے لیے updateMany چلائیں"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "غلط فارمیٹ۔ (filter, update) یا {\"filter\": {...}, \"update\": {...}} استعمال کریں۔"
     }
   },
   "schema": {
@@ -515,7 +515,7 @@
       "profile": "ڈیٹا بیس پروفائلر سطح حاصل/سیٹ کریں",
       "explain": "تلاش کے سوال کے لیے وضاحت کا منصوبہ",
       "explainAggregate": "مجموعی کے لیے وضاحت کا منصوبہ",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "اس کلیکشن میں متعدد دستاویزات اپ ڈیٹ کریں"
     },
     "context": {
       "runningOn": "ڈیٹا بیس پر چل رہا ہے:"

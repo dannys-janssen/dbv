@@ -93,7 +93,7 @@
     },
     "documents": "Документи",
     "aggregate": "Агрегація",
-    "update": "Update",
+    "update": "Оновлення",
     "schema": "Схема",
     "indexes": "Індекси",
     "stats": "Статистика",
@@ -405,19 +405,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "Введіть аргументи updateMany для цієї колекції у форматі (filter, update):",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ Виконати",
+      "running": "Виконується…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// Запустіть updateMany, щоб побачити результати"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "Неправильний формат. Використовуйте (filter, update) або {\"filter\": {...}, \"update\": {...}}."
     }
   },
   "schema": {
@@ -515,7 +515,7 @@
       "profile": "Отримати/встановити рівень профілювання бази даних",
       "explain": "План пояснення для запиту find",
       "explainAggregate": "План пояснення для агрегації",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "Оновити кілька документів у цій колекції"
     },
     "context": {
       "runningOn": "Виконується на базі даних:"

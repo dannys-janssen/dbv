@@ -93,7 +93,7 @@
     },
     "documents": "文档",
     "aggregate": "聚合",
-    "update": "Update",
+    "update": "更新",
     "schema": "模式",
     "indexes": "索引",
     "stats": "统计",
@@ -399,19 +399,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "以 (filter, update) 的形式输入此集合的 updateMany 参数：",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ 运行",
+      "running": "运行中…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// 运行 updateMany 以查看结果"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "格式无效。请使用 (filter, update) 或 {\"filter\": {...}, \"update\": {...}}。"
     }
   },
   "schema": {
@@ -507,7 +507,7 @@
       "profile": "获取/设置数据库分析器级别",
       "explain": "查询find的执行计划",
       "explainAggregate": "聚合的执行计划",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "更新此集合中的多个文档"
     },
     "context": {
       "runningOn": "运行在数据库："

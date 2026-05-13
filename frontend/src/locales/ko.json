@@ -93,7 +93,7 @@
     },
     "documents": "문서",
     "aggregate": "집계",
-    "update": "Update",
+    "update": "업데이트",
     "schema": "스키마",
     "indexes": "인덱스",
     "stats": "통계",
@@ -405,19 +405,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "이 컬렉션의 updateMany 인수를 (filter, update) 형식으로 입력하세요:",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ 실행",
+      "running": "실행 중…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// 결과를 보려면 updateMany를 실행하세요"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "잘못된 형식입니다. (filter, update) 또는 {\"filter\": {...}, \"update\": {...}}를 사용하세요."
     }
   },
   "schema": {
@@ -515,7 +515,7 @@
       "profile": "데이터베이스 프로파일러 레벨 가져오기/설정",
       "explain": "find 쿼리의 실행 계획",
       "explainAggregate": "집계의 실행 계획",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "이 컬렉션의 여러 문서 업데이트"
     },
     "context": {
       "runningOn": "실행 중인 데이터베이스:"

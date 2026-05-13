@@ -93,7 +93,7 @@
     },
     "documents": "दस्तावेज़",
     "aggregate": "एकत्रीकरण",
-    "update": "Update",
+    "update": "अद्यतन",
     "schema": "स्कीमा",
     "indexes": "अनुक्रमणिका",
     "stats": "आँकड़े",
@@ -399,19 +399,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "इस कलेक्शन के लिए updateMany आर्ग्युमेंट्स (filter, update) के रूप में दर्ज करें:",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ चलाएँ",
+      "running": "चल रहा है…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// परिणाम देखने के लिए updateMany चलाएँ"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "अमान्य प्रारूप। (filter, update) या {\"filter\": {...}, \"update\": {...}} का उपयोग करें।"
     }
   },
   "schema": {
@@ -507,7 +507,7 @@
       "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें",
       "explain": "खोज क्वेरी के लिए व्याख्या योजना",
       "explainAggregate": "एकत्रीकरण के लिए व्याख्या योजना",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "इस कलेक्शन में कई डॉक्यूमेंट अपडेट करें"
     },
     "context": {
       "runningOn": "डेटाबेस पर चल रहा है:"

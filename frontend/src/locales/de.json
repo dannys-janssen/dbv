@@ -93,7 +93,7 @@
     },
     "documents": "Dokumente",
     "aggregate": "Aggregation",
-    "update": "Update",
+    "update": "Aktualisieren",
     "schema": "Schema",
     "indexes": "Indizes",
     "stats": "Statistiken",
@@ -399,19 +399,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "Geben Sie updateMany-Argumente für diese Sammlung als (filter, update) ein:",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ Ausführen",
+      "running": "Wird ausgeführt…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// Führen Sie updateMany aus, um Ergebnisse zu sehen"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "Ungültiges Format. Verwenden Sie (filter, update) oder {\"filter\": {...}, \"update\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +507,7 @@
       "profile": "Datenbank-Profiler-Level abrufen/setzen",
       "explain": "Erklärplan für eine Find-Abfrage",
       "explainAggregate": "Erklärplan für eine Aggregation",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "Mehrere Dokumente in dieser Sammlung aktualisieren"
     },
     "context": {
       "runningOn": "Wird auf Datenbank ausgeführt:"

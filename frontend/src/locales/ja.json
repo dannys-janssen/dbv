@@ -93,7 +93,7 @@
     },
     "documents": "ドキュメント",
     "aggregate": "集約",
-    "update": "Update",
+    "update": "更新",
     "schema": "スキーマ",
     "indexes": "インデックス",
     "stats": "統計",
@@ -399,19 +399,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "このコレクションの updateMany 引数を (filter, update) 形式で入力してください:",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ 実行",
+      "running": "実行中…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// 結果を見るには updateMany を実行してください"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "無効な形式です。(filter, update) または {\"filter\": {...}, \"update\": {...}} を使用してください。"
     }
   },
   "schema": {
@@ -507,7 +507,7 @@
       "profile": "データベースプロファイラーレベルの取得/設定",
       "explain": "findクエリの実行プラン",
       "explainAggregate": "集約の実行プラン",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "このコレクション内の複数のドキュメントを更新"
     },
     "context": {
       "runningOn": "実行中のデータベース:"

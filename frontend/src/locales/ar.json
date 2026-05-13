@@ -93,7 +93,7 @@
     },
     "documents": "المستندات",
     "aggregate": "التجميع",
-    "update": "Update",
+    "update": "تحديث",
     "schema": "المخطط",
     "indexes": "الفهارس",
     "stats": "الإحصائيات",
@@ -399,19 +399,19 @@
     }
   },
   "update": {
-    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "prompt": "أدخل معاملات updateMany لهذه المجموعة بصيغة (filter, update):",
     "button": {
-      "run": "▶ Run",
-      "running": "Running…"
+      "run": "▶ تشغيل",
+      "running": "جارٍ التنفيذ…"
     },
     "hint": {
       "ctrlEnter": "Ctrl+Enter"
     },
     "placeholder": {
-      "result": "// Run updateMany to see results"
+      "result": "// شغّل updateMany لرؤية النتائج"
     },
     "error": {
-      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+      "invalidFormat": "تنسيق غير صالح. استخدم (filter, update) أو {\"filter\": {...}, \"update\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +507,7 @@
       "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات",
       "explain": "خطة شرح لاستعلام البحث",
       "explainAggregate": "خطة شرح للتجميع",
-      "updateManyCommand": "Update multiple documents in this collection"
+      "updateManyCommand": "تحديث عدة مستندات في هذه المجموعة"
     },
     "context": {
       "runningOn": "يعمل على قاعدة البيانات:"
