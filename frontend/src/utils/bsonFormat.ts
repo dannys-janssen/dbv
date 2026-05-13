@@ -21,12 +21,19 @@ export function formatBsonValue(v: unknown): string {
 
     if ("$date" in obj) {
       const d = obj["$date"];
-      if (typeof d === "string") return new Date(d).toISOString();
-      if (typeof d === "number") return new Date(d).toISOString();
+      if (typeof d === "string") {
+        const iso = toIsoDateString(d);
+        return iso ?? JSON.stringify(obj);
+      }
+      if (typeof d === "number") {
+        const iso = toIsoDateString(d);
+        return iso ?? JSON.stringify(obj);
+      }
       // Canonical form: {"$date": {"$numberLong": "ms-since-epoch"}}
       if (typeof d === "object" && d !== null && "$numberLong" in (d as object)) {
         const ms = Number((d as Record<string, unknown>)["$numberLong"]);
-        return new Date(ms).toISOString();
+        const iso = toIsoDateString(ms);
+        return iso ?? JSON.stringify(obj);
       }
       return JSON.stringify(obj); // unexpected shape
     }
@@ -52,6 +59,70 @@ export function formatBsonValue(v: unknown): string {
   }
 
   return String(v);
+}
+
+function bytesToUuid(bytes: Uint8Array): string {
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10, 16).join(""),
+  ].join("-");
+}
+
+function toIsoDateString(value: string | number): string | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
+function tryDecodeUuidFromBinary(base64: unknown, subType: unknown): string | null {
+  if (typeof base64 !== "string") return null;
+  // BSON UUID subtypes:
+  // - "04": standard UUID bytes (RFC 4122)
+  // - "03": legacy UUID representation
+  if (subType !== "04" && subType !== "03") return null;
+  if (typeof atob !== "function") return null;
+  try {
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    if (bytes.length !== 16) return null;
+    return bytesToUuid(bytes);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Converts BSON Extended JSON values into a read-only friendly JSON shape:
+ * - UUID binaries -> UUID strings
+ * - Dates -> ISO date strings
+ */
+export function normalizeBsonForReadonlyJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(normalizeBsonForReadonlyJson);
+  if (value === null || typeof value !== "object") return value;
+
+  const obj = value as Record<string, unknown>;
+  if ("$date" in obj) {
+    const d = obj["$date"];
+    if (typeof d === "string") return toIsoDateString(d) ?? value;
+    if (typeof d === "number") return toIsoDateString(d) ?? value;
+    if (d && typeof d === "object" && "$numberLong" in (d as object)) {
+      const ms = Number((d as Record<string, unknown>)["$numberLong"]);
+      return toIsoDateString(ms) ?? value;
+    }
+  }
+
+  if ("$binary" in obj && obj["$binary"] && typeof obj["$binary"] === "object") {
+    const bin = obj["$binary"] as Record<string, unknown>;
+    const uuid = tryDecodeUuidFromBinary(bin["base64"], bin["subType"]);
+    if (uuid) return uuid;
+  }
+
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, nested]) => [key, normalizeBsonForReadonlyJson(nested)])
+  );
 }
 
 /** Returns true if a value should be rendered inline (no expand toggle needed). */

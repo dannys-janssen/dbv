@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "Vista albero"
+    },
+    "json": {
+      "title": "Vista JSON"
     }
   },
   "selection": {

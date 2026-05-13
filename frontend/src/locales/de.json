@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "Baumansicht"
+    },
+    "json": {
+      "title": "JSON-Ansicht"
     }
   },
   "selection": {

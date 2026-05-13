@@ -329,6 +329,9 @@
     },
     "tree": {
       "title": "ٹری ویو"
+    },
+    "json": {
+      "title": "JSON ویو"
     }
   },
   "selection": {

@@ -323,6 +323,9 @@
     },
     "tree": {
       "title": "Boomweergave"
+    },
+    "json": {
+      "title": "JSON-weergave"
     }
   },
   "selection": {

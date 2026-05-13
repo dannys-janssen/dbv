@@ -163,7 +163,8 @@
   },
   "views": {
     "table": { "title": "Table view" },
-    "tree": { "title": "Tree view" }
+    "tree": { "title": "Tree view" },
+    "json": { "title": "JSON view" }
   },
   "selection": {
     "count_one": "{{count}} document selected",

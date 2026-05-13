@@ -329,6 +329,9 @@
     },
     "tree": {
       "title": "Древовидный вид"
+    },
+    "json": {
+      "title": "Просмотр JSON"
     }
   },
   "selection": {

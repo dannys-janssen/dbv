@@ -153,7 +153,7 @@ Each collection opens in its own **tab** so you can work with multiple collectio
 - **Right-click any tab** to open a context menu with:
   - **Close Other Tabs** — closes all tabs except the one you right-clicked
   - **Close All Tabs** — closes every open tab (a new empty tab is created automatically)
-- Each tab independently preserves its filter, projection, sort, pagination, view mode (table/tree), aggregate pipeline, and all other per-collection state.
+- Each tab independently preserves its filter, projection, sort, pagination, view mode (table/tree/json), aggregate pipeline, and all other per-collection state.
 - Dropping a database or collection automatically closes any tabs that reference it.
 
 **Document view**
@@ -199,8 +199,10 @@ The query bar supports two modes, toggled with the **MQL / SQL** button group:
 - Example: `SELECT name, age FROM users WHERE status = 'active' ORDER BY age DESC LIMIT 20`
 - The SQL editor is **resizable** — drag the handle below it to adjust the editor height independently
 - The Documents tab badge shows the total matching count
-- Toggle between **Table view** (default) and **Tree view** (🌲 icon) — tree view shows documents as collapsible cards with type-coloured values; per-document **Expand all / Collapse all** buttons
-- BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in both views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`
+- Toggle between **Table view** (default), **Tree view**, and **JSON view** using the three-icon layout switcher in the Documents toolbar
+  - **Tree view** shows documents as collapsible cards with type-coloured values; each card has **Expand all / Collapse all** controls
+  - **JSON view** shows all documents as read-only JSON cards (one Monaco viewer per document) with the same per-document selection and action controls used in Tree view
+- BSON types (Date, ObjectId, UUID, etc.) are displayed as human-readable strings in all three views — e.g. a date field stored as `{"$date": {"$numberLong": "1775174388000"}}` is shown as `2026-04-03T20:57:47.000Z`; BSON UUID binary values are shown as UUID strings in JSON view
 
 **Selecting and bulk-acting on documents** *(export available to all roles; delete requires dbv-admin)*
 
