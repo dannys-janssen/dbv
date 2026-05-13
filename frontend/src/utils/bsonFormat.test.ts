@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel } from "./bsonFormat";
+import {
+  formatBsonValue,
+  isBsonPrimitive,
+  bsonTypeColor,
+  bsonTypeLabel,
+  normalizeBsonForReadonlyJson,
+} from "./bsonFormat";
 
 // ── formatBsonValue ───────────────────────────────────────────────────────────
 
@@ -249,5 +255,28 @@ describe("bsonTypeLabel", () => {
     expect(bsonTypeLabel(42)).toBe("number");
     expect(bsonTypeLabel("hello")).toBe("string");
     expect(bsonTypeLabel(true)).toBe("boolean");
+  });
+});
+
+describe("normalizeBsonForReadonlyJson", () => {
+  it("converts canonical date to ISO string", () => {
+    expect(normalizeBsonForReadonlyJson({ createdAt: { $date: { $numberLong: "1705315800000" } } }))
+      .toEqual({ createdAt: new Date(1705315800000).toISOString() });
+  });
+
+  it("converts UUID binary to UUID string", () => {
+    expect(normalizeBsonForReadonlyJson({
+      id: { $binary: { base64: "Ej5FZ+ibEtOkVkJmFBdAAA==", subType: "04" } },
+    })).toEqual({
+      id: "123e4567-e89b-12d3-a456-426614174000",
+    });
+  });
+
+  it("converts nested arrays and objects recursively", () => {
+    expect(normalizeBsonForReadonlyJson({
+      items: [{ at: { $date: "2024-01-01T00:00:00Z" } }],
+    })).toEqual({
+      items: [{ at: "2024-01-01T00:00:00.000Z" }],
+    });
   });
 });

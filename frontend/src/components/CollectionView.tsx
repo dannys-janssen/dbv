@@ -33,7 +33,7 @@ import {
   buildProjectionSchema,
   PIPELINE_SCHEMA,
 } from "../utils/mongoSchema";
-import { formatBsonValue } from "../utils/bsonFormat";
+import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonFormat";
 import { parseSqlToMql } from "../utils/sqlToMql";
 
 type View = "documents" | "aggregate" | "schema" | "indexes" | "stats" | "commands";
@@ -196,7 +196,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const [error, setError] = useState("");
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [docLayout, setDocLayout] = useState<"table" | "tree">("table");
+  const [docLayout, setDocLayout] = useState<"table" | "tree" | "json">("table");
   const loadDocumentsRef = useRef<() => void>(() => {});
 
   const [editorOpen, setEditorOpen] = useState(false);
@@ -449,6 +449,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
+  const readonlyDocumentsJson = JSON.stringify(
+    normalizeBsonForReadonlyJson(documents),
+    null,
+    2
+  );
 
   const startFilterResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -928,6 +933,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                         >
                           ⊞
                         </button>
+                        <button
+                          title={t("views.json.title", { defaultValue: "JSON view" })}
+                          aria-label={t("views.json.title", { defaultValue: "JSON view" })}
+                          onClick={() => setDocLayout("json")}
+                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                        >
+                          📄
+                        </button>
                       </div>
                       <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
                         <button
@@ -1067,6 +1080,23 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     loading={false}
                     filterText={filterText}
                   />
+                ) : docLayout === "json" ? (
+                  <div style={{ border: "1px solid #e2e8f0", borderRadius: "8px", overflow: "hidden" }}>
+                    <Editor
+                      height="500px"
+                      defaultLanguage="json"
+                      path={`dbv://documents-readonly/${tabId}`}
+                      value={readonlyDocumentsJson}
+                      options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        lineNumbers: "on",
+                        wordWrap: "on",
+                        automaticLayout: true,
+                      }}
+                    />
+                  </div>
                 ) : (
                   <table
                     style={{
