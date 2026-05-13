@@ -1142,6 +1142,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               <input
                                 type="checkbox"
                                 checked={isSelected}
+                                aria-label={`Select document ${id}`}
                                 onChange={(e) => {
                                   setSelectedIds((prev) => {
                                     const next = new Set(prev);
@@ -1151,7 +1152,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                   });
                                 }}
                               />
-                              <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              <span
+                                aria-label={`Document ID: ${id}`}
+                                style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                              >
                                 {id}
                               </span>
                               <button
