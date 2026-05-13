@@ -928,8 +928,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           ⊞
                         </button>
                         <button
-                          title={t("views.json.title", { defaultValue: "JSON view" })}
-                          aria-label={t("views.json.title", { defaultValue: "JSON view" })}
+                          title={t("views.json.title")}
+                          aria-label={t("views.json.title")}
                           onClick={() => setDocLayout("json")}
                           style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
@@ -1153,7 +1153,6 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 }}
                               />
                               <span
-                                aria-label={`Document ID: ${id}`}
                                 style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                               >
                                 {id}
