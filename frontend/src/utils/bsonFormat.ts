@@ -21,12 +21,19 @@ export function formatBsonValue(v: unknown): string {
 
     if ("$date" in obj) {
       const d = obj["$date"];
-      if (typeof d === "string") return new Date(d).toISOString();
-      if (typeof d === "number") return new Date(d).toISOString();
+      if (typeof d === "string") {
+        const iso = toIsoDateString(d);
+        return iso ?? JSON.stringify(obj);
+      }
+      if (typeof d === "number") {
+        const iso = toIsoDateString(d);
+        return iso ?? JSON.stringify(obj);
+      }
       // Canonical form: {"$date": {"$numberLong": "ms-since-epoch"}}
       if (typeof d === "object" && d !== null && "$numberLong" in (d as object)) {
         const ms = Number((d as Record<string, unknown>)["$numberLong"]);
-        return new Date(ms).toISOString();
+        const iso = toIsoDateString(ms);
+        return iso ?? JSON.stringify(obj);
       }
       return JSON.stringify(obj); // unexpected shape
     }
@@ -65,8 +72,17 @@ function bytesToUuid(bytes: Uint8Array): string {
   ].join("-");
 }
 
+function toIsoDateString(value: string | number): string | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
 function tryDecodeUuidFromBinary(base64: unknown, subType: unknown): string | null {
   if (typeof base64 !== "string") return null;
+  // BSON UUID subtypes:
+  // - "04": standard UUID bytes (RFC 4122)
+  // - "03": legacy UUID representation
   if (subType !== "04" && subType !== "03") return null;
   if (typeof atob !== "function") return null;
   try {
@@ -90,11 +106,11 @@ export function normalizeBsonForReadonlyJson(value: unknown): unknown {
   const obj = value as Record<string, unknown>;
   if ("$date" in obj) {
     const d = obj["$date"];
-    if (typeof d === "string") return new Date(d).toISOString();
-    if (typeof d === "number") return new Date(d).toISOString();
+    if (typeof d === "string") return toIsoDateString(d) ?? value;
+    if (typeof d === "number") return toIsoDateString(d) ?? value;
     if (d && typeof d === "object" && "$numberLong" in (d as object)) {
       const ms = Number((d as Record<string, unknown>)["$numberLong"]);
-      return new Date(ms).toISOString();
+      return toIsoDateString(ms) ?? value;
     }
   }
 

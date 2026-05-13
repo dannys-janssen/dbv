@@ -66,6 +66,12 @@ describe("formatBsonValue", () => {
     expect(result).toBe(JSON.stringify(weird));
   });
 
+  it("falls back to JSON for invalid $date value", () => {
+    const invalid = { $date: "not-a-date" };
+    const result = formatBsonValue(invalid);
+    expect(result).toBe(JSON.stringify(invalid));
+  });
+
   it("formats $numberInt", () => {
     expect(formatBsonValue({ $numberInt: "42" })).toBe("42");
   });
@@ -278,5 +284,10 @@ describe("normalizeBsonForReadonlyJson", () => {
     })).toEqual({
       items: [{ at: "2024-01-01T00:00:00.000Z" }],
     });
+  });
+
+  it("keeps invalid date value unchanged", () => {
+    expect(normalizeBsonForReadonlyJson({ when: { $date: "not-a-date" } }))
+      .toEqual({ when: { $date: "not-a-date" } });
   });
 });
