@@ -93,6 +93,7 @@
     },
     "documents": "المستندات",
     "aggregate": "التجميع",
+    "update": "Update",
     "schema": "المخطط",
     "indexes": "الفهارس",
     "stats": "الإحصائيات",
@@ -397,6 +398,22 @@
       "result": "// شغّل أمرًا لرؤية النتائج"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "تم أخذ عينة من",
@@ -489,7 +506,8 @@
       "listIndexes": "سرد الفهارس على مجموعة",
       "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات",
       "explain": "خطة شرح لاستعلام البحث",
-      "explainAggregate": "خطة شرح للتجميع"
+      "explainAggregate": "خطة شرح للتجميع",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "يعمل على قاعدة البيانات:"

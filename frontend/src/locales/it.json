@@ -93,6 +93,7 @@
     },
     "documents": "Documenti",
     "aggregate": "Aggregazione",
+    "update": "Update",
     "schema": "Schema",
     "indexes": "Indici",
     "stats": "Statistiche",
@@ -397,6 +398,22 @@
       "result": "// Esegui un comando per vedere i risultati"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Campionato",
@@ -489,7 +506,8 @@
       "listIndexes": "Elenca gli indici di una collezione",
       "profile": "Ottieni/imposta il livello del profiler",
       "explain": "Piano di spiegazione per una query find",
-      "explainAggregate": "Piano di spiegazione per un'aggregazione"
+      "explainAggregate": "Piano di spiegazione per un'aggregazione",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "In esecuzione sul database:"

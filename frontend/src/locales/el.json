@@ -93,6 +93,7 @@
     },
     "documents": "Έγγραφα",
     "aggregate": "Συγκέντρωση",
+    "update": "Update",
     "schema": "Σχήμα",
     "indexes": "Ευρετήρια",
     "stats": "Στατιστικά",
@@ -403,6 +404,22 @@
       "result": "// Εκτελέστε εντολή για να δείτε αποτελέσματα"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Δείγμα",
@@ -497,7 +514,8 @@
       "listIndexes": "Λίστα ευρετηρίων σε συλλογή",
       "profile": "Λήψη/ορισμός επιπέδου profiler βάσης δεδομένων",
       "explain": "Σχέδιο εξήγησης για ερώτημα find",
-      "explainAggregate": "Σχέδιο εξήγησης για συγκέντρωση"
+      "explainAggregate": "Σχέδιο εξήγησης για συγκέντρωση",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "Εκτέλεση σε βάση δεδομένων:"

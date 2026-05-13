@@ -93,6 +93,7 @@
     },
     "documents": "Documenten",
     "aggregate": "Aggregatie",
+    "update": "Update",
     "schema": "Schema",
     "indexes": "Indexen",
     "stats": "Statistieken",
@@ -397,6 +398,22 @@
       "result": "// Voer een opdracht uit om resultaten te zien"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Gesampled",
@@ -489,7 +506,8 @@
       "listIndexes": "Indexen op een collectie weergeven",
       "profile": "Databaseprofilerniveau opvragen/instellen",
       "explain": "Verklaringsplan voor een zoekquery",
-      "explainAggregate": "Verklaringsplan voor een aggregatie"
+      "explainAggregate": "Verklaringsplan voor een aggregatie",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "Uitvoeren op database:"

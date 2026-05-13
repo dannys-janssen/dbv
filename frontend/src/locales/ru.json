@@ -93,6 +93,7 @@
     },
     "documents": "Документы",
     "aggregate": "Агрегация",
+    "update": "Update",
     "schema": "Схема",
     "indexes": "Индексы",
     "stats": "Статистика",
@@ -403,6 +404,22 @@
       "result": "// Запустите команду для просмотра результатов"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Выборка",
@@ -497,7 +514,8 @@
       "listIndexes": "Список индексов в коллекции",
       "profile": "Получить/установить уровень профилировщика базы данных",
       "explain": "План объяснения для запроса find",
-      "explainAggregate": "План объяснения для агрегации"
+      "explainAggregate": "План объяснения для агрегации",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "Выполняется на базе данных:"

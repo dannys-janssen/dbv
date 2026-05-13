@@ -93,6 +93,7 @@
     },
     "documents": "दस्तावेज़",
     "aggregate": "एकत्रीकरण",
+    "update": "Update",
     "schema": "स्कीमा",
     "indexes": "अनुक्रमणिका",
     "stats": "आँकड़े",
@@ -397,6 +398,22 @@
       "result": "// परिणाम देखने के लिए कोई आदेश चलाएँ"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "नमूना लिया",
@@ -489,7 +506,8 @@
       "listIndexes": "संग्रह पर अनुक्रमणिकाएँ सूचीबद्ध करें",
       "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें",
       "explain": "खोज क्वेरी के लिए व्याख्या योजना",
-      "explainAggregate": "एकत्रीकरण के लिए व्याख्या योजना"
+      "explainAggregate": "एकत्रीकरण के लिए व्याख्या योजना",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "डेटाबेस पर चल रहा है:"

@@ -260,6 +260,19 @@ Run an aggregation pipeline against the selected collection. The Monaco editor p
 
 Press **Ctrl+Enter** or **▶ Run** to execute. While running, the **▶ Run** button is disabled and shows ⏳; on completion the elapsed time is displayed. The pipeline editor is **resizable** — drag the handle below it to adjust the editor height. Results fill the remaining height in a read-only Monaco viewer (syntax-highlighted JSON, line numbers, code folding). A document count badge is shown on success; pipeline errors from MongoDB are displayed inline in red below the Run button.
 
+**Update** *(dbv-admin only)*
+
+Run collection-scoped `updateMany` without building a full command document manually.
+
+```js
+(
+  { "status": "inactive" },
+  { "$set": { "archived": true } }
+)
+```
+
+Press **Ctrl+Enter** or **▶ Run** to execute. The command sent to MongoDB uses `multi: true` for the currently selected collection.
+
 **Schema**
 
 Inspect the inferred schema of a collection — sampled from up to 100 documents. Shows:
@@ -289,12 +302,13 @@ The **Commands** tab provides a split-panel MongoDB command runner:
   |---|---|
   | Server | `ping`, `serverStatus`, `buildInfo`, `currentOp`, `getLog` |
   | Database | `dbStats`, `listCollections`, `createUser`, `dropUser` |
-  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate` |
+  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate`, `updateManyCommand` |
   | Replication | `replSetGetStatus`, `replSetGetConfig` |
   | Administration | `renameCollection`, `fsync`, `profile` |
 
 - Click any palette entry to pre-fill the Monaco editor with a ready-to-run template (collection-name placeholders are replaced with the currently selected collection)
 - **Explain plan** templates (`explain` and `explainAggregate`) default to `"verbosity": "executionStats"` — useful for diagnosing query performance
+- **`updateManyCommand`** template runs an update command with `multi: true` for the active collection
 - **Use admin database** toggle — when enabled the command runs against the `admin` database (required for server-wide and replication commands; indicated by a yellow `admin` badge in the palette)
 - The command editor is **resizable** — drag the handle below it to adjust the editor height independently
 - Press **▶ Run** or **Ctrl+Enter** to execute — while running the button is disabled and shows ⏳; on completion the elapsed time is shown. Results appear in a read-only Monaco viewer; errors are highlighted in red
@@ -333,6 +347,7 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | Import BSON into collection | ❌ | ✅ |
 | Create index | ❌ | ✅ |
 | Drop index | ❌ | ✅ |
+| Run updateMany (Update tab) | ❌ | ✅ |
 | Run MongoDB commands | ❌ | ✅ |
 
 ---

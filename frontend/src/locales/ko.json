@@ -93,6 +93,7 @@
     },
     "documents": "문서",
     "aggregate": "집계",
+    "update": "Update",
     "schema": "스키마",
     "indexes": "인덱스",
     "stats": "통계",
@@ -403,6 +404,22 @@
       "result": "// 결과를 보려면 명령을 실행하세요"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "샘플링됨",
@@ -497,7 +514,8 @@
       "listIndexes": "컬렉션의 인덱스 목록",
       "profile": "데이터베이스 프로파일러 레벨 가져오기/설정",
       "explain": "find 쿼리의 실행 계획",
-      "explainAggregate": "집계의 실행 계획"
+      "explainAggregate": "집계의 실행 계획",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "실행 중인 데이터베이스:"

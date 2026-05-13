@@ -93,6 +93,7 @@
     },
     "documents": "Documents",
     "aggregate": "Agrégat",
+    "update": "Update",
     "schema": "Schéma",
     "indexes": "Index",
     "stats": "Statistiques",
@@ -397,6 +398,22 @@
       "result": "// Exécutez une commande pour voir les résultats"
     }
   },
+  "update": {
+    "prompt": "Enter updateMany arguments for this collection as (filter, update):",
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Échantillonné",
@@ -489,7 +506,8 @@
       "listIndexes": "Lister les index d'une collection",
       "profile": "Obtenir/définir le niveau du profileur",
       "explain": "Plan d'exécution pour une requête find",
-      "explainAggregate": "Plan d'exécution pour une agrégation"
+      "explainAggregate": "Plan d'exécution pour une agrégation",
+      "updateManyCommand": "Update multiple documents in this collection"
     },
     "context": {
       "runningOn": "Exécution sur la base de données :"
