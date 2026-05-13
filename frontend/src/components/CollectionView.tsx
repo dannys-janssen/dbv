@@ -1087,15 +1087,16 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     </div>
                   ) : (
                     <div>
+                      {(() => {
+                        const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)));
+                        const someSelected = selectedIds.size > 0 && !allSelected;
+                        return (
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
                         <input
                           type="checkbox"
-                          checked={documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)))}
+                          checked={allSelected}
                           ref={(el) => {
-                            if (el) {
-                              const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)));
-                              el.indeterminate = selectedIds.size > 0 && !allSelected;
-                            }
+                            if (el) el.indeterminate = someSelected;
                           }}
                           onChange={(e) => {
                             if (e.target.checked) setSelectedIds(new Set(documents.map((d) => getDocId(d))));
@@ -1107,11 +1108,13 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           {t("tree.checkbox.selectAllLabel")}
                         </span>
                       </div>
+                        );
+                      })()}
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        {documents.map((doc) => {
+                        {documents.map((doc, index) => {
                           const id = getDocId(doc);
                           return (
-                            <div key={id} style={{ border: `1px solid ${selectedIds.has(id) ? "#93c5fd" : "#e2e8f0"}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? "#eff6ff" : "#ffffff" }}>
+                            <div key={id || `doc-${index}`} style={{ border: `1px solid ${selectedIds.has(id) ? "#93c5fd" : "#e2e8f0"}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? "#eff6ff" : "#ffffff" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? "#dbeafe" : "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                                 <input
                                   type="checkbox"
@@ -1148,7 +1151,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               <Editor
                                 height="250px"
                                 defaultLanguage="json"
-                                path={`dbv://documents-readonly/${tabId}/${encodeURIComponent(id)}`}
+                                path={`dbv://documents-readonly/${tabId}/${index}`}
                                 value={JSON.stringify(normalizeBsonForReadonlyJson(doc), null, 2)}
                                 options={{
                                   readOnly: true,
