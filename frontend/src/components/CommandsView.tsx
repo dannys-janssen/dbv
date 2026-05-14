@@ -60,7 +60,7 @@ const PALETTE: Category[] = [
       { name: "convertToCapped",  description: "Convert to a capped collection",  template: '{\n  "convertToCapped": "collectionName",\n  "size": 1048576\n}',      admin: false },
       { name: "explain",          description: "Explain plan for a find query",   template: '{\n  "explain": {\n    "find": "collectionName",\n    "filter": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
       { name: "explainAggregate", description: "Explain plan for an aggregation", template: '{\n  "explain": {\n    "aggregate": "collectionName",\n    "pipeline": [],\n    "cursor": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
-      { name: "update", description: "Update multiple documents in this collection", template: '{\n  "update": "collectionName",\n  "updates": [\n    {\n      "q": { "status": "inactive" },\n      "u": { "$set": { "archived": true } },\n      "multi": true\n    }\n  ]\n}', admin: true },
+      { name: "update", description: "Update multiple documents in this collection", template: '{\n  "update": "collectionName",\n  "updates": [\n    {\n      "q": { "status": "inactive" },\n      "u": { "$set": { "archived": true } },\n      "multi": true\n    }\n  ]\n}', admin: false },
     ],
   },
   {
