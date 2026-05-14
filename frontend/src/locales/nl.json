@@ -507,7 +507,7 @@
       "profile": "Databaseprofilerniveau opvragen/instellen",
       "explain": "Verklaringsplan voor een zoekquery",
       "explainAggregate": "Verklaringsplan voor een aggregatie",
-      "updateManyCommand": "Meerdere documenten in deze collectie bijwerken"
+      "update": "Meerdere documenten in deze collectie bijwerken"
     },
     "context": {
       "runningOn": "Uitvoeren op database:"

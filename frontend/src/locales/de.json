@@ -507,7 +507,7 @@
       "profile": "Datenbank-Profiler-Level abrufen/setzen",
       "explain": "Erklärplan für eine Find-Abfrage",
       "explainAggregate": "Erklärplan für eine Aggregation",
-      "updateManyCommand": "Mehrere Dokumente in dieser Sammlung aktualisieren"
+      "update": "Mehrere Dokumente in dieser Sammlung aktualisieren"
     },
     "context": {
       "runningOn": "Wird auf Datenbank ausgeführt:"

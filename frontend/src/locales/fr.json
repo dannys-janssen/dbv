@@ -507,7 +507,7 @@
       "profile": "Obtenir/définir le niveau du profileur",
       "explain": "Plan d'exécution pour une requête find",
       "explainAggregate": "Plan d'exécution pour une agrégation",
-      "updateManyCommand": "Mettre à jour plusieurs documents de cette collection"
+      "update": "Mettre à jour plusieurs documents de cette collection"
     },
     "context": {
       "runningOn": "Exécution sur la base de données :"

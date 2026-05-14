@@ -515,7 +515,7 @@
       "profile": "Pobierz/ustaw poziom profilera bazy danych",
       "explain": "Plan wyjaśnienia dla zapytania find",
       "explainAggregate": "Plan wyjaśnienia dla agregacji",
-      "updateManyCommand": "Zaktualizuj wiele dokumentów w tej kolekcji"
+      "update": "Zaktualizuj wiele dokumentów w tej kolekcji"
     },
     "context": {
       "runningOn": "Uruchomione na bazie danych:"

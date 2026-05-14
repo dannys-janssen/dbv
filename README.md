@@ -302,13 +302,13 @@ The **Commands** tab provides a split-panel MongoDB command runner:
   |---|---|
   | Server | `ping`, `serverStatus`, `buildInfo`, `currentOp`, `getLog` |
   | Database | `dbStats`, `listCollections`, `createUser`, `dropUser` |
-  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate`, `updateManyCommand` |
+  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate`, `update` |
   | Replication | `replSetGetStatus`, `replSetGetConfig` |
   | Administration | `renameCollection`, `fsync`, `profile` |
 
 - Click any palette entry to pre-fill the Monaco editor with a ready-to-run template (collection-name placeholders are replaced with the currently selected collection)
 - **Explain plan** templates (`explain` and `explainAggregate`) default to `"verbosity": "executionStats"` — useful for diagnosing query performance
-- **`updateManyCommand`** template runs an update command with `multi: true` for the active collection
+- **`update`** template runs an update command with `multi: true` for the active collection
 - **Use admin database** toggle — when enabled the command runs against the `admin` database (required for server-wide and replication commands; indicated by a yellow `admin` badge in the palette)
 - The command editor is **resizable** — drag the handle below it to adjust the editor height independently
 - Press **▶ Run** or **Ctrl+Enter** to execute — while running the button is disabled and shows ⏳; on completion the elapsed time is shown. Results appear in a read-only Monaco viewer; errors are highlighted in red

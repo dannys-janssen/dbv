@@ -515,7 +515,7 @@
       "profile": "데이터베이스 프로파일러 레벨 가져오기/설정",
       "explain": "find 쿼리의 실행 계획",
       "explainAggregate": "집계의 실행 계획",
-      "updateManyCommand": "이 컬렉션의 여러 문서 업데이트"
+      "update": "이 컬렉션의 여러 문서 업데이트"
     },
     "context": {
       "runningOn": "실행 중인 데이터베이스:"

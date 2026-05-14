@@ -261,7 +261,7 @@
       "convertToCapped": "Convert to a capped collection",
       "explain": "Explain plan for a find query",
       "explainAggregate": "Explain plan for an aggregation",
-      "updateManyCommand": "Update multiple documents in this collection",
+      "update": "Update multiple documents in this collection",
       "replSetGetStatus": "Replica set status",
       "replSetGetConfig": "Replica set configuration",
       "isMaster": "Server role check (legacy)",

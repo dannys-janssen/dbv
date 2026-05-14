@@ -507,7 +507,7 @@
       "profile": "Obter/definir nível do profiler do banco",
       "explain": "Plano de explicação para uma consulta find",
       "explainAggregate": "Plano de explicação para uma agregação",
-      "updateManyCommand": "Atualizar vários documentos nesta coleção"
+      "update": "Atualizar vários documentos nesta coleção"
     },
     "context": {
       "runningOn": "Executando no banco de dados:"

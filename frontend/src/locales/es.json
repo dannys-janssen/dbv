@@ -507,7 +507,7 @@
       "profile": "Obtener/establecer nivel del perfilador",
       "explain": "Plan de explicación para una consulta find",
       "explainAggregate": "Plan de explicación para una agregación",
-      "updateManyCommand": "Actualizar varios documentos en esta colección"
+      "update": "Actualizar varios documentos en esta colección"
     },
     "context": {
       "runningOn": "Ejecutando en base de datos:"

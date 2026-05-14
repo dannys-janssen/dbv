@@ -507,7 +507,7 @@
       "profile": "Ottieni/imposta il livello del profiler",
       "explain": "Piano di spiegazione per una query find",
       "explainAggregate": "Piano di spiegazione per un'aggregazione",
-      "updateManyCommand": "Aggiorna più documenti in questa raccolta"
+      "update": "Aggiorna più documenti in questa raccolta"
     },
     "context": {
       "runningOn": "In esecuzione sul database:"

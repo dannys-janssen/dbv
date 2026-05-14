@@ -507,7 +507,7 @@
       "profile": "获取/设置数据库分析器级别",
       "explain": "查询find的执行计划",
       "explainAggregate": "聚合的执行计划",
-      "updateManyCommand": "更新此集合中的多个文档"
+      "update": "更新此集合中的多个文档"
     },
     "context": {
       "runningOn": "运行在数据库："
