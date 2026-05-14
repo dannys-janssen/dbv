@@ -93,6 +93,7 @@
     },
     "documents": "Dokumenter",
     "aggregate": "Aggregering",
+    "update": "Opdater",
     "schema": "Skema",
     "indexes": "Indekser",
     "stats": "Statistikker",
@@ -397,6 +398,22 @@
       "result": "// Kør en kommando for at se resultater"
     }
   },
+  "update": {
+    "prompt": "Indtast updateMany-argumenter for denne samling som (filter, update):",
+    "button": {
+      "run": "▶ Kør",
+      "running": "Kører…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Kør updateMany for at se resultater"
+    },
+    "error": {
+      "invalidFormat": "Ugyldigt format. Brug (filter, update) eller {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Samplet",
@@ -489,7 +506,8 @@
       "listIndexes": "List indekser på en samling",
       "profile": "Hent/indstil database-profilerniveau",
       "explain": "Forklaringsplan for en find-forespørgsel",
-      "explainAggregate": "Forklaringsplan for en aggregering"
+      "explainAggregate": "Forklaringsplan for en aggregering",
+      "update": "Opdater flere dokumenter i denne samling"
     },
     "context": {
       "runningOn": "Kører på database:"

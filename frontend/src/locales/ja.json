@@ -93,6 +93,7 @@
     },
     "documents": "ドキュメント",
     "aggregate": "集約",
+    "update": "更新",
     "schema": "スキーマ",
     "indexes": "インデックス",
     "stats": "統計",
@@ -397,6 +398,22 @@
       "result": "// コマンドを実行して結果を表示"
     }
   },
+  "update": {
+    "prompt": "このコレクションの updateMany 引数を (filter, update) 形式で入力してください:",
+    "button": {
+      "run": "▶ 実行",
+      "running": "実行中…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// 結果を見るには updateMany を実行してください"
+    },
+    "error": {
+      "invalidFormat": "無効な形式です。(filter, update) または {\"filter\": {...}, \"update\": {...}} を使用してください。"
+    }
+  },
   "schema": {
     "label": {
       "sampled": "サンプル済み",
@@ -489,7 +506,8 @@
       "listIndexes": "コレクションのインデックスを一覧表示",
       "profile": "データベースプロファイラーレベルの取得/設定",
       "explain": "findクエリの実行プラン",
-      "explainAggregate": "集約の実行プラン"
+      "explainAggregate": "集約の実行プラン",
+      "update": "このコレクション内の複数のドキュメントを更新"
     },
     "context": {
       "runningOn": "実行中のデータベース:"

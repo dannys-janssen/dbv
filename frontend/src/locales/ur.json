@@ -93,6 +93,7 @@
     },
     "documents": "دستاویزات",
     "aggregate": "مجموعی",
+    "update": "تازہ کاری",
     "schema": "اسکیما",
     "indexes": "اشاریے",
     "stats": "اعداد و شمار",
@@ -403,6 +404,22 @@
       "result": "// نتائج دیکھنے کے لیے حکم چلائیں"
     }
   },
+  "update": {
+    "prompt": "اس کلیکشن کے لیے updateMany آرگیومنٹس کو (filter, update) کی صورت میں درج کریں:",
+    "button": {
+      "run": "▶ چلائیں",
+      "running": "چل رہا ہے…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// نتائج دیکھنے کے لیے updateMany چلائیں"
+    },
+    "error": {
+      "invalidFormat": "غلط فارمیٹ۔ (filter, update) یا {\"filter\": {...}, \"update\": {...}} استعمال کریں۔"
+    }
+  },
   "schema": {
     "label": {
       "sampled": "نمونہ",
@@ -497,7 +514,8 @@
       "listIndexes": "مجموعے پر اشاریوں کی فہرست",
       "profile": "ڈیٹا بیس پروفائلر سطح حاصل/سیٹ کریں",
       "explain": "تلاش کے سوال کے لیے وضاحت کا منصوبہ",
-      "explainAggregate": "مجموعی کے لیے وضاحت کا منصوبہ"
+      "explainAggregate": "مجموعی کے لیے وضاحت کا منصوبہ",
+      "update": "اس کلیکشن میں متعدد دستاویزات اپ ڈیٹ کریں"
     },
     "context": {
       "runningOn": "ڈیٹا بیس پر چل رہا ہے:"

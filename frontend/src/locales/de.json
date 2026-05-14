@@ -93,6 +93,7 @@
     },
     "documents": "Dokumente",
     "aggregate": "Aggregation",
+    "update": "Aktualisieren",
     "schema": "Schema",
     "indexes": "Indizes",
     "stats": "Statistiken",
@@ -397,6 +398,22 @@
       "result": "// Führen Sie einen Befehl aus, um Ergebnisse zu sehen"
     }
   },
+  "update": {
+    "prompt": "Geben Sie updateMany-Argumente für diese Sammlung als (filter, update) ein:",
+    "button": {
+      "run": "▶ Ausführen",
+      "running": "Wird ausgeführt…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Führen Sie updateMany aus, um Ergebnisse zu sehen"
+    },
+    "error": {
+      "invalidFormat": "Ungültiges Format. Verwenden Sie (filter, update) oder {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Abgetastet",
@@ -489,7 +506,8 @@
       "listIndexes": "Indizes einer Sammlung auflisten",
       "profile": "Datenbank-Profiler-Level abrufen/setzen",
       "explain": "Erklärplan für eine Find-Abfrage",
-      "explainAggregate": "Erklärplan für eine Aggregation"
+      "explainAggregate": "Erklärplan für eine Aggregation",
+      "update": "Mehrere Dokumente in dieser Sammlung aktualisieren"
     },
     "context": {
       "runningOn": "Wird auf Datenbank ausgeführt:"

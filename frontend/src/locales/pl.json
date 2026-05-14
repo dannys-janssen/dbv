@@ -93,6 +93,7 @@
     },
     "documents": "Dokumenty",
     "aggregate": "Agregacja",
+    "update": "Aktualizacja",
     "schema": "Schemat",
     "indexes": "Indeksy",
     "stats": "Statystyki",
@@ -403,6 +404,22 @@
       "result": "// Uruchom polecenie aby zobaczyć wyniki"
     }
   },
+  "update": {
+    "prompt": "Wprowadź argumenty updateMany dla tej kolekcji jako (filter, update):",
+    "button": {
+      "run": "▶ Uruchom",
+      "running": "Trwa uruchamianie…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Uruchom updateMany, aby zobaczyć wyniki"
+    },
+    "error": {
+      "invalidFormat": "Nieprawidłowy format. Użyj (filter, update) lub {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
   "schema": {
     "label": {
       "sampled": "Próbka",
@@ -497,7 +514,8 @@
       "listIndexes": "Lista indeksów w kolekcji",
       "profile": "Pobierz/ustaw poziom profilera bazy danych",
       "explain": "Plan wyjaśnienia dla zapytania find",
-      "explainAggregate": "Plan wyjaśnienia dla agregacji"
+      "explainAggregate": "Plan wyjaśnienia dla agregacji",
+      "update": "Zaktualizuj wiele dokumentów w tej kolekcji"
     },
     "context": {
       "runningOn": "Uruchomione na bazie danych:"

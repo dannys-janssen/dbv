@@ -16,6 +16,7 @@ import {
   createIndex,
   dropIndex,
   getCollectionStats,
+  runDbCommand,
   type CollectionSchema,
   type IndexInfo,
   type IndexKey,
@@ -35,8 +36,9 @@ import {
 } from "../utils/mongoSchema";
 import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonFormat";
 import { parseSqlToMql } from "../utils/sqlToMql";
+import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
 
-type View = "documents" | "aggregate" | "schema" | "indexes" | "stats" | "commands";
+type View = "documents" | "aggregate" | "update" | "schema" | "indexes" | "stats" | "commands";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -210,6 +212,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const [aggLoading, setAggLoading] = useState(false);
   const [queryDuration, setQueryDuration] = useState<number | null>(null);
   const [aggDuration, setAggDuration] = useState<number | null>(null);
+  const [updateManyText, setUpdateManyText] = useState('(\n  { "status": "inactive" },\n  { "$set": { "archived": true } }\n)');
+  const [updateManyResult, setUpdateManyResult] = useState<Record<string, unknown> | null>(null);
+  const [updateManyError, setUpdateManyError] = useState("");
+  const [updateManyLoading, setUpdateManyLoading] = useState(false);
+  const [updateManyDuration, setUpdateManyDuration] = useState<number | null>(null);
 
   // Editor heights for resizable panels
   const [filterHeight, setFilterHeight] = useState(68);
@@ -427,6 +434,35 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
     }
   }, [pipeline, db, col]);
 
+  const runUpdateMany = useCallback(async () => {
+    let parsed;
+    try {
+      parsed = parseUpdateManyInput(updateManyText);
+    } catch {
+      setUpdateManyError(t("update.error.invalidFormat"));
+      setUpdateManyDuration(null);
+      return;
+    }
+
+    setUpdateManyLoading(true);
+    setUpdateManyError("");
+    setUpdateManyResult(null);
+    setUpdateManyDuration(null);
+    const t0 = Date.now();
+
+    try {
+      const result = await runDbCommand(db, buildUpdateManyCommand(col, parsed), false);
+      setUpdateManyResult(result);
+      setUpdateManyDuration(Date.now() - t0);
+    } catch (e: unknown) {
+      const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setUpdateManyError(axiosBody ?? (e as Error).message ?? "Unknown error");
+      setUpdateManyDuration(null);
+    } finally {
+      setUpdateManyLoading(false);
+    }
+  }, [updateManyText, db, col, t]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -442,10 +478,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
         e.preventDefault();
         void runAggregate();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canWrite && view === "update") {
+        e.preventDefault();
+        void runUpdateMany();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate]);
+  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, canWrite]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
@@ -614,7 +654,9 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
               flexDirection: "row",
             }}
           >
-            {(["documents", "aggregate", "schema", "indexes", "stats", "commands"] as View[]).map((tab) => {
+            {((canWrite
+              ? ["documents", "aggregate", "update", "schema", "indexes", "stats", "commands"]
+              : ["documents", "aggregate", "schema", "indexes", "stats", "commands"]) as View[]).map((tab) => {
               const isActive = view === tab;
               const label = t(`tabs.${tab}`);
               return (
@@ -1550,6 +1592,86 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   />
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── Update tab ── */}
+          {view === "update" && canWrite && (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: FONT }}>
+              <div style={{ padding: "16px 20px 0", flexShrink: 0 }}>
+                <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 8px 0" }}>
+                  {t("update.prompt")}
+                </p>
+                <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                  <Editor
+                    height={`${aggHeight}px`}
+                    defaultLanguage="json"
+                    path={`dbv://update/${tabId}`}
+                    value={updateManyText}
+                    onChange={(v) => setUpdateManyText(v ?? "")}
+                    options={{
+                      minimap: { enabled: false },
+                      lineNumbers: "off" as const,
+                      folding: false,
+                      scrollBeyondLastLine: false,
+                      fontSize: 13,
+                      padding: { top: 6, bottom: 6 },
+                      wordWrap: "on" as const,
+                      suggest: { showSnippets: true, showWords: false },
+                      quickSuggestions: { other: true, comments: false, strings: true },
+                    }}
+                    onMount={(editor, monaco) => {
+                      editor.addCommand(
+                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                        () => void runUpdateMany()
+                      );
+                    }}
+                  />
+                  <div title={t("query.resize.title")} style={resizeHandleStyle}
+                    onMouseDown={startAggResize} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", marginBottom: "12px" }}>
+                  <button
+                    onClick={() => void runUpdateMany()}
+                    disabled={updateManyLoading}
+                    aria-busy={updateManyLoading}
+                    style={{ background: updateManyLoading ? "#94a3b8" : "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: updateManyLoading ? "not-allowed" : "pointer", fontFamily: FONT, fontWeight: 600 }}
+                  >
+                    {updateManyLoading ? `⏳ ${t("update.button.running")}` : t("update.button.run")}
+                  </button>
+                  <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("update.hint.ctrlEnter")}</span>
+                  {!updateManyLoading && updateManyDuration !== null && !updateManyError && (
+                    <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT, marginLeft: "auto" }}>
+                      {t("query.duration", { duration: formatDuration(updateManyDuration) })}
+                    </span>
+                  )}
+                </div>
+                {updateManyError && (
+                  <div style={{
+                    marginBottom: "12px", background: "#fef2f2", border: "1px solid #fca5a5",
+                    borderRadius: "6px", padding: "10px 14px", fontSize: "13px", color: "#dc2626",
+                    fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-word",
+                  }}>
+                    {updateManyError}
+                  </div>
+                )}
+              </div>
+              <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
+                <Editor
+                  height="100%"
+                  defaultLanguage="json"
+                  value={updateManyResult ? JSON.stringify(updateManyResult, null, 2) : t("update.placeholder.result")}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    lineNumbers: "on" as const,
+                    folding: true,
+                    scrollBeyondLastLine: false,
+                    fontSize: 12,
+                    wordWrap: "off" as const,
+                  }}
+                />
+              </div>
             </div>
           )}
 
