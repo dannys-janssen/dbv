@@ -995,18 +995,18 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px" }}>
                       <div style={{ flex: 1 }} />
                       {/* Layout toggle */}
-                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", height: "36px" }}>
                         <button
                           title={t("views.table.title")}
                           onClick={() => setDocLayout("table")}
-                          style={{ background: docLayout === "table" ? "#2563eb" : "transparent", color: docLayout === "table" ? "#fff" : "#64748b", border: "none", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          style={{ background: docLayout === "table" ? "#2563eb" : "transparent", color: docLayout === "table" ? "#fff" : "#64748b", border: "none", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
                           ☰
                         </button>
                         <button
                           title={t("views.tree.title")}
                           onClick={() => setDocLayout("tree")}
-                          style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
                           ⊞
                         </button>
@@ -1014,22 +1014,22 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           title={t("views.json.title")}
                           aria-label={t("views.json.title")}
                           onClick={() => setDocLayout("json")}
-                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "5px 10px", cursor: "pointer", fontSize: "14px", lineHeight: "1", fontFamily: "monospace" }}
+                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1", fontFamily: "monospace" }}
                         >
                           {"{}"}
                         </button>
                       </div>
-                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", height: "36px" }}>
                         <button
                           onClick={() => exportCollection(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                          style={{ background: "transparent", color: "#374151", padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportJson")}
                         >
                           {t("buttons.export")} JSON
                         </button>
                         <button
                           onClick={() => exportCollectionBson(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                          style={{ background: "transparent", color: "#374151", padding: "6px 12px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
+                          style={{ background: "transparent", color: "#374151", padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportBson")}
                         >
                           {t("buttons.export")} BSON
@@ -1037,11 +1037,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       </div>
                       {canWrite && (
                         <>
-                          <label style={{ background: "transparent", color: "#374151", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
+                          <label style={{ background: "transparent", color: "#374151", padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
                             {t("buttons.import")}
                             <input ref={importInputRef} type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
-                          <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "6px 14px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
+                          <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
                             {t("documents.button.create")}
                           </button>
                         </>
