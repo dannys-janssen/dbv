@@ -244,7 +244,10 @@
       "removeField": {
         "title": "إزالة الحقل"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ إضافة عنصر",
+      "expand": "توسيع",
+      "collapse": "طي"
     },
     "value": {
       "null": "null"
@@ -254,11 +257,15 @@
       "false": "خطأ"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "نوع العنصر الجديد",
+      "items": "عناصر",
+      "fields": "حقول"
     },
     "placeholder": {
       "objectId": "سلسلة سداسية عشرية من 24 حرفًا",
-      "jsonValue": "قيمة JSON"
+      "jsonValue": "قيمة JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "إضافة حقل"
@@ -266,6 +273,12 @@
     "validation": {
       "fieldExists": "الحقل \"{{key}}\" موجود بالفعل.",
       "fieldNameRequired": "اسم الحقل مطلوب."
+    },
+    "nested": {
+      "empty": "لا توجد حقول فرعية بعد. أضف واحداً أدناه."
+    },
+    "array": {
+      "empty": "مصفوفة فارغة. أضف عناصر أدناه."
     }
   },
   "editor": {

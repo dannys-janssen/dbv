@@ -244,7 +244,10 @@
       "removeField": {
         "title": "Feld entfernen"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ Element hinzufügen",
+      "expand": "Aufklappen",
+      "collapse": "Zuklappen"
     },
     "value": {
       "null": "null"
@@ -254,11 +257,15 @@
       "false": "falsch"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "Neuer Elementtyp",
+      "items": "Elemente",
+      "fields": "Felder"
     },
     "placeholder": {
       "objectId": "24-Zeichen Hex-String",
-      "jsonValue": "JSON-Wert"
+      "jsonValue": "JSON-Wert",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Feld hinzufügen"
@@ -266,6 +273,12 @@
     "validation": {
       "fieldExists": "Feld \"{{key}}\" existiert bereits.",
       "fieldNameRequired": "Feldname ist erforderlich."
+    },
+    "nested": {
+      "empty": "Noch keine Unterfelder. Unten eines hinzufügen."
+    },
+    "array": {
+      "empty": "Leeres Array. Elemente unten hinzufügen."
     }
   },
   "editor": {

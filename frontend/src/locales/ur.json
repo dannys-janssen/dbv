@@ -245,7 +245,10 @@
         "title": "فیلڈ ہٹائیں"
       },
       "remove": "×",
-      "setNull": "null پر سیٹ کریں:"
+      "setNull": "null پر سیٹ کریں:",
+      "addItem": "+ آئٹم شامل کریں",
+      "expand": "پھیلائیں",
+      "collapse": "سمیٹیں"
     },
     "value": {
       "null": "null"
@@ -260,11 +263,15 @@
       "newFieldType": "نئے فیلڈ کی قسم",
       "date": "تاریخ",
       "time": "وقت",
-      "type": "قسم"
+      "type": "قسم",
+      "newItemType": "نئے آئٹم کی قسم",
+      "items": "آئٹمز",
+      "fields": "فیلڈز"
     },
     "placeholder": {
       "objectId": "24 حرفی ہیکس سٹرنگ",
-      "jsonValue": "JSON قدر"
+      "jsonValue": "JSON قدر",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "فیلڈ شامل کریں"
@@ -272,6 +279,12 @@
     "validation": {
       "fieldExists": "فیلڈ «{{key}}» پہلے سے موجود ہے۔",
       "fieldNameRequired": "فیلڈ کا نام ضروری ہے۔"
+    },
+    "nested": {
+      "empty": "ابھی تک کوئی ذیلی فیلڈ نہیں۔ نیچے ایک شامل کریں۔"
+    },
+    "array": {
+      "empty": "خالی صف۔ نیچے آئٹم شامل کریں۔"
     }
   },
   "editor": {

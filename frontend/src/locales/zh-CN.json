@@ -244,7 +244,10 @@
       "removeField": {
         "title": "删除字段"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ 添加项目",
+      "expand": "展开",
+      "collapse": "折叠"
     },
     "value": {
       "null": "null"
@@ -254,11 +257,15 @@
       "false": "false"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "新项目类型",
+      "items": "项",
+      "fields": "字段"
     },
     "placeholder": {
       "objectId": "24位十六进制字符串",
-      "jsonValue": "JSON 值"
+      "jsonValue": "JSON 值",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "添加字段"
@@ -266,6 +273,12 @@
     "validation": {
       "fieldExists": "字段 \"{{key}}\" 已存在。",
       "fieldNameRequired": "字段名不能为空。"
+    },
+    "nested": {
+      "empty": "暂无子字段。在下方添加一个。"
+    },
+    "array": {
+      "empty": "空数组。在下方添加项目。"
     }
   },
   "editor": {

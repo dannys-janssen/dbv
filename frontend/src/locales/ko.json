@@ -245,7 +245,10 @@
         "title": "필드 제거"
       },
       "remove": "×",
-      "setNull": "null로 설정:"
+      "setNull": "null로 설정:",
+      "addItem": "+ 항목 추가",
+      "expand": "펼치기",
+      "collapse": "접기"
     },
     "value": {
       "null": "null"
@@ -260,11 +263,15 @@
       "newFieldType": "새 필드 유형",
       "date": "날짜",
       "time": "시간",
-      "type": "유형"
+      "type": "유형",
+      "newItemType": "새 항목 유형",
+      "items": "항목",
+      "fields": "필드"
     },
     "placeholder": {
       "objectId": "24자리 16진수 문자열",
-      "jsonValue": "JSON 값"
+      "jsonValue": "JSON 값",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "필드 추가"
@@ -272,6 +279,12 @@
     "validation": {
       "fieldExists": "필드 \"{{key}}\"이(가) 이미 존재합니다.",
       "fieldNameRequired": "필드 이름이 필요합니다."
+    },
+    "nested": {
+      "empty": "하위 필드가 없습니다. 아래에 추가하세요."
+    },
+    "array": {
+      "empty": "빈 배열입니다. 아래에 항목을 추가하세요."
     }
   },
   "editor": {

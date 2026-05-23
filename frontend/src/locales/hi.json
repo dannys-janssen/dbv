@@ -244,7 +244,10 @@
       "removeField": {
         "title": "फ़ील्ड हटाएँ"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ आइटम जोड़ें",
+      "expand": "विस्तार करें",
+      "collapse": "संकुचित करें"
     },
     "value": {
       "null": "null"
@@ -254,11 +257,15 @@
       "false": "असत्य"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "नए आइटम का प्रकार",
+      "items": "आइटम",
+      "fields": "फ़ील्ड"
     },
     "placeholder": {
       "objectId": "24-अक्षर हेक्स स्ट्रिंग",
-      "jsonValue": "JSON मान"
+      "jsonValue": "JSON मान",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "फ़ील्ड जोड़ें"
@@ -266,6 +273,12 @@
     "validation": {
       "fieldExists": "फ़ील्ड \"{{key}}\" पहले से मौजूद है।",
       "fieldNameRequired": "फ़ील्ड नाम आवश्यक है।"
+    },
+    "nested": {
+      "empty": "अभी कोई उप-फ़ील्ड नहीं। नीचे एक जोड़ें।"
+    },
+    "array": {
+      "empty": "खाली सरणी। नीचे आइटम जोड़ें।"
     }
   },
   "editor": {

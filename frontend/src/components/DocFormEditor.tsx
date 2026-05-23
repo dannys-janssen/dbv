@@ -2,16 +2,17 @@
  * DocFormEditor.tsx
  *
  * A form-based document editor built from a CollectionSchema.
- * Each top-level field gets a type-appropriate input widget:
- *   date       → datetime-local input
- *   bool       → checkbox
+ * Each field gets a type-appropriate input widget:
+ *   date       → date + time inputs (UTC)
+ *   bool       → true / false radio buttons
  *   int/double → number input
  *   string     → text input
- *   objectId   → text input (hex string)
- *   uuid       → text input (base64/UUID display)
- *   object / array / mixed → JSON textarea
+ *   objectId   → text input (24-char hex string)
+ *   uuid       → text input (UUID string, e.g. "550e8400-e29b-41d4-a716-446655440000")
+ *   object     → recursive sub-form (NestedObjectEditor)
+ *   array      → list of item editors (NestedArrayEditor)
  *
- * Extra doc fields not found in the schema are shown as JSON textareas.
+ * Extra doc fields not found in the schema are shown with type-detected inputs.
  * The component is purely controlled: it receives a JSON string and emits
  * an updated JSON string on every change.
  */
@@ -69,6 +70,79 @@ function hexToBsonOid(hex: string): Record<string, string> {
   return { $oid: hex };
 }
 
+/** Extract a UUID string from a BSON $binary value (subtypes 03 and 04). */
+function bsonBinaryToUuid(v: unknown): string {
+  if (!v || typeof v !== "object") return "";
+  const d = v as Record<string, unknown>;
+  if (!d.$binary || typeof d.$binary !== "object") return "";
+  const bin = d.$binary as Record<string, unknown>;
+  const base64 = bin.base64;
+  const subType = bin.subType;
+  if (typeof base64 !== "string" || (subType !== "04" && subType !== "03")) return "";
+  try {
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    if (bytes.length !== 16) return "";
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+    return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+  } catch {
+    return "";
+  }
+}
+
+/** Convert a UUID string back to a BSON $binary object (subtype 04). */
+function uuidToBsonBinary(uuid: string): Record<string, unknown> {
+  const hex = uuid.replace(/-/g, "");
+  const bytes = new Uint8Array(16);
+  for (let i = 0; i < 16; i++) {
+    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  const base64 = btoa(String.fromCharCode(...bytes));
+  return { $binary: { base64, subType: "04" } };
+}
+
+/** Generate a random UUID v4 string. */
+function generateUuid(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant RFC 4122
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+}
+
+/** Generate a new ObjectId-compatible 24-char hex string. */
+function generateObjectId(): string {
+  const bytes = new Uint8Array(12);
+  // First 4 bytes: current timestamp in seconds (big-endian)
+  const secs = Math.floor(Date.now() / 1000);
+  bytes[0] = (secs >> 24) & 0xff;
+  bytes[1] = (secs >> 16) & 0xff;
+  bytes[2] = (secs >> 8) & 0xff;
+  bytes[3] = secs & 0xff;
+  // Remaining 8 bytes: random
+  crypto.getRandomValues(bytes.subarray(4));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Return the initial displayValue for a newly-added field of the given type. */
+function defaultDisplayValue(type: string): string {
+  switch (type) {
+    case "uuid":      return generateUuid();
+    case "objectId":  return generateObjectId();
+    case "bool":      return "true";
+    case "int":
+    case "double":
+    case "long":
+    case "decimal":   return "0";
+    case "date": {
+      const now = new Date();
+      const iso = now.toISOString(); // "YYYY-MM-DDTHH:MM:SS.mmmZ"
+      return `${iso.slice(0, 10)}|${iso.slice(11, 19)}`;
+    }
+    default:          return "";
+  }
+}
+
 /** Try to determine the best BSON type for a given doc value. */
 function detectValueType(v: unknown): string {
   if (v === null || v === undefined) return "null";
@@ -90,16 +164,24 @@ function detectValueType(v: unknown): string {
 
 /** Pick the best single BSON type from a schema field's types array. */
 function pickDominantType(types: string[]): string {
+  // Normalise backend type names to their canonical internal equivalents:
+  //   binary → uuid,  int32 → int,  int64 → long,  decimal128 → decimal
+  const normalise = (t: string) =>
+    t === "binary" ? "uuid" :
+    t === "int32" ? "int" :
+    t === "int64" ? "long" :
+    t === "decimal128" ? "decimal" : t;
+  const normalised = types.map(normalise);
   const priority = ["date", "objectId", "uuid", "bool", "int", "long", "double", "decimal", "string", "object", "array", "binData"];
   for (const t of priority) {
-    if (types.includes(t)) return t;
+    if (normalised.includes(t)) return t;
   }
-  return types[0] ?? "string";
+  return normalised[0] ?? "string";
 }
 
 /** True if this type maps to a simple scalar form control. */
 function isSimpleType(t: string): boolean {
-  return ["date", "bool", "int", "long", "double", "decimal", "string", "objectId"].includes(t);
+  return ["date", "bool", "int", "long", "double", "decimal", "string", "objectId", "uuid"].includes(t);
 }
 
 function safeStringify(v: unknown): string {
@@ -123,17 +205,43 @@ function safeParse(s: string): unknown {
 interface FieldState {
   key: string;
   type: string;       // detected/schema type
-  /** For scalar types, the edited string/boolean. For complex, JSON string. */
+  /** For scalar types, the edited string/boolean. Unused for object/array (see children/arrayItems). */
   displayValue: string;
   isNull: boolean;
   fromSchema: boolean;
+  /** Sub-fields for type === "object" (non-null). */
+  children?: FieldState[];
+  /** Element states for type === "array" (non-null). */
+  arrayItems?: FieldState[];
 }
 
-function docValueToFieldState(key: string, v: unknown, schemaType: string | null): FieldState {
+/**
+ * Convert a document value + optional schema type into a FieldState.
+ *
+ * @param key                  Field key / array index.
+ * @param v                    Raw BSON-extended-JSON value.
+ * @param schemaType           Type from the schema (or null to auto-detect).
+ * @param childrenSchemaPrefix Dot-path prefix used when looking up sub-field
+ *                             types in the schema.  For a regular object field
+ *                             this is the field's own full path (e.g. "address").
+ *                             For array items it is the *array*'s full path so
+ *                             that sub-field lookups resolve to "items.name"
+ *                             rather than "items.0.name".
+ * @param schema               Full collection schema for recursive type lookup.
+ */
+function docValueToFieldState(
+  key: string,
+  v: unknown,
+  schemaType: string | null,
+  childrenSchemaPrefix: string,
+  schema: CollectionSchema | null | undefined,
+): FieldState {
   const isNull = v === null || v === undefined;
   const type = schemaType ?? detectValueType(v);
 
   let displayValue = "";
+  let children: FieldState[] | undefined;
+  let arrayItems: FieldState[] | undefined;
 
   if (!isNull) {
     switch (type) {
@@ -144,6 +252,9 @@ function docValueToFieldState(key: string, v: unknown, schemaType: string | null
       }
       case "objectId":
         displayValue = bsonOidToHex(v);
+        break;
+      case "uuid":
+        displayValue = bsonBinaryToUuid(v);
         break;
       case "bool":
         displayValue = String(Boolean(v));
@@ -161,12 +272,38 @@ function docValueToFieldState(key: string, v: unknown, schemaType: string | null
       case "string":
         displayValue = typeof v === "string" ? v : safeStringify(v);
         break;
+      case "object": {
+        if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+          const obj = v as Record<string, unknown>;
+          children = Object.entries(obj).map(([k, val]) => {
+            const childPath = childrenSchemaPrefix ? `${childrenSchemaPrefix}.${k}` : k;
+            const schemaField = schema?.fields.find((f) => f.path === childPath);
+            const childType = schemaField ? pickDominantType(schemaField.types) : null;
+            return docValueToFieldState(k, val, childType, childPath, schema);
+          });
+        } else {
+          children = [];
+        }
+        break;
+      }
+      case "array": {
+        if (Array.isArray(v)) {
+          arrayItems = (v as unknown[]).map((item, i) =>
+            // Pass childrenSchemaPrefix (the array's own path) so that object
+            // items look up sub-fields as "items.field" rather than "items.0.field".
+            docValueToFieldState(String(i), item, null, childrenSchemaPrefix, schema),
+          );
+        } else {
+          arrayItems = [];
+        }
+        break;
+      }
       default:
         displayValue = safeStringify(v);
     }
   }
 
-  return { key, type, displayValue, isNull, fromSchema: schemaType !== null };
+  return { key, type, displayValue, isNull, fromSchema: schemaType !== null, children, arrayItems };
 }
 
 function fieldStateToBsonValue(f: FieldState): unknown {
@@ -179,6 +316,8 @@ function fieldStateToBsonValue(f: FieldState): unknown {
     }
     case "objectId":
       return f.displayValue ? hexToBsonOid(f.displayValue) : null;
+    case "uuid":
+      return f.displayValue ? uuidToBsonBinary(f.displayValue) : null;
     case "bool":
       return f.displayValue === "true";
     case "int":
@@ -191,6 +330,22 @@ function fieldStateToBsonValue(f: FieldState): unknown {
       return f.displayValue !== "" ? { $numberDecimal: f.displayValue } : null;
     case "string":
       return f.displayValue;
+    case "object": {
+      if (f.children !== undefined) {
+        const obj: Record<string, unknown> = {};
+        for (const child of f.children) {
+          obj[child.key] = fieldStateToBsonValue(child);
+        }
+        return obj;
+      }
+      return safeParse(f.displayValue);
+    }
+    case "array": {
+      if (f.arrayItems !== undefined) {
+        return f.arrayItems.map((item) => fieldStateToBsonValue(item));
+      }
+      return safeParse(f.displayValue);
+    }
     default:
       return safeParse(f.displayValue);
   }
@@ -258,13 +413,43 @@ interface FieldRowProps {
   field: FieldState;
   isId: boolean;
   isEditing: boolean;
+  /** Full collection schema, passed down for nested-field type lookups. */
+  schema?: CollectionSchema | null;
+  /**
+   * The full dot-path of the PARENT object/array.  Used to compute this
+   * field's own schema path for rendering nested editors.
+   * E.g. "" for top-level, "address" for fields inside the address object.
+   */
+  pathPrefix?: string;
+  /**
+   * Override for the schema lookup path of this field itself.  Normally
+   * computed as `${pathPrefix}.${field.key}` but for array items it must
+   * equal the array's path (so sub-fields use "items.field" not "items.0.field").
+   */
+  schemaPath?: string;
   onChange: (key: string, update: Partial<FieldState>) => void;
   onRemove: (key: string) => void;
 }
 
-const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, onRemove }) => {
+// All three sub-components (FieldRow, NestedObjectEditor, NestedArrayEditor) are
+// defined as function declarations so they can mutually reference each other via
+// JSX without triggering TypeScript's "used before declaration" error.
+
+function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath, onChange, onRemove }: FieldRowProps): React.ReactElement {
   const { t } = useTranslation();
   const readOnly = isId && isEditing;
+  // Full schema path for this field — used as the pathPrefix for nested editors.
+  const currentSchemaPath = schemaPath ?? (pathPrefix ? `${pathPrefix}.${field.key}` : field.key);
+  // Display label: show "[0]" for valid array-index keys (non-negative integers
+  // with no leading zeros, e.g. "0", "1", "12"), but not for names like "007".
+  const displayKey = Number.isInteger(Number(field.key)) && String(parseInt(field.key, 10)) === field.key
+    ? `[${field.key}]`
+    : field.key;
+
+  // Collapsible state for object and array fields.
+  const isNested = (field.type === "object" && field.children !== undefined)
+                || (field.type === "array" && field.arrayItems !== undefined);
+  const [collapsed, setCollapsed] = React.useState(false);
 
   const handleNull = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(field.key, { isNull: e.target.checked });
@@ -275,15 +460,39 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
   };
 
   const handleType = (newType: string) => {
-    onChange(field.key, { type: newType, displayValue: "", isNull: false });
+    onChange(field.key, {
+      type: newType,
+      displayValue: defaultDisplayValue(newType),
+      isNull: false,
+      children: newType === "object" ? [] : undefined,
+      arrayItems: newType === "array" ? [] : undefined,
+    });
   };
 
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
+        {/* Collapse/expand toggle for nested object and array fields */}
+        {isNested && (
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? t("form.button.expand") : t("form.button.collapse")}
+            title={collapsed ? t("form.button.expand") : t("form.button.collapse")}
+            style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11, padding: "0 4px 0 0", lineHeight: 1, flexShrink: 0 }}
+          >
+            {collapsed ? "▶" : "▼"}
+          </button>
+        )}
         <label style={{ ...labelStyle, marginBottom: 0, flex: 1 }}>
-          {field.key}
+          {displayKey}
           <span style={typeTagStyle(field.type)}>{field.type}</span>
+          {isNested && collapsed && (
+            <span style={{ fontSize: 11, color: "#475569", fontWeight: 400, marginLeft: 8 }}>
+              {field.type === "array"
+                ? `[${field.arrayItems?.length ?? 0} ${t("form.label.items")}]`
+                : `{${field.children?.length ?? 0} ${t("form.label.fields")}}`}
+            </span>
+          )}
         </label>
 
         {/* Type selector for non-id, non-schema fields */}
@@ -300,8 +509,8 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
               marginLeft: 8,
             }}
           >
-            {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "object", "array"].map((t) => (
-              <option key={t} value={t}>{t}</option>
+            {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
+              <option key={tp} value={tp}>{tp}</option>
             ))}
           </select>
         )}
@@ -334,7 +543,7 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
         )}
       </div>
 
-      {field.isNull || readOnly ? (
+      {!collapsed && (field.isNull || readOnly ? (
         <input
           type="text"
           readOnly
@@ -386,9 +595,30 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           type={["int", "double", "long", "decimal"].includes(field.type) ? "number" : "text"}
           value={field.displayValue}
           onChange={(e) => handleValue(e.target.value)}
-          placeholder={field.type === "objectId" ? t("form.placeholder.objectId") : ""}
+          placeholder={
+            field.type === "objectId" ? t("form.placeholder.objectId") :
+            field.type === "uuid" ? t("form.placeholder.uuid") : ""
+          }
           step={field.type === "double" || field.type === "decimal" ? "any" : undefined}
           style={inputStyle}
+        />
+      ) : field.type === "object" && field.children !== undefined ? (
+        <NestedObjectEditor
+          parentKey={field.key}
+          children={field.children}
+          isEditing={isEditing}
+          schema={schema}
+          pathPrefix={currentSchemaPath}
+          onChange={onChange}
+        />
+      ) : field.type === "array" && field.arrayItems !== undefined ? (
+        <NestedArrayEditor
+          parentKey={field.key}
+          arrayItems={field.arrayItems}
+          isEditing={isEditing}
+          schema={schema}
+          pathPrefix={currentSchemaPath}
+          onChange={onChange}
         />
       ) : (
         <textarea
@@ -398,10 +628,194 @@ const FieldRow: React.FC<FieldRowProps> = ({ field, isId, isEditing, onChange, o
           style={textareaStyle}
           spellCheck={false}
         />
-      )}
+      ))}
     </div>
   );
-};
+}
+
+// ── NestedObjectEditor ────────────────────────────────────────────────────────
+
+interface NestedObjectEditorProps {
+  parentKey: string;
+  children: FieldState[];
+  isEditing: boolean;
+  schema: CollectionSchema | null | undefined;
+  /** Full schema path of the parent object, e.g. "address". */
+  pathPrefix: string;
+  onChange: (key: string, update: Partial<FieldState>) => void;
+}
+
+function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix, onChange }: NestedObjectEditorProps): React.ReactElement {
+  const { t } = useTranslation();
+  const [newChildKey, setNewChildKey] = useState("");
+  const [newChildType, setNewChildType] = useState("string");
+  const [addError, setAddError] = useState("");
+
+  const handleChildChange = (childKey: string, update: Partial<FieldState>) => {
+    const newChildren = children.map((c) => (c.key === childKey ? { ...c, ...update } : c));
+    onChange(parentKey, { children: newChildren });
+  };
+
+  const handleChildRemove = (childKey: string) => {
+    const newChildren = children.filter((c) => c.key !== childKey);
+    onChange(parentKey, { children: newChildren });
+  };
+
+  const handleAddChild = () => {
+    const key = newChildKey.trim();
+    if (!key) { setAddError(t("form.validation.fieldNameRequired")); return; }
+    if (children.some((c) => c.key === key)) { setAddError(t("form.validation.fieldExists", { key })); return; }
+    setAddError("");
+    const childFullPath = pathPrefix ? `${pathPrefix}.${key}` : key;
+    const schemaField = schema?.fields.find((f) => f.path === childFullPath);
+    const resolvedType = schemaField ? pickDominantType(schemaField.types) : newChildType;
+    const newChild: FieldState = {
+      key,
+      type: resolvedType,
+      displayValue: defaultDisplayValue(resolvedType),
+      isNull: false,
+      fromSchema: !!schemaField,
+      children: resolvedType === "object" ? [] : undefined,
+      arrayItems: resolvedType === "array" ? [] : undefined,
+    };
+    onChange(parentKey, { children: [...children, newChild] });
+    setNewChildKey("");
+  };
+
+  return (
+    <div style={{ paddingLeft: 14, borderLeft: "2px solid #1e3a5f", marginTop: 6, marginBottom: 4 }}>
+      {children.length === 0 && (
+        <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.nested.empty")}</div>
+      )}
+      {children.map((child) => (
+        <FieldRow
+          key={child.key}
+          field={child}
+          isId={false}
+          isEditing={isEditing}
+          schema={schema}
+          pathPrefix={pathPrefix}
+          onChange={handleChildChange}
+          onRemove={handleChildRemove}
+        />
+      ))}
+      {/* Add sub-field */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8 }}>
+        <input
+          type="text"
+          placeholder={t("form.labels.fieldName")}
+          value={newChildKey}
+          onChange={(e) => { setNewChildKey(e.target.value); setAddError(""); }}
+          onKeyDown={(e) => { if (e.key === "Enter") handleAddChild(); }}
+          style={{ ...inputStyle, flex: 2, fontSize: 12, padding: "4px 8px" }}
+          aria-label={t("form.label.newFieldName")}
+        />
+        <select
+          value={newChildType}
+          onChange={(e) => setNewChildType(e.target.value)}
+          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "4px 8px" }}
+          aria-label={t("form.label.newFieldType")}
+        >
+          {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
+            <option key={tp} value={tp}>{tp}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleAddChild}
+          style={{ padding: "4px 10px", background: "#1e3a5f", border: "1px solid #3b82f6", borderRadius: 6, color: "#93c5fd", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+        >
+          {t("buttons.add")}
+        </button>
+      </div>
+      {addError && <div style={{ color: "#ef4444", fontSize: 11, marginTop: 4 }}>{addError}</div>}
+    </div>
+  );
+}
+
+// ── NestedArrayEditor ─────────────────────────────────────────────────────────
+
+interface NestedArrayEditorProps {
+  parentKey: string;
+  arrayItems: FieldState[];
+  isEditing: boolean;
+  schema: CollectionSchema | null | undefined;
+  /** Full schema path of the parent array, e.g. "tags" or "items". */
+  pathPrefix: string;
+  onChange: (key: string, update: Partial<FieldState>) => void;
+}
+
+function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefix, onChange }: NestedArrayEditorProps): React.ReactElement {
+  const { t } = useTranslation();
+  const [newItemType, setNewItemType] = useState("string");
+
+  const handleItemChange = (itemKey: string, update: Partial<FieldState>) => {
+    const newItems = arrayItems.map((item) => (item.key === itemKey ? { ...item, ...update } : item));
+    onChange(parentKey, { arrayItems: newItems });
+  };
+
+  const handleItemRemove = (itemKey: string) => {
+    // Remove the item and re-index remaining items.
+    const newItems = arrayItems
+      .filter((item) => item.key !== itemKey)
+      .map((item, i) => ({ ...item, key: String(i) }));
+    onChange(parentKey, { arrayItems: newItems });
+  };
+
+  const handleAddItem = () => {
+    const newItem: FieldState = {
+      key: String(arrayItems.length),
+      type: newItemType,
+      displayValue: defaultDisplayValue(newItemType),
+      isNull: false,
+      fromSchema: false,
+      children: newItemType === "object" ? [] : undefined,
+      arrayItems: newItemType === "array" ? [] : undefined,
+    };
+    onChange(parentKey, { arrayItems: [...arrayItems, newItem] });
+  };
+
+  return (
+    <div style={{ paddingLeft: 14, borderLeft: "2px solid #0e4429", marginTop: 6, marginBottom: 4 }}>
+      {arrayItems.length === 0 && (
+        <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.array.empty")}</div>
+      )}
+      {arrayItems.map((item) => (
+        <FieldRow
+          key={item.key}
+          field={item}
+          isId={false}
+          isEditing={isEditing}
+          schema={schema}
+          // Array items pass pathPrefix as schemaPath so that object-type items
+          // look up sub-fields as "items.field" rather than "items.0.field".
+          pathPrefix={pathPrefix}
+          schemaPath={pathPrefix}
+          onChange={handleItemChange}
+          onRemove={handleItemRemove}
+        />
+      ))}
+      {/* Add item */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8 }}>
+        <select
+          value={newItemType}
+          onChange={(e) => setNewItemType(e.target.value)}
+          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "4px 8px" }}
+          aria-label={t("form.label.newItemType")}
+        >
+          {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
+            <option key={tp} value={tp}>{tp}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleAddItem}
+          style={{ padding: "4px 10px", background: "#14532d", border: "1px solid #22c55e", borderRadius: 6, color: "#86efac", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+        >
+          {t("form.button.addItem")}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ── main component ────────────────────────────────────────────────────────────
 
@@ -445,13 +859,13 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
     // Schema fields first (preserving schema order)
     for (const [key, schemaType] of schemaTopLevel) {
       const v = Object.prototype.hasOwnProperty.call(doc, key) ? doc[key] : undefined;
-      result.push(docValueToFieldState(key, v, schemaType));
+      result.push(docValueToFieldState(key, v, schemaType, key, schema));
     }
 
     // Extra fields in the doc not covered by schema
     for (const key of Object.keys(doc)) {
       if (!schemaTopLevel.has(key)) {
-        result.push(docValueToFieldState(key, doc[key], null));
+        result.push(docValueToFieldState(key, doc[key], null, key, schema));
       }
     }
 
@@ -501,9 +915,11 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
     const newField: FieldState = {
       key,
       type: newFieldType,
-      displayValue: "",
+      displayValue: defaultDisplayValue(newFieldType),
       isNull: false,
       fromSchema: false,
+      children: newFieldType === "object" ? [] : undefined,
+      arrayItems: newFieldType === "array" ? [] : undefined,
     };
     setFields((prev) => {
       const next = [...prev, newField];
@@ -535,6 +951,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             field={idField}
             isId
             isEditing={isEditing}
+            schema={schema}
+            pathPrefix=""
             onChange={handleChange}
             onRemove={handleRemove}
           />
@@ -549,6 +967,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
           field={f}
           isId={false}
           isEditing={isEditing}
+          schema={schema}
+          pathPrefix=""
           onChange={handleChange}
           onRemove={handleRemove}
         />
@@ -575,8 +995,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             style={{ ...inputStyle, flex: 1 }}
             aria-label={t("form.label.newFieldType")}
           >
-            {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "object", "array"].map((t) => (
-              <option key={t} value={t}>{t}</option>
+            {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
+              <option key={tp} value={tp}>{tp}</option>
             ))}
           </select>
           <button

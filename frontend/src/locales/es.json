@@ -244,7 +244,10 @@
       "removeField": {
         "title": "Eliminar campo"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ Agregar elemento",
+      "expand": "Expandir",
+      "collapse": "Contraer"
     },
     "value": {
       "null": "null"
@@ -254,11 +257,15 @@
       "false": "falso"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "Tipo de nuevo elemento",
+      "items": "elementos",
+      "fields": "campos"
     },
     "placeholder": {
       "objectId": "Cadena hexadecimal de 24 caracteres",
-      "jsonValue": "Valor JSON"
+      "jsonValue": "Valor JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Añadir campo"
@@ -266,6 +273,12 @@
     "validation": {
       "fieldExists": "El campo \"{{key}}\" ya existe.",
       "fieldNameRequired": "El nombre del campo es obligatorio."
+    },
+    "nested": {
+      "empty": "Aún no hay subcampos. Añade uno abajo."
+    },
+    "array": {
+      "empty": "Array vacío. Añade elementos abajo."
     }
   },
   "editor": {

@@ -245,7 +245,10 @@
         "title": "Usuń pole"
       },
       "remove": "×",
-      "setNull": "Ustaw na null:"
+      "setNull": "Ustaw na null:",
+      "addItem": "+ Dodaj element",
+      "expand": "Rozwiń",
+      "collapse": "Zwiń"
     },
     "value": {
       "null": "null"
@@ -260,11 +263,15 @@
       "newFieldType": "Nowy typ pola",
       "date": "Data",
       "time": "Czas",
-      "type": "Typ"
+      "type": "Typ",
+      "newItemType": "Typ nowego elementu",
+      "items": "elementy",
+      "fields": "pola"
     },
     "placeholder": {
       "objectId": "24-znakowy ciąg heksadecymalny",
-      "jsonValue": "Wartość JSON"
+      "jsonValue": "Wartość JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Dodaj pole"
@@ -272,6 +279,12 @@
     "validation": {
       "fieldExists": "Pole \"{{key}}\" już istnieje.",
       "fieldNameRequired": "Nazwa pola jest wymagana."
+    },
+    "nested": {
+      "empty": "Brak podpól. Dodaj jedno poniżej."
+    },
+    "array": {
+      "empty": "Pusta tablica. Dodaj elementy poniżej."
     }
   },
   "editor": {

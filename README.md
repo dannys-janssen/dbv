@@ -224,9 +224,12 @@ The query bar supports two modes, toggled with the **MQL / SQL** button group:
     - `bool` → True / False radio buttons
     - `int` / `double` → number inputs
     - `long` → number stored as `{"$numberLong": "…"}`
+    - `decimal` → number stored as `{"$numberDecimal": "…"}`
     - `objectId` → text input stored as `{"$oid": "…"}`
+    - `uuid` → text input (UUID string format `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`, stored as BSON `$binary` subtype `04`); auto-generated when adding a new UUID field
     - `string` → text input
-    - `object` / `array` / mixed → inline JSON textarea
+    - `object` → inline recursive sub-form with a ▶/▼ collapse toggle; add/remove sub-fields at any depth
+    - `array` → inline list of type-aware item editors with a ▶/▼ collapse toggle; add/remove items at any depth (items can themselves be objects or arrays)
     - `_id` is shown read-only when editing an existing document
     - Any field (except `_id`) can be removed with the **×** button
     - **Add field** row at the bottom to append new fields with a type selector
