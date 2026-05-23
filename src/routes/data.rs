@@ -269,7 +269,9 @@ pub async fn delete_document(
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum BulkDeleteBody {
-    Ids { ids: Vec<String> },
+    Ids {
+        ids: Vec<String>,
+    },
     DeleteMany {
         filter: Value,
         #[serde(default)]
