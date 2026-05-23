@@ -497,7 +497,10 @@ paths:
           description: Document inserted
     delete:
       summary: Bulk delete documents
-      description: Deletes multiple documents by their `_id` values. Requires `dbv-admin` role.
+      description: >
+        Deletes multiple documents. Supports either bulk delete by `_id` values
+        or deleteMany-style payload with `filter` and optional `options`.
+        Requires `dbv-admin` role.
       operationId: bulkDeleteDocuments
       tags: [Documents]
       parameters:
@@ -508,14 +511,26 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [ids]
-              properties:
-                ids:
-                  type: array
-                  items:
-                    type: string
-                  description: Array of `_id` values (ObjectId hex strings or plain strings)
+              oneOf:
+                - type: object
+                  required: [ids]
+                  properties:
+                    ids:
+                      type: array
+                      items:
+                        type: string
+                      description: Array of `_id` values (ObjectId hex strings or plain strings)
+                - type: object
+                  required: [filter]
+                  properties:
+                    filter:
+                      type: object
+                      additionalProperties: true
+                      description: deleteMany filter document
+                    options:
+                      type: object
+                      additionalProperties: true
+                      description: Optional deleteMany options document
       responses:
         "200":
           description: Documents deleted
