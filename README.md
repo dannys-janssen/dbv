@@ -273,6 +273,25 @@ Run collection-scoped `updateMany` without building a full command document manu
 
 Press **Ctrl+Enter** or **▶ Run** to execute. The command sent to MongoDB uses `multi: true` for the currently selected collection.
 
+**Delete** *(dbv-admin only)*
+
+Run collection-scoped `deleteMany` with tuple-style arguments:
+
+```js
+(
+  { "status": "inactive" },
+  {
+    "writeConcern": {},
+    "collation": {},
+    "hint": "",
+    "maxTimeMS": 30000,
+    "let": {}
+  }
+)
+```
+
+Press **Ctrl+Enter** or **▶ Run** to execute. The command sent to MongoDB uses `limit: 0` for the currently selected collection.
+
 **Schema**
 
 Inspect the inferred schema of a collection — sampled from up to 100 documents. Shows:
@@ -302,13 +321,14 @@ The **Commands** tab provides a split-panel MongoDB command runner:
   |---|---|
   | Server | `ping`, `serverStatus`, `buildInfo`, `currentOp`, `getLog` |
   | Database | `dbStats`, `listCollections`, `createUser`, `dropUser` |
-  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate`, `update` |
+  | Collection | `collStats`, `validate`, `compact`, `reIndex`, `explain` (find), `explainAggregate`, `update`, `delete` |
   | Replication | `replSetGetStatus`, `replSetGetConfig` |
   | Administration | `renameCollection`, `fsync`, `profile` |
 
 - Click any palette entry to pre-fill the Monaco editor with a ready-to-run template (collection-name placeholders are replaced with the currently selected collection)
 - **Explain plan** templates (`explain` and `explainAggregate`) default to `"verbosity": "executionStats"` — useful for diagnosing query performance
 - **`update`** template runs an update command with `multi: true` for the active collection
+- **`delete`** template runs a delete command with `limit: 0` for the active collection
 - **Use admin database** toggle — when enabled the command runs against the `admin` database (required for server-wide and replication commands; indicated by a yellow `admin` badge in the palette)
 - The command editor is **resizable** — drag the handle below it to adjust the editor height independently
 - Press **▶ Run** or **Ctrl+Enter** to execute — while running the button is disabled and shows ⏳; on completion the elapsed time is shown. Results appear in a read-only Monaco viewer; errors are highlighted in red
@@ -348,6 +368,7 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | Create index | ❌ | ✅ |
 | Drop index | ❌ | ✅ |
 | Run updateMany (Update tab) | ❌ | ✅ |
+| Run deleteMany (Delete tab) | ❌ | ✅ |
 | Run MongoDB commands | ❌ | ✅ |
 
 ---

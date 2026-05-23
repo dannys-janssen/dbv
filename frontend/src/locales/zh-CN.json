@@ -94,6 +94,7 @@
     "documents": "文档",
     "aggregate": "聚合",
     "update": "更新",
+    "delete": "删除",
     "schema": "模式",
     "indexes": "索引",
     "stats": "统计",
@@ -334,7 +335,7 @@
     "count_other": "已选择 {{count}} 个文档",
     "button": {
       "export": "导出所选",
-      "delete": "删除所选",
+      "delete": "删除",
       "clear": "✕ 清除",
       "exportJson": "导出JSON",
       "exportBson": "导出BSON"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "格式无效。请使用 (filter, update) 或 {\"filter\": {...}, \"update\": {...}}。"
+    }
+  },
+  "delete": {
+    "prompt": "以 (filter, options) 的形式输入此集合的 deleteMany 参数：",
+    "button": {
+      "run": "▶ 运行",
+      "running": "运行中…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// 运行 deleteMany 以查看结果"
+    },
+    "error": {
+      "invalidFormat": "格式无效。请使用 (filter, options) 或 {\"filter\": {...}, \"options\": {...}}。"
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "获取/设置数据库分析器级别",
       "explain": "查询find的执行计划",
       "explainAggregate": "聚合的执行计划",
-      "update": "更新此集合中的多个文档"
+      "update": "更新此集合中的多个文档",
+      "delete": "删除此集合中的多个文档"
     },
     "context": {
       "runningOn": "运行在数据库："

@@ -94,6 +94,7 @@
     "documents": "Documenti",
     "aggregate": "Aggregazione",
     "update": "Aggiorna",
+    "delete": "Elimina",
     "schema": "Schema",
     "indexes": "Indici",
     "stats": "Statistiche",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} documenti selezionati",
     "button": {
       "export": "Esporta selezionati",
-      "delete": "Elimina selezionati",
+      "delete": "Elimina",
       "clear": "✕ Cancella",
       "exportJson": "Esporta JSON",
       "exportBson": "Esporta BSON"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "Formato non valido. Usa (filter, update) oppure {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Inserisci gli argomenti deleteMany per questa raccolta come (filter, options):",
+    "button": {
+      "run": "▶ Esegui",
+      "running": "In esecuzione…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Esegui deleteMany per vedere i risultati"
+    },
+    "error": {
+      "invalidFormat": "Formato non valido. Usa (filter, options) oppure {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "Ottieni/imposta il livello del profiler",
       "explain": "Piano di spiegazione per una query find",
       "explainAggregate": "Piano di spiegazione per un'aggregazione",
-      "update": "Aggiorna più documenti in questa raccolta"
+      "update": "Aggiorna più documenti in questa raccolta",
+      "delete": "Elimina più documenti in questa raccolta"
     },
     "context": {
       "runningOn": "In esecuzione sul database:"

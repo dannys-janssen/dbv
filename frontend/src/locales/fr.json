@@ -94,6 +94,7 @@
     "documents": "Documents",
     "aggregate": "Agrégat",
     "update": "Mise à jour",
+    "delete": "Supprimer",
     "schema": "Schéma",
     "indexes": "Index",
     "stats": "Statistiques",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} documents sélectionnés",
     "button": {
       "export": "Exporter la sélection",
-      "delete": "Supprimer la sélection",
+      "delete": "Supprimer",
       "clear": "✕ Effacer",
       "exportJson": "Exporter JSON",
       "exportBson": "Exporter BSON"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "Format invalide. Utilisez (filter, update) ou {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Entrez les arguments deleteMany pour cette collection au format (filter, options) :",
+    "button": {
+      "run": "▶ Exécuter",
+      "running": "Exécution…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Exécutez deleteMany pour voir les résultats"
+    },
+    "error": {
+      "invalidFormat": "Format invalide. Utilisez (filter, options) ou {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "Obtenir/définir le niveau du profileur",
       "explain": "Plan d'exécution pour une requête find",
       "explainAggregate": "Plan d'exécution pour une agrégation",
-      "update": "Mettre à jour plusieurs documents de cette collection"
+      "update": "Mettre à jour plusieurs documents de cette collection",
+      "delete": "Mettre à jour plusieurs documents de cette collection"
     },
     "context": {
       "runningOn": "Exécution sur la base de données :"

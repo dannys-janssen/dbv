@@ -94,6 +94,7 @@
     "documents": "Έγγραφα",
     "aggregate": "Συγκέντρωση",
     "update": "Ενημέρωση",
+    "delete": "Διαγραφή",
     "schema": "Σχήμα",
     "indexes": "Ευρετήρια",
     "stats": "Στατιστικά",
@@ -340,7 +341,7 @@
     "count_other": "{{count}} έγγραφα επιλεγμένα",
     "button": {
       "export": "Εξαγωγή Επιλεγμένων",
-      "delete": "Διαγραφή Επιλεγμένων",
+      "delete": "Διαγραφή",
       "clear": "✕ Εκκαθάριση",
       "exportJson": "Εξαγωγή JSON",
       "exportBson": "Εξαγωγή BSON"
@@ -418,6 +419,22 @@
     },
     "error": {
       "invalidFormat": "Μη έγκυρη μορφή. Χρησιμοποιήστε (filter, update) ή {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Εισαγάγετε ορίσματα deleteMany για αυτή τη συλλογή ως (filter, options):",
+    "button": {
+      "run": "▶ Εκτέλεση",
+      "running": "Εκτελείται…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Εκτελέστε deleteMany για να δείτε αποτελέσματα"
+    },
+    "error": {
+      "invalidFormat": "Μη έγκυρη μορφή. Χρησιμοποιήστε (filter, options) ή {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -515,7 +532,8 @@
       "profile": "Λήψη/ορισμός επιπέδου profiler βάσης δεδομένων",
       "explain": "Σχέδιο εξήγησης για ερώτημα find",
       "explainAggregate": "Σχέδιο εξήγησης για συγκέντρωση",
-      "update": "Ενημέρωση πολλών εγγράφων σε αυτή τη συλλογή"
+      "update": "Ενημέρωση πολλών εγγράφων σε αυτή τη συλλογή",
+      "delete": "Διαγραφή πολλών εγγράφων σε αυτή τη συλλογή"
     },
     "context": {
       "runningOn": "Εκτέλεση σε βάση δεδομένων:"

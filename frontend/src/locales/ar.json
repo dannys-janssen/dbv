@@ -94,6 +94,7 @@
     "documents": "المستندات",
     "aggregate": "التجميع",
     "update": "تحديث",
+    "delete": "حذف",
     "schema": "المخطط",
     "indexes": "الفهارس",
     "stats": "الإحصائيات",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} مستندات محددة",
     "button": {
       "export": "تصدير المحدد",
-      "delete": "حذف المحدد",
+      "delete": "حذف",
       "clear": "✕ مسح",
       "exportJson": "تصدير JSON",
       "exportBson": "تصدير BSON"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "تنسيق غير صالح. استخدم (filter, update) أو {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "أدخل معاملات deleteMany لهذه المجموعة بصيغة (filter, options):",
+    "button": {
+      "run": "▶ تشغيل",
+      "running": "جارٍ التنفيذ…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// شغّل deleteMany لرؤية النتائج"
+    },
+    "error": {
+      "invalidFormat": "تنسيق غير صالح. استخدم (filter, options) أو {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "الحصول على/تعيين مستوى محلل قاعدة البيانات",
       "explain": "خطة شرح لاستعلام البحث",
       "explainAggregate": "خطة شرح للتجميع",
-      "update": "تحديث عدة مستندات في هذه المجموعة"
+      "update": "تحديث عدة مستندات في هذه المجموعة",
+      "delete": "حذف عدة مستندات في هذه المجموعة"
     },
     "context": {
       "runningOn": "يعمل على قاعدة البيانات:"

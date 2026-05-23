@@ -37,8 +37,9 @@ import {
 import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonFormat";
 import { parseSqlToMql } from "../utils/sqlToMql";
 import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
+import { buildDeleteManyCommand, parseDeleteManyInput } from "../utils/deleteMany";
 
-type View = "documents" | "aggregate" | "update" | "schema" | "indexes" | "stats" | "commands";
+type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexes" | "stats" | "commands";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -217,6 +218,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const [updateManyError, setUpdateManyError] = useState("");
   const [updateManyLoading, setUpdateManyLoading] = useState(false);
   const [updateManyDuration, setUpdateManyDuration] = useState<number | null>(null);
+  const [deleteManyText, setDeleteManyText] = useState('(\n  { "status": "inactive" },\n  {\n    "writeConcern": {},\n    "collation": {},\n    "hint": "",\n    "maxTimeMS": 30000,\n    "let": {}\n  }\n)');
+  const [deleteManyResult, setDeleteManyResult] = useState<Record<string, unknown> | null>(null);
+  const [deleteManyError, setDeleteManyError] = useState("");
+  const [deleteManyLoading, setDeleteManyLoading] = useState(false);
+  const [deleteManyDuration, setDeleteManyDuration] = useState<number | null>(null);
 
   // Editor heights for resizable panels
   const [filterHeight, setFilterHeight] = useState(68);
@@ -463,6 +469,35 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
     }
   }, [updateManyText, db, col, t]);
 
+  const runDeleteMany = useCallback(async () => {
+    let parsed;
+    try {
+      parsed = parseDeleteManyInput(deleteManyText);
+    } catch {
+      setDeleteManyError(t("delete.error.invalidFormat"));
+      setDeleteManyDuration(null);
+      return;
+    }
+
+    setDeleteManyLoading(true);
+    setDeleteManyError("");
+    setDeleteManyResult(null);
+    setDeleteManyDuration(null);
+    const t0 = Date.now();
+
+    try {
+      const result = await runDbCommand(db, buildDeleteManyCommand(col, parsed), false);
+      setDeleteManyResult(result);
+      setDeleteManyDuration(Date.now() - t0);
+    } catch (e: unknown) {
+      const axiosBody = (e as { response?: { data?: { error?: string } } }).response?.data?.error;
+      setDeleteManyError(axiosBody ?? (e as Error).message ?? "Unknown error");
+      setDeleteManyDuration(null);
+    } finally {
+      setDeleteManyLoading(false);
+    }
+  }, [deleteManyText, db, col, t]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -482,10 +517,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
         e.preventDefault();
         void runUpdateMany();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canWrite && view === "delete") {
+        e.preventDefault();
+        void runDeleteMany();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, canWrite]);
+  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, runDeleteMany, canWrite]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
@@ -655,7 +694,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
             }}
           >
             {((canWrite
-              ? ["documents", "aggregate", "update", "schema", "indexes", "stats", "commands"]
+              ? ["documents", "aggregate", "update", "delete", "schema", "indexes", "stats", "commands"]
               : ["documents", "aggregate", "schema", "indexes", "stats", "commands"]) as View[]).map((tab) => {
               const isActive = view === tab;
               const label = t(`tabs.${tab}`);
@@ -1661,6 +1700,86 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   height="100%"
                   defaultLanguage="json"
                   value={updateManyResult ? JSON.stringify(updateManyResult, null, 2) : t("update.placeholder.result")}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    lineNumbers: "on" as const,
+                    folding: true,
+                    scrollBeyondLastLine: false,
+                    fontSize: 12,
+                    wordWrap: "off" as const,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── Delete tab ── */}
+          {view === "delete" && canWrite && (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: FONT }}>
+              <div style={{ padding: "16px 20px 0", flexShrink: 0 }}>
+                <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 8px 0" }}>
+                  {t("delete.prompt")}
+                </p>
+                <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+                  <Editor
+                    height={`${aggHeight}px`}
+                    defaultLanguage="json"
+                    path={`dbv://delete/${tabId}`}
+                    value={deleteManyText}
+                    onChange={(v) => setDeleteManyText(v ?? "")}
+                    options={{
+                      minimap: { enabled: false },
+                      lineNumbers: "off" as const,
+                      folding: false,
+                      scrollBeyondLastLine: false,
+                      fontSize: 13,
+                      padding: { top: 6, bottom: 6 },
+                      wordWrap: "on" as const,
+                      suggest: { showSnippets: true, showWords: false },
+                      quickSuggestions: { other: true, comments: false, strings: true },
+                    }}
+                    onMount={(editor, monaco) => {
+                      editor.addCommand(
+                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                        () => void runDeleteMany()
+                      );
+                    }}
+                  />
+                  <div title={t("query.resize.title")} style={resizeHandleStyle}
+                    onMouseDown={startAggResize} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", marginBottom: "12px" }}>
+                  <button
+                    onClick={() => void runDeleteMany()}
+                    disabled={deleteManyLoading}
+                    aria-busy={deleteManyLoading}
+                    style={{ background: deleteManyLoading ? "#94a3b8" : "#2563eb", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", border: "none", cursor: deleteManyLoading ? "not-allowed" : "pointer", fontFamily: FONT, fontWeight: 600 }}
+                  >
+                    {deleteManyLoading ? `⏳ ${t("delete.button.running")}` : t("delete.button.run")}
+                  </button>
+                  <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>{t("delete.hint.ctrlEnter")}</span>
+                  {!deleteManyLoading && deleteManyDuration !== null && !deleteManyError && (
+                    <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT, marginLeft: "auto" }}>
+                      {t("query.duration", { duration: formatDuration(deleteManyDuration) })}
+                    </span>
+                  )}
+                </div>
+                {deleteManyError && (
+                  <div style={{
+                    marginBottom: "12px", background: "#fef2f2", border: "1px solid #fca5a5",
+                    borderRadius: "6px", padding: "10px 14px", fontSize: "13px", color: "#dc2626",
+                    fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-word",
+                  }}>
+                    {deleteManyError}
+                  </div>
+                )}
+              </div>
+              <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
+                <Editor
+                  height="100%"
+                  defaultLanguage="json"
+                  value={deleteManyResult ? JSON.stringify(deleteManyResult, null, 2) : t("delete.placeholder.result")}
                   options={{
                     readOnly: true,
                     minimap: { enabled: false },

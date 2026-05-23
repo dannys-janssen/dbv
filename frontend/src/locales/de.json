@@ -94,6 +94,7 @@
     "documents": "Dokumente",
     "aggregate": "Aggregation",
     "update": "Aktualisieren",
+    "delete": "Löschen",
     "schema": "Schema",
     "indexes": "Indizes",
     "stats": "Statistiken",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} Dokumente ausgewählt",
     "button": {
       "export": "Auswahl exportieren",
-      "delete": "Auswahl löschen",
+      "delete": "Löschen",
       "clear": "✕ Löschen",
       "exportJson": "JSON exportieren",
       "exportBson": "BSON exportieren"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "Ungültiges Format. Verwenden Sie (filter, update) oder {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Geben Sie deleteMany-Argumente für diese Sammlung als (filter, options) ein:",
+    "button": {
+      "run": "▶ Ausführen",
+      "running": "Wird ausgeführt…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Führen Sie deleteMany aus, um Ergebnisse zu sehen"
+    },
+    "error": {
+      "invalidFormat": "Ungültiges Format. Verwenden Sie (filter, options) oder {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "Datenbank-Profiler-Level abrufen/setzen",
       "explain": "Erklärplan für eine Find-Abfrage",
       "explainAggregate": "Erklärplan für eine Aggregation",
-      "update": "Mehrere Dokumente in dieser Sammlung aktualisieren"
+      "update": "Mehrere Dokumente in dieser Sammlung aktualisieren",
+      "delete": "Mehrere Dokumente in dieser Sammlung löschen"
     },
     "context": {
       "runningOn": "Wird auf Datenbank ausgeführt:"

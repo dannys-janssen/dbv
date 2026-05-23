@@ -94,6 +94,7 @@
     "documents": "ドキュメント",
     "aggregate": "集約",
     "update": "更新",
+    "delete": "削除",
     "schema": "スキーマ",
     "indexes": "インデックス",
     "stats": "統計",
@@ -334,7 +335,7 @@
     "count_other": "{{count}}件のドキュメントを選択",
     "button": {
       "export": "選択をエクスポート",
-      "delete": "選択を削除",
+      "delete": "削除",
       "clear": "✕ クリア",
       "exportJson": "JSONエクスポート",
       "exportBson": "BSONエクスポート"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "無効な形式です。(filter, update) または {\"filter\": {...}, \"update\": {...}} を使用してください。"
+    }
+  },
+  "delete": {
+    "prompt": "このコレクションの deleteMany 引数を (filter, options) 形式で入力してください:",
+    "button": {
+      "run": "▶ 実行",
+      "running": "実行中…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// 結果を見るには deleteMany を実行してください"
+    },
+    "error": {
+      "invalidFormat": "無効な形式です。(filter, options) または {\"filter\": {...}, \"options\": {...}} を使用してください。"
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "データベースプロファイラーレベルの取得/設定",
       "explain": "findクエリの実行プラン",
       "explainAggregate": "集約の実行プラン",
-      "update": "このコレクション内の複数のドキュメントを更新"
+      "update": "このコレクション内の複数のドキュメントを更新",
+      "delete": "このコレクション内の複数のドキュメントを削除"
     },
     "context": {
       "runningOn": "実行中のデータベース:"
