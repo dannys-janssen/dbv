@@ -525,7 +525,7 @@
       "explain": "Plan d'exécution pour une requête find",
       "explainAggregate": "Plan d'exécution pour une agrégation",
       "update": "Mettre à jour plusieurs documents de cette collection",
-      "delete": "Mettre à jour plusieurs documents de cette collection"
+      "delete": "Supprimer plusieurs documents de cette collection"
     },
     "context": {
       "runningOn": "Exécution sur la base de données :"

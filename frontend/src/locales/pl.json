@@ -533,7 +533,7 @@
       "explain": "Plan wyjaśnienia dla zapytania find",
       "explainAggregate": "Plan wyjaśnienia dla agregacji",
       "update": "Zaktualizuj wiele dokumentów w tej kolekcji",
-      "delete": "Zaktualizuj wiele dokumentów w tej kolekcji"
+      "delete": "Usuń wiele dokumentów w tej kolekcji"
     },
     "context": {
       "runningOn": "Uruchomione na bazie danych:"
