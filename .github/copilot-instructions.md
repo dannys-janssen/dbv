@@ -362,6 +362,8 @@ The UI targets WCAG 2.1 Level AA. Key patterns:
   - Adds OCI labels for authors, vendor, title, documentation, source, description, and license metadata.
   - Uses `GITHUB_TOKEN` — no extra secrets required.
   - Uses GitHub Actions cache (`type=gha`) for Docker layer caching.
+- Release/version bump commits must be merged into `main` before creating and pushing a release tag; do not tag a commit that exists only on a topic branch.
+- Before publishing a release tag, verify the tag target is reachable from `origin/main` (for example with `git branch -r --contains v1.2.3^{}`).
 - **`.github/dependabot.yml`** — weekly PRs for Cargo, npm, and GitHub Actions dependencies.
 - When adding a new workflow action, always pin to a specific major version tag (e.g. `@v4`).
 - Do not add secrets to workflows beyond `GITHUB_TOKEN` unless absolutely necessary. Document any required repo secrets in README.
