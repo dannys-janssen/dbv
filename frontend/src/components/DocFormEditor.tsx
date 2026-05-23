@@ -121,12 +121,19 @@ function detectValueType(v: unknown): string {
 
 /** Pick the best single BSON type from a schema field's types array. */
 function pickDominantType(types: string[]): string {
+  // Normalise backend type names to their canonical internal equivalents:
+  //   binary → uuid,  int32 → int,  int64 → long,  decimal128 → decimal
+  const normalise = (t: string) =>
+    t === "binary" ? "uuid" :
+    t === "int32" ? "int" :
+    t === "int64" ? "long" :
+    t === "decimal128" ? "decimal" : t;
+  const normalised = types.map(normalise);
   const priority = ["date", "objectId", "uuid", "bool", "int", "long", "double", "decimal", "string", "object", "array", "binData"];
   for (const t of priority) {
-    // Also map backend type names: "binary" → "uuid", "int32" → "int", etc.
-    if (types.includes(t) || (t === "uuid" && types.includes("binary"))) return t;
+    if (normalised.includes(t)) return t;
   }
-  return types[0] ?? "string";
+  return normalised[0] ?? "string";
 }
 
 /** True if this type maps to a simple scalar form control. */
@@ -390,8 +397,11 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
   const readOnly = isId && isEditing;
   // Full schema path for this field — used as the pathPrefix for nested editors.
   const currentSchemaPath = schemaPath ?? (pathPrefix ? `${pathPrefix}.${field.key}` : field.key);
-  // Display label: show "[0]" for numeric keys (array item indices).
-  const displayKey = /^\d+$/.test(field.key) ? `[${field.key}]` : field.key;
+  // Display label: show "[0]" for valid array-index keys (non-negative integers
+  // with no leading zeros, e.g. "0", "1", "12"), but not for names like "007".
+  const displayKey = Number.isInteger(Number(field.key)) && String(parseInt(field.key, 10)) === field.key
+    ? `[${field.key}]`
+    : field.key;
 
   const handleNull = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(field.key, { isNull: e.target.checked });
