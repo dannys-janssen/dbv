@@ -110,9 +110,37 @@ function generateUuid(): string {
   return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
 }
 
+/** Generate a new ObjectId-compatible 24-char hex string. */
+function generateObjectId(): string {
+  const bytes = new Uint8Array(12);
+  // First 4 bytes: current timestamp in seconds (big-endian)
+  const secs = Math.floor(Date.now() / 1000);
+  bytes[0] = (secs >> 24) & 0xff;
+  bytes[1] = (secs >> 16) & 0xff;
+  bytes[2] = (secs >> 8) & 0xff;
+  bytes[3] = secs & 0xff;
+  // Remaining 8 bytes: random
+  crypto.getRandomValues(bytes.subarray(4));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 /** Return the initial displayValue for a newly-added field of the given type. */
 function defaultDisplayValue(type: string): string {
-  return type === "uuid" ? generateUuid() : "";
+  switch (type) {
+    case "uuid":      return generateUuid();
+    case "objectId":  return generateObjectId();
+    case "bool":      return "true";
+    case "int":
+    case "double":
+    case "long":
+    case "decimal":   return "0";
+    case "date": {
+      const now = new Date();
+      const iso = now.toISOString(); // "YYYY-MM-DDTHH:MM:SS.mmmZ"
+      return `${iso.slice(0, 10)}|${iso.slice(11, 19)}`;
+    }
+    default:          return "";
+  }
 }
 
 /** Try to determine the best BSON type for a given doc value. */
@@ -434,7 +462,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
   const handleType = (newType: string) => {
     onChange(field.key, {
       type: newType,
-      displayValue: "",
+      displayValue: defaultDisplayValue(newType),
       isNull: false,
       children: newType === "object" ? [] : undefined,
       arrayItems: newType === "array" ? [] : undefined,
