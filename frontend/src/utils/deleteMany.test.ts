@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDeleteManyCommand, parseDeleteManyInput } from "./deleteMany";
+import { buildDeleteManyRequest, parseDeleteManyInput } from "./deleteMany";
 
 describe("parseDeleteManyInput", () => {
   it("parses tuple-style input", () => {
@@ -38,22 +38,16 @@ describe("parseDeleteManyInput", () => {
   });
 });
 
-describe("buildDeleteManyCommand", () => {
-  it("builds a MongoDB delete command with limit=0", () => {
+describe("buildDeleteManyRequest", () => {
+  it("builds a deleteMany request payload", () => {
     expect(
-      buildDeleteManyCommand("users", {
+      buildDeleteManyRequest({
         filter: { status: "inactive" },
         options: { maxTimeMS: 30000 },
       })
     ).toEqual({
-      delete: "users",
-      deletes: [
-        {
-          q: { status: "inactive" },
-          limit: 0,
-          maxTimeMS: 30000,
-        },
-      ],
+      filter: { status: "inactive" },
+      options: { maxTimeMS: 30000 },
     });
   });
 });

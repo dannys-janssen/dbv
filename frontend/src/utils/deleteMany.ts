@@ -3,6 +3,11 @@ export interface ParsedDeleteMany {
   options: Record<string, unknown>;
 }
 
+export interface DeleteManyRequest {
+  filter: Record<string, unknown>;
+  options: Record<string, unknown>;
+}
+
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -38,15 +43,9 @@ export function parseDeleteManyInput(text: string): ParsedDeleteMany {
   throw new Error("invalid-format");
 }
 
-export function buildDeleteManyCommand(collection: string, parsed: ParsedDeleteMany): Record<string, unknown> {
+export function buildDeleteManyRequest(parsed: ParsedDeleteMany): DeleteManyRequest {
   return {
-    delete: collection,
-    deletes: [
-      {
-        ...parsed.options,
-        q: parsed.filter,
-        limit: 0,
-      },
-    ],
+    filter: parsed.filter,
+    options: parsed.options,
   };
 }

@@ -290,7 +290,7 @@ Run collection-scoped `deleteMany` with tuple-style arguments:
 )
 ```
 
-Press **Ctrl+Enter** or **▶ Run** to execute. The command sent to MongoDB uses `limit: 0` for the currently selected collection.
+Press **Ctrl+Enter** or **▶ Run** to execute. The Delete tab uses MongoDB driver's `collection.delete_many(filter, options)` method for the currently selected collection.
 
 **Schema**
 

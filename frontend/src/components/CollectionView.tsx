@@ -4,6 +4,7 @@ import {
   getDocuments,
   deleteDocument,
   bulkDeleteDocuments,
+  deleteManyDocuments,
   exportCollection,
   exportCollectionBson,
   importCollection,
@@ -37,7 +38,7 @@ import {
 import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonFormat";
 import { parseSqlToMql } from "../utils/sqlToMql";
 import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
-import { buildDeleteManyCommand, parseDeleteManyInput } from "../utils/deleteMany";
+import { buildDeleteManyRequest, parseDeleteManyInput } from "../utils/deleteMany";
 
 type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexes" | "stats" | "commands";
 
@@ -486,7 +487,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
     const t0 = Date.now();
 
     try {
-      const result = await runDbCommand(db, buildDeleteManyCommand(col, parsed), false);
+      const request = buildDeleteManyRequest(parsed);
+      const result = await deleteManyDocuments(db, col, request.filter, request.options);
       setDeleteManyResult(result);
       setDeleteManyDuration(Date.now() - t0);
     } catch (e: unknown) {
