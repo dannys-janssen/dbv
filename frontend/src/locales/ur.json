@@ -246,7 +246,9 @@
       },
       "remove": "×",
       "setNull": "null پر سیٹ کریں:",
-      "addItem": "+ آئٹم شامل کریں"
+      "addItem": "+ آئٹم شامل کریں",
+      "expand": "پھیلائیں",
+      "collapse": "سمیٹیں"
     },
     "value": {
       "null": "null"
@@ -262,7 +264,9 @@
       "date": "تاریخ",
       "time": "وقت",
       "type": "قسم",
-      "newItemType": "نئے آئٹم کی قسم"
+      "newItemType": "نئے آئٹم کی قسم",
+      "items": "آئٹمز",
+      "fields": "فیلڈز"
     },
     "placeholder": {
       "objectId": "24 حرفی ہیکس سٹرنگ",

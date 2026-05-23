@@ -245,7 +245,9 @@
         "title": "Veld verwijderen"
       },
       "remove": "×",
-      "addItem": "+ Item toevoegen"
+      "addItem": "+ Item toevoegen",
+      "expand": "Uitvouwen",
+      "collapse": "Inklappen"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Nieuw itemtype"
+      "newItemType": "Nieuw itemtype",
+      "items": "items",
+      "fields": "velden"
     },
     "placeholder": {
       "objectId": "24-teken hexadecimale tekenreeks",

@@ -245,7 +245,9 @@
         "title": "Feld entfernen"
       },
       "remove": "×",
-      "addItem": "+ Element hinzufügen"
+      "addItem": "+ Element hinzufügen",
+      "expand": "Aufklappen",
+      "collapse": "Zuklappen"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Neuer Elementtyp"
+      "newItemType": "Neuer Elementtyp",
+      "items": "Elemente",
+      "fields": "Felder"
     },
     "placeholder": {
       "objectId": "24-Zeichen Hex-String",

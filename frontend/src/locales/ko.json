@@ -246,7 +246,9 @@
       },
       "remove": "×",
       "setNull": "null로 설정:",
-      "addItem": "+ 항목 추가"
+      "addItem": "+ 항목 추가",
+      "expand": "펼치기",
+      "collapse": "접기"
     },
     "value": {
       "null": "null"
@@ -262,7 +264,9 @@
       "date": "날짜",
       "time": "시간",
       "type": "유형",
-      "newItemType": "새 항목 유형"
+      "newItemType": "새 항목 유형",
+      "items": "항목",
+      "fields": "필드"
     },
     "placeholder": {
       "objectId": "24자리 16진수 문자열",

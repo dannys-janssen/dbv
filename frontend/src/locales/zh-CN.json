@@ -245,7 +245,9 @@
         "title": "删除字段"
       },
       "remove": "×",
-      "addItem": "+ 添加项目"
+      "addItem": "+ 添加项目",
+      "expand": "展开",
+      "collapse": "折叠"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "新项目类型"
+      "newItemType": "新项目类型",
+      "items": "项",
+      "fields": "字段"
     },
     "placeholder": {
       "objectId": "24位十六进制字符串",

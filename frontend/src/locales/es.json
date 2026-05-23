@@ -245,7 +245,9 @@
         "title": "Eliminar campo"
       },
       "remove": "×",
-      "addItem": "+ Agregar elemento"
+      "addItem": "+ Agregar elemento",
+      "expand": "Expandir",
+      "collapse": "Contraer"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Tipo de nuevo elemento"
+      "newItemType": "Tipo de nuevo elemento",
+      "items": "elementos",
+      "fields": "campos"
     },
     "placeholder": {
       "objectId": "Cadena hexadecimal de 24 caracteres",

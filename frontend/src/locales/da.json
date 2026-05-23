@@ -245,7 +245,9 @@
         "title": "Fjern felt"
       },
       "remove": "×",
-      "addItem": "+ Tilføj element"
+      "addItem": "+ Tilføj element",
+      "expand": "Udvid",
+      "collapse": "Skjul"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Ny elementtype"
+      "newItemType": "Ny elementtype",
+      "items": "elementer",
+      "fields": "felter"
     },
     "placeholder": {
       "objectId": "24-tegns hex-streng",

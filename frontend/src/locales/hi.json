@@ -245,7 +245,9 @@
         "title": "फ़ील्ड हटाएँ"
       },
       "remove": "×",
-      "addItem": "+ आइटम जोड़ें"
+      "addItem": "+ आइटम जोड़ें",
+      "expand": "विस्तार करें",
+      "collapse": "संकुचित करें"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "नए आइटम का प्रकार"
+      "newItemType": "नए आइटम का प्रकार",
+      "items": "आइटम",
+      "fields": "फ़ील्ड"
     },
     "placeholder": {
       "objectId": "24-अक्षर हेक्स स्ट्रिंग",

@@ -246,7 +246,9 @@
       },
       "remove": "×",
       "setNull": "Set to null:",
-      "addItem": "+ Add item"
+      "addItem": "+ Add item",
+      "expand": "Expand",
+      "collapse": "Collapse"
     },
     "value": {
       "null": "null"
@@ -262,7 +264,9 @@
       "date": "Date",
       "time": "Time",
       "type": "Type",
-      "newItemType": "New item type"
+      "newItemType": "New item type",
+      "items": "items",
+      "fields": "fields"
     },
     "placeholder": {
       "objectId": "24-character hex string",

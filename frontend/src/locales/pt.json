@@ -245,7 +245,9 @@
         "title": "Remover campo"
       },
       "remove": "×",
-      "addItem": "+ Adicionar item"
+      "addItem": "+ Adicionar item",
+      "expand": "Expandir",
+      "collapse": "Recolher"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Tipo do novo item"
+      "newItemType": "Tipo do novo item",
+      "items": "itens",
+      "fields": "campos"
     },
     "placeholder": {
       "objectId": "String hexadecimal de 24 caracteres",

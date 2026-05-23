@@ -245,7 +245,9 @@
         "title": "Supprimer le champ"
       },
       "remove": "×",
-      "addItem": "+ Ajouter un élément"
+      "addItem": "+ Ajouter un élément",
+      "expand": "Développer",
+      "collapse": "Réduire"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Type du nouvel élément"
+      "newItemType": "Type du nouvel élément",
+      "items": "éléments",
+      "fields": "champs"
     },
     "placeholder": {
       "objectId": "Chaîne hexadécimale de 24 caractères",

@@ -245,7 +245,9 @@
         "title": "Rimuovi campo"
       },
       "remove": "×",
-      "addItem": "+ Aggiungi elemento"
+      "addItem": "+ Aggiungi elemento",
+      "expand": "Espandi",
+      "collapse": "Comprimi"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "Tipo nuovo elemento"
+      "newItemType": "Tipo nuovo elemento",
+      "items": "elementi",
+      "fields": "campi"
     },
     "placeholder": {
       "objectId": "Stringa esadecimale di 24 caratteri",

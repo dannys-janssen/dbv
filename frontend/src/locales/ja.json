@@ -245,7 +245,9 @@
         "title": "フィールドを削除"
       },
       "remove": "×",
-      "addItem": "+ アイテムを追加"
+      "addItem": "+ アイテムを追加",
+      "expand": "展開",
+      "collapse": "折りたたむ"
     },
     "value": {
       "null": "null"
@@ -256,7 +258,9 @@
     },
     "label": {
       "utc": "UTC",
-      "newItemType": "新しいアイテムの型"
+      "newItemType": "新しいアイテムの型",
+      "items": "項目",
+      "fields": "フィールド"
     },
     "placeholder": {
       "objectId": "24文字の16進数文字列",

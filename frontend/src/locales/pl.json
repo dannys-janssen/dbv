@@ -246,7 +246,9 @@
       },
       "remove": "×",
       "setNull": "Ustaw na null:",
-      "addItem": "+ Dodaj element"
+      "addItem": "+ Dodaj element",
+      "expand": "Rozwiń",
+      "collapse": "Zwiń"
     },
     "value": {
       "null": "null"
@@ -262,7 +264,9 @@
       "date": "Data",
       "time": "Czas",
       "type": "Typ",
-      "newItemType": "Typ nowego elementu"
+      "newItemType": "Typ nowego elementu",
+      "items": "elementy",
+      "fields": "pola"
     },
     "placeholder": {
       "objectId": "24-znakowy ciąg heksadecymalny",

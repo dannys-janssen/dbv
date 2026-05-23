@@ -212,7 +212,7 @@ The collection view query bar has two modes toggled by the user: **MQL** (defaul
 A schema-driven form component used alongside the Monaco JSON editor in the document edit/create modal.
 
 - Receives `schema: CollectionSchema | null`, `value: string` (JSON), `onChange`, `isEditing` props.
-- Parses the JSON document and renders one input per top-level field based on its dominant BSON type:
+- Parses the JSON document and renders one input per field based on its dominant BSON type:
 
   | Type | Widget |
   |---|---|
@@ -222,8 +222,10 @@ A schema-driven form component used alongside the Monaco JSON editor in the docu
   | `long` | Number input → `{"$numberLong": "..."}` |
   | `decimal` | Number input → `{"$numberDecimal": "..."}` |
   | `objectId` | Text input → `{"$oid": "..."}` |
+  | `uuid` | Text input (UUID string `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`) → `{"$binary": {"base64": "...", "subType": "04"}}`. Auto-generates a UUID v4 when a new uuid field is added. |
   | `string` | `<input type="text">` |
-  | `object` / `array` / mixed | JSON textarea |
+  | `object` | Inline recursive sub-form (`NestedObjectEditor`) with ▶/▼ collapse toggle and add/remove sub-fields. Supports arbitrary nesting depth. |
+  | `array` | Inline list of item editors (`NestedArrayEditor`) with ▶/▼ collapse toggle and add/remove items. Items can be any type (including `object` / `array`). |
 
 - `_id` is read-only when `isEditing` is true.
 - Schema fields **and** extra doc fields both show a **×** remove button (except `_id`).

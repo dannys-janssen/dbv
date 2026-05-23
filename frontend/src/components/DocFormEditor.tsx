@@ -100,6 +100,21 @@ function uuidToBsonBinary(uuid: string): Record<string, unknown> {
   return { $binary: { base64, subType: "04" } };
 }
 
+/** Generate a random UUID v4 string. */
+function generateUuid(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant RFC 4122
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+}
+
+/** Return the initial displayValue for a newly-added field of the given type. */
+function defaultDisplayValue(type: string): string {
+  return type === "uuid" ? generateUuid() : "";
+}
+
 /** Try to determine the best BSON type for a given doc value. */
 function detectValueType(v: unknown): string {
   if (v === null || v === undefined) return "null";
@@ -403,6 +418,11 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
     ? `[${field.key}]`
     : field.key;
 
+  // Collapsible state for object and array fields.
+  const isNested = (field.type === "object" && field.children !== undefined)
+                || (field.type === "array" && field.arrayItems !== undefined);
+  const [collapsed, setCollapsed] = React.useState(false);
+
   const handleNull = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(field.key, { isNull: e.target.checked });
   };
@@ -424,9 +444,27 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
+        {/* Collapse/expand toggle for nested object and array fields */}
+        {isNested && (
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? t("form.button.expand") : t("form.button.collapse")}
+            title={collapsed ? t("form.button.expand") : t("form.button.collapse")}
+            style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11, padding: "0 4px 0 0", lineHeight: 1, flexShrink: 0 }}
+          >
+            {collapsed ? "▶" : "▼"}
+          </button>
+        )}
         <label style={{ ...labelStyle, marginBottom: 0, flex: 1 }}>
           {displayKey}
           <span style={typeTagStyle(field.type)}>{field.type}</span>
+          {isNested && collapsed && (
+            <span style={{ fontSize: 11, color: "#475569", fontWeight: 400, marginLeft: 8 }}>
+              {field.type === "array"
+                ? `[${field.arrayItems?.length ?? 0} ${t("form.label.items")}]`
+                : `{${field.children?.length ?? 0} ${t("form.label.fields")}}`}
+            </span>
+          )}
         </label>
 
         {/* Type selector for non-id, non-schema fields */}
@@ -477,7 +515,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
         )}
       </div>
 
-      {field.isNull || readOnly ? (
+      {!collapsed && (field.isNull || readOnly ? (
         <input
           type="text"
           readOnly
@@ -562,7 +600,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
           style={textareaStyle}
           spellCheck={false}
         />
-      )}
+      ))}
     </div>
   );
 }
@@ -606,7 +644,7 @@ function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix
     const newChild: FieldState = {
       key,
       type: resolvedType,
-      displayValue: "",
+      displayValue: defaultDisplayValue(resolvedType),
       isNull: false,
       fromSchema: !!schemaField,
       children: resolvedType === "object" ? [] : undefined,
@@ -699,7 +737,7 @@ function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefi
     const newItem: FieldState = {
       key: String(arrayItems.length),
       type: newItemType,
-      displayValue: "",
+      displayValue: defaultDisplayValue(newItemType),
       isNull: false,
       fromSchema: false,
       children: newItemType === "object" ? [] : undefined,
@@ -849,7 +887,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
     const newField: FieldState = {
       key,
       type: newFieldType,
-      displayValue: "",
+      displayValue: defaultDisplayValue(newFieldType),
       isNull: false,
       fromSchema: false,
       children: newFieldType === "object" ? [] : undefined,
