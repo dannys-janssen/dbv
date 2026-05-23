@@ -244,7 +244,8 @@
       "removeField": {
         "title": "フィールドを削除"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ アイテムを追加"
     },
     "value": {
       "null": "null"
@@ -254,11 +255,13 @@
       "false": "false"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "新しいアイテムの型"
     },
     "placeholder": {
       "objectId": "24文字の16進数文字列",
-      "jsonValue": "JSON値"
+      "jsonValue": "JSON値",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "フィールドを追加"
@@ -266,6 +269,12 @@
     "validation": {
       "fieldExists": "フィールド \"{{key}}\" はすでに存在します。",
       "fieldNameRequired": "フィールド名は必須です。"
+    },
+    "nested": {
+      "empty": "サブフィールドがありません。以下に追加してください。"
+    },
+    "array": {
+      "empty": "空の配列。以下にアイテムを追加してください。"
     }
   },
   "editor": {

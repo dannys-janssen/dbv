@@ -244,7 +244,8 @@
       "removeField": {
         "title": "Veld verwijderen"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ Item toevoegen"
     },
     "value": {
       "null": "null"
@@ -254,11 +255,13 @@
       "false": "onwaar"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "Nieuw itemtype"
     },
     "placeholder": {
       "objectId": "24-teken hexadecimale tekenreeks",
-      "jsonValue": "JSON-waarde"
+      "jsonValue": "JSON-waarde",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Veld toevoegen"
@@ -266,6 +269,12 @@
     "validation": {
       "fieldExists": "Veld \"{{key}}\" bestaat al.",
       "fieldNameRequired": "Veldnaam is verplicht."
+    },
+    "nested": {
+      "empty": "Nog geen subvelden. Voeg er hieronder een toe."
+    },
+    "array": {
+      "empty": "Lege array. Voeg hieronder items toe."
     }
   },
   "editor": {

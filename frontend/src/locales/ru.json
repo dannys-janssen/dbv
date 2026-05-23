@@ -245,7 +245,8 @@
         "title": "Удалить поле"
       },
       "remove": "×",
-      "setNull": "Установить null:"
+      "setNull": "Установить null:",
+      "addItem": "+ Добавить элемент"
     },
     "value": {
       "null": "null"
@@ -260,11 +261,13 @@
       "newFieldType": "Новый тип поля",
       "date": "Дата",
       "time": "Время",
-      "type": "Тип"
+      "type": "Тип",
+      "newItemType": "Тип нового элемента"
     },
     "placeholder": {
       "objectId": "24-символьная шестнадцатеричная строка",
-      "jsonValue": "Значение JSON"
+      "jsonValue": "Значение JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Добавить поле"
@@ -272,6 +275,12 @@
     "validation": {
       "fieldExists": "Поле «{{key}}» уже существует.",
       "fieldNameRequired": "Название поля обязательно."
+    },
+    "nested": {
+      "empty": "Нет подполей. Добавьте ниже."
+    },
+    "array": {
+      "empty": "Пустой массив. Добавьте элементы ниже."
     }
   },
   "editor": {

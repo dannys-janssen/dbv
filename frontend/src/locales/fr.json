@@ -244,7 +244,8 @@
       "removeField": {
         "title": "Supprimer le champ"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ Ajouter un élément"
     },
     "value": {
       "null": "null"
@@ -254,11 +255,13 @@
       "false": "faux"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "Type du nouvel élément"
     },
     "placeholder": {
       "objectId": "Chaîne hexadécimale de 24 caractères",
-      "jsonValue": "Valeur JSON"
+      "jsonValue": "Valeur JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Ajouter un champ"
@@ -266,6 +269,12 @@
     "validation": {
       "fieldExists": "Le champ \"{{key}}\" existe déjà.",
       "fieldNameRequired": "Le nom du champ est requis."
+    },
+    "nested": {
+      "empty": "Aucun sous-champ pour l'instant. Ajoutez-en un ci-dessous."
+    },
+    "array": {
+      "empty": "Tableau vide. Ajoutez des éléments ci-dessous."
     }
   },
   "editor": {

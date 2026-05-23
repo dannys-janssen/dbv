@@ -245,7 +245,8 @@
         "title": "Αφαίρεση πεδίου"
       },
       "remove": "×",
-      "setNull": "Ορισμός σε null:"
+      "setNull": "Ορισμός σε null:",
+      "addItem": "+ Προσθήκη στοιχείου"
     },
     "value": {
       "null": "null"
@@ -260,11 +261,13 @@
       "newFieldType": "Τύπος νέου πεδίου",
       "date": "Ημερομηνία",
       "time": "Ώρα",
-      "type": "Τύπος"
+      "type": "Τύπος",
+      "newItemType": "Τύπος νέου στοιχείου"
     },
     "placeholder": {
       "objectId": "Αλφαριθμητικό 24 χαρακτήρων",
-      "jsonValue": "Τιμή JSON"
+      "jsonValue": "Τιμή JSON",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Προσθήκη πεδίου"
@@ -272,6 +275,12 @@
     "validation": {
       "fieldExists": "Το πεδίο «{{key}}» υπάρχει ήδη.",
       "fieldNameRequired": "Το όνομα πεδίου είναι υποχρεωτικό."
+    },
+    "nested": {
+      "empty": "Δεν υπάρχουν ακόμα υποπεδία. Προσθέστε ένα παρακάτω."
+    },
+    "array": {
+      "empty": "Κενός πίνακας. Προσθέστε στοιχεία παρακάτω."
     }
   },
   "editor": {

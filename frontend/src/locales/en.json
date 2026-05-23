@@ -1,40 +1,100 @@
 {
-  "brand": { "name": "dbv" },
+  "brand": {
+    "name": "dbv"
+  },
   "auth": {
     "login": {
       "title": "Sign in",
       "subtitle": "Access your MongoDB databases",
       "footer": "Secured by Keycloak OAuth2",
-      "button": { "label": "Sign In", "loading": "Signing in…" },
-      "validation": { "fieldsRequired": "Username and password are required" },
-      "error": { "invalidCredentials": "Login failed. Check your credentials." }
+      "button": {
+        "label": "Sign In",
+        "loading": "Signing in…"
+      },
+      "validation": {
+        "fieldsRequired": "Username and password are required"
+      },
+      "error": {
+        "invalidCredentials": "Login failed. Check your credentials."
+      }
     }
   },
   "nav": {
     "signOut": "Sign out",
-    "section": { "databases": "DATABASES", "collections": "COLLECTIONS" }
+    "section": {
+      "databases": "DATABASES",
+      "collections": "COLLECTIONS"
+    }
   },
   "connection": {
-    "status": { "noInfo": "No connection info" },
-    "button": {
-      "reconnect": { "label": "↻ Reconnect", "title": "Reconnect using current URI" },
-      "change": { "label": "⚙ Change", "title": "Change MongoDB connection" }
+    "status": {
+      "noInfo": "No connection info"
     },
-    "error": { "failed": "⚠ MongoDB connection failed:" }
+    "button": {
+      "reconnect": {
+        "label": "↻ Reconnect",
+        "title": "Reconnect using current URI"
+      },
+      "change": {
+        "label": "⚙ Change",
+        "title": "Change MongoDB connection"
+      }
+    },
+    "error": {
+      "failed": "⚠ MongoDB connection failed:"
+    }
   },
   "database": {
-    "search": { "placeholder": "Search databases…" },
-    "list": { "empty": "No databases found" },
-    "button": { "create": { "title": "Create database" }, "stats": { "title": "Database stats for \"{{db}}\"" }, "drop": { "title": "Drop database \"{{db}}\"" } }
+    "search": {
+      "placeholder": "Search databases…"
+    },
+    "list": {
+      "empty": "No databases found"
+    },
+    "button": {
+      "create": {
+        "title": "Create database"
+      },
+      "stats": {
+        "title": "Database stats for \"{{db}}\""
+      },
+      "drop": {
+        "title": "Drop database \"{{db}}\""
+      }
+    }
   },
   "collection": {
-    "search": { "placeholder": "Search collections…" },
-    "list": { "empty": { "noCollections": "No collections.", "canCreate": "Click ＋ to create one." } },
-    "button": { "create": { "title": "Create collection" }, "drop": { "title": "Drop collection \"{{col}}\"" } }
+    "search": {
+      "placeholder": "Search collections…"
+    },
+    "list": {
+      "empty": {
+        "noCollections": "No collections.",
+        "canCreate": "Click ＋ to create one."
+      }
+    },
+    "button": {
+      "create": {
+        "title": "Create collection"
+      },
+      "drop": {
+        "title": "Drop collection \"{{col}}\""
+      }
+    }
   },
   "tabs": {
-    "button": { "close": { "title": "Close tab" }, "new": { "title": "New tab" } },
-    "contextMenu": { "closeOthers": "Close other tabs", "closeAll": "Close all tabs" },
+    "button": {
+      "close": {
+        "title": "Close tab"
+      },
+      "new": {
+        "title": "New tab"
+      }
+    },
+    "contextMenu": {
+      "closeOthers": "Close other tabs",
+      "closeAll": "Close all tabs"
+    },
     "documents": "Documents",
     "aggregate": "Aggregate",
     "update": "Update",
@@ -48,14 +108,24 @@
     "createDatabase": {
       "title": "Create Database",
       "subtitle": "MongoDB creates a database when its first collection is created.",
-      "label": { "dbName": "Database name", "collectionName": "Initial collection name" },
-      "placeholder": { "dbName": "e.g. myapp", "collectionName": "e.g. users" }
+      "label": {
+        "dbName": "Database name",
+        "collectionName": "Initial collection name"
+      },
+      "placeholder": {
+        "dbName": "e.g. myapp",
+        "collectionName": "e.g. users"
+      }
     },
     "createCollection": {
       "title": "Create Collection",
       "subtitle": "Add a new collection to",
-      "label": { "name": "Collection name" },
-      "placeholder": { "name": "e.g. products" }
+      "label": {
+        "name": "Collection name"
+      },
+      "placeholder": {
+        "name": "e.g. products"
+      }
     },
     "dbStats": {
       "title": "Database:",
@@ -79,37 +149,72 @@
         "tlsCertKeyFile": "e.g. /certs/client.pem"
       },
       "optional": "(optional, path on server)",
-      "warning": { "insecure": "⚠ insecure" }
+      "warning": {
+        "insecure": "⚠ insecure"
+      }
     },
     "confirmDrop": {
       "database": "Drop entire database \"{{db}}\"? This cannot be undone.",
       "collection": "Drop collection \"{{col}}\"? All documents will be deleted.",
       "index": "Drop index \"{{name}}\"?"
     },
-    "editDocument": { "title": "Edit Document" },
-    "newDocument": { "title": "New Document" },
+    "editDocument": {
+      "title": "Edit Document"
+    },
+    "newDocument": {
+      "title": "New Document"
+    },
     "createIndex": {
       "title": "Create Index",
       "subtitle": "Define the fields and options for the new index.",
-      "label": { "keys": "Index Keys", "name": "Index Name", "unique": "Unique", "sparse": "Sparse", "background": "Background", "ttl": "TTL", "partialFilter": "Partial Filter Expression" },
+      "label": {
+        "keys": "Index Keys",
+        "name": "Index Name",
+        "unique": "Unique",
+        "sparse": "Sparse",
+        "background": "Background",
+        "ttl": "TTL",
+        "partialFilter": "Partial Filter Expression"
+      },
       "optional": "(optional)",
-      "hint": { "background": "(non-blocking)", "ttl": "(seconds, optional)" },
-      "placeholder": { "fieldName": "field name", "name": "auto-generated if empty", "ttl": "e.g. 3600", "partialFilter": "e.g. { \"status\": { \"$exists\": true } }" },
-      "option": { "ascending": "1 (asc)", "descending": "-1 (desc)" },
-      "button": { "addField": "+ Add field", "submit": "Create Index" },
-      "validation": { "fieldRequired": "At least one field is required.", "partialFilterInvalid": "Invalid JSON for partial filter expression." }
+      "hint": {
+        "background": "(non-blocking)",
+        "ttl": "(seconds, optional)"
+      },
+      "placeholder": {
+        "fieldName": "field name",
+        "name": "auto-generated if empty",
+        "ttl": "e.g. 3600",
+        "partialFilter": "e.g. { \"status\": { \"$exists\": true } }"
+      },
+      "option": {
+        "ascending": "1 (asc)",
+        "descending": "-1 (desc)"
+      },
+      "button": {
+        "addField": "+ Add field",
+        "submit": "Create Index"
+      },
+      "validation": {
+        "fieldRequired": "At least one field is required.",
+        "partialFilterInvalid": "Invalid JSON for partial filter expression."
+      }
     },
     "import": {
       "title": "Import Documents",
       "subtitleJson": "File: {{filename}} — {{count}} documents found.",
       "subtitleBson": "File: {{filename}}",
       "replaceLabel": "Replace existing data (drop collection before import)",
-      "button": { "import": "Import" },
+      "button": {
+        "import": "Import"
+      },
       "error": "Import failed:",
       "confirmReplace": "Import {{count}} documents? (replace existing?)",
       "confirmReplaceBson": "Import BSON file? (replace existing data?)"
     },
-    "confirmDelete": { "document": "Delete this document?" }
+    "confirmDelete": {
+      "document": "Delete this document?"
+    }
   },
   "buttons": {
     "cancel": "Cancel",
@@ -130,29 +235,93 @@
     "json": "{ } JSON"
   },
   "form": {
-    "labels": { "username": "Username", "password": "Password", "fieldName": "Field name" },
-    "button": { "removeField": { "title": "Remove field" }, "remove": "×", "setNull": "Set to null:" },
-    "value": { "null": "null" },
-    "option": { "true": "true", "false": "false" },
-    "label": { "utc": "UTC", "newFieldName": "New field name", "newFieldType": "New field type", "date": "Date", "time": "Time", "type": "Type" },
-    "placeholder": { "objectId": "24-character hex string", "jsonValue": "JSON value" },
-    "section": { "addField": "Add field" },
-    "validation": { "fieldExists": "Field \"{{key}}\" already exists.", "fieldNameRequired": "Field name is required." }
+    "labels": {
+      "username": "Username",
+      "password": "Password",
+      "fieldName": "Field name"
+    },
+    "button": {
+      "removeField": {
+        "title": "Remove field"
+      },
+      "remove": "×",
+      "setNull": "Set to null:",
+      "addItem": "+ Add item"
+    },
+    "value": {
+      "null": "null"
+    },
+    "option": {
+      "true": "true",
+      "false": "false"
+    },
+    "label": {
+      "utc": "UTC",
+      "newFieldName": "New field name",
+      "newFieldType": "New field type",
+      "date": "Date",
+      "time": "Time",
+      "type": "Type",
+      "newItemType": "New item type"
+    },
+    "placeholder": {
+      "objectId": "24-character hex string",
+      "jsonValue": "JSON value",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+    },
+    "section": {
+      "addField": "Add field"
+    },
+    "validation": {
+      "fieldExists": "Field \"{{key}}\" already exists.",
+      "fieldNameRequired": "Field name is required."
+    },
+    "nested": {
+      "empty": "No sub-fields yet. Add one below."
+    },
+    "array": {
+      "empty": "Empty array. Add items below."
+    }
   },
   "editor": {
-    "form": { "noSchema": "No schema available. Use JSON mode to edit this document." },
-    "mode": {
-      "form": { "subtitle": "Edit fields using type-aware inputs. Switch to JSON for raw editing." },
-      "json": { "subtitle": "Edit the raw JSON document. Switch to Form for guided editing." }
+    "form": {
+      "noSchema": "No schema available. Use JSON mode to edit this document."
     },
-    "error": { "saveFailure": "Invalid JSON or save failed:" }
+    "mode": {
+      "form": {
+        "subtitle": "Edit fields using type-aware inputs. Switch to JSON for raw editing."
+      },
+      "json": {
+        "subtitle": "Edit the raw JSON document. Switch to Form for guided editing."
+      }
+    },
+    "error": {
+      "saveFailure": "Invalid JSON or save failed:"
+    }
   },
   "query": {
-    "label": { "filter": "Filter", "sort": "Sort", "projection": "Projection", "limit": "Limit" },
-    "hint": { "ctrlEnter": "Ctrl+Enter to apply" },
-    "badge": { "active": "active", "invalidJson": "invalid JSON" },
-    "button": { "apply": "Apply", "clear": "Clear", "loading": "Loading…" },
-    "mode": { "label": "Query mode", "sqlHint": "Type a SQL SELECT — Ctrl+Enter to apply" },
+    "label": {
+      "filter": "Filter",
+      "sort": "Sort",
+      "projection": "Projection",
+      "limit": "Limit"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter to apply"
+    },
+    "badge": {
+      "active": "active",
+      "invalidJson": "invalid JSON"
+    },
+    "button": {
+      "apply": "Apply",
+      "clear": "Clear",
+      "loading": "Loading…"
+    },
+    "mode": {
+      "label": "Query mode",
+      "sqlHint": "Type a SQL SELECT — Ctrl+Enter to apply"
+    },
     "sql": {
       "label": "SQL Query",
       "parseError": "parse error",
@@ -160,67 +329,150 @@
       "noConstraints": "No filter, sort or projection — returns all documents",
       "example": "e.g. SELECT name, age FROM {{col}} WHERE status = 'active' ORDER BY age DESC LIMIT 20"
     },
-    "resize": { "title": "Drag to resize" },
+    "resize": {
+      "title": "Drag to resize"
+    },
     "duration": "⏱ {{duration}}"
   },
   "views": {
-    "table": { "title": "Table view" },
-    "tree": { "title": "Tree view" },
-    "json": { "title": "JSON view" }
+    "table": {
+      "title": "Table view"
+    },
+    "tree": {
+      "title": "Tree view"
+    },
+    "json": {
+      "title": "JSON view"
+    }
   },
   "selection": {
     "count_one": "{{count}} document selected",
     "count_other": "{{count}} documents selected",
-    "button": { "export": "Export Selected", "exportJson": "Export JSON", "exportBson": "Export BSON", "delete": "Delete", "clear": "✕ Clear" },
+    "button": {
+      "export": "Export Selected",
+      "exportJson": "Export JSON",
+      "exportBson": "Export BSON",
+      "delete": "Delete",
+      "clear": "✕ Clear"
+    },
     "confirmDelete_one": "Delete {{count}} selected document? This cannot be undone.",
     "confirmDelete_other": "Delete {{count}} selected documents? This cannot be undone."
   },
   "documents": {
-    "list": { "empty": "No documents found", "emptyWithFilter": "Try adjusting your filter or projection.", "emptyNoFilter": "This collection is empty." },
-    "button": { "create": "+ New Document" },
+    "list": {
+      "empty": "No documents found",
+      "emptyWithFilter": "Try adjusting your filter or projection.",
+      "emptyNoFilter": "This collection is empty."
+    },
+    "button": {
+      "create": "+ New Document"
+    },
     "fieldCount_one": "{{count}} field",
     "fieldCount_other": "{{count}} fields"
   },
   "table": {
-    "header": { "id": "_id", "preview": "Preview", "actions": "Actions", "name": "Name", "keys": "Keys", "unique": "Unique", "sparse": "Sparse", "ttl": "TTL (s)", "partialFilter": "Partial Filter", "index": "Index", "size": "Size", "fieldPath": "Field path", "types": "Types", "coverage": "Coverage", "nullable": "Nullable" }
+    "header": {
+      "id": "_id",
+      "preview": "Preview",
+      "actions": "Actions",
+      "name": "Name",
+      "keys": "Keys",
+      "unique": "Unique",
+      "sparse": "Sparse",
+      "ttl": "TTL (s)",
+      "partialFilter": "Partial Filter",
+      "index": "Index",
+      "size": "Size",
+      "fieldPath": "Field path",
+      "types": "Types",
+      "coverage": "Coverage",
+      "nullable": "Nullable"
+    }
   },
   "pagination": {
     "label": "Showing {{start}}–{{end}} of {{total}} documents",
     "label_page": "Page {{page}}",
-    "button": { "prev": "← Prev", "next": "Next →" }
+    "button": {
+      "prev": "← Prev",
+      "next": "Next →"
+    }
   },
   "aggregate": {
     "prompt": "Enter an aggregation pipeline (JSON array):",
-    "button": { "run": "▶ Run", "running": "Running…" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "results": { "count_one": "{{count}} document", "count_other": "{{count}} documents" },
-    "placeholder": { "result": "// Run a command to see results" }
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "results": {
+      "count_one": "{{count}} document",
+      "count_other": "{{count}} documents"
+    },
+    "placeholder": {
+      "result": "// Run a command to see results"
+    }
   },
   "update": {
     "prompt": "Enter updateMany arguments for this collection as (filter, update):",
-    "button": { "run": "▶ Run", "running": "Running…" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "placeholder": { "result": "// Run updateMany to see results" },
-    "error": { "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}." }
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run updateMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}."
+    }
   },
   "delete": {
     "prompt": "Enter deleteMany arguments for this collection as (filter, options):",
-    "button": { "run": "▶ Run", "running": "Running…" },
-    "hint": { "ctrlEnter": "Ctrl+Enter" },
-    "placeholder": { "result": "// Run deleteMany to see results" },
-    "error": { "invalidFormat": "Invalid format. Use (filter, options) or {\"filter\": {...}, \"options\": {...}}." }
+    "button": {
+      "run": "▶ Run",
+      "running": "Running…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Run deleteMany to see results"
+    },
+    "error": {
+      "invalidFormat": "Invalid format. Use (filter, options) or {\"filter\": {...}, \"options\": {...}}."
+    }
   },
   "schema": {
-    "label": { "sampled": "Sampled", "document": "document", "field": "field", "nullable": "nullable" },
-    "plural": { "documents": "s", "fields": "s" },
+    "label": {
+      "sampled": "Sampled",
+      "document": "document",
+      "field": "field",
+      "nullable": "nullable"
+    },
+    "plural": {
+      "documents": "s",
+      "fields": "s"
+    },
     "inferring": "Inferring schema…",
     "unavailable": "No schema data available.",
     "summary": "Sampled {{docCount}} document{{docPlural}} · {{fieldCount}} field{{fieldPlural}}"
   },
   "indexes": {
-    "list": { "empty": "No indexes found." },
-    "button": { "create": "+ New Index" },
-    "label": { "count_one": "{{count}} index", "count_other": "{{count}} indexes", "loading": "Loading…" }
+    "list": {
+      "empty": "No indexes found."
+    },
+    "button": {
+      "create": "+ New Index"
+    },
+    "label": {
+      "count_one": "{{count}} index",
+      "count_other": "{{count}} indexes",
+      "loading": "Loading…"
+    }
   },
   "stats": {
     "loading": "Loading stats…",
@@ -236,11 +488,22 @@
       "indexSize": "Index size",
       "totalSize": "Total size"
     },
-    "section": { "indexSizes": "Index sizes" }
+    "section": {
+      "indexSizes": "Index sizes"
+    }
   },
   "commands": {
-    "search": { "placeholder": "Search commands…", "label": "Search commands" },
-    "category": { "server": "Server", "database": "Database", "collection": "Collection", "replication": "Replication", "administration": "Administration" },
+    "search": {
+      "placeholder": "Search commands…",
+      "label": "Search commands"
+    },
+    "category": {
+      "server": "Server",
+      "database": "Database",
+      "collection": "Collection",
+      "replication": "Replication",
+      "administration": "Administration"
+    },
     "description": {
       "ping": "Test server connectivity",
       "buildInfo": "Server version and build info",
@@ -281,11 +544,23 @@
       "listIndexes": "List indexes on a collection",
       "profile": "Get/set database profiler level"
     },
-    "context": { "runningOn": "Running on database:" },
-    "checkbox": { "useAdminDb": "Use admin database" },
-    "button": { "run": "▶ Run  (Ctrl+Enter)", "running": "⏳ Running…" },
-    "label": { "command": "Command", "result": "Result" },
-    "error": { "invalidJson": "Invalid JSON — fix the command before running." }
+    "context": {
+      "runningOn": "Running on database:"
+    },
+    "checkbox": {
+      "useAdminDb": "Use admin database"
+    },
+    "button": {
+      "run": "▶ Run  (Ctrl+Enter)",
+      "running": "⏳ Running…"
+    },
+    "label": {
+      "command": "Command",
+      "result": "Result"
+    },
+    "error": {
+      "invalidJson": "Invalid JSON — fix the command before running."
+    }
   },
   "badge": {
     "admin": "● Admin",
@@ -294,13 +569,22 @@
     "success": "OK"
   },
   "tree": {
-    "button": { "expandAll": "Expand all", "collapseAll": "Collapse all" },
-    "checkbox": { "selectAllLabel": "Select all on page" }
+    "button": {
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all"
+    },
+    "checkbox": {
+      "selectAllLabel": "Select all on page"
+    }
   },
   "ui": {
     "loading": "Loading…",
     "connecting": "Connecting…",
-    "sidebar": { "resize": { "title": "Drag to resize sidebar" } }
+    "sidebar": {
+      "resize": {
+        "title": "Drag to resize sidebar"
+      }
+    }
   },
   "empty": {
     "title": "Select a database and collection",
@@ -309,7 +593,9 @@
       "databaseNeeded": "Choose a database from the sidebar to get started."
     }
   },
-  "language": { "label": "Language" },
+  "language": {
+    "label": "Language"
+  },
   "a11y": {
     "skipToContent": "Skip to main content",
     "tabList": "Open tabs",

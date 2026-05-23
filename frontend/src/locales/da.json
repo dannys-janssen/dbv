@@ -244,7 +244,8 @@
       "removeField": {
         "title": "Fjern felt"
       },
-      "remove": "×"
+      "remove": "×",
+      "addItem": "+ Tilføj element"
     },
     "value": {
       "null": "null"
@@ -254,11 +255,13 @@
       "false": "falsk"
     },
     "label": {
-      "utc": "UTC"
+      "utc": "UTC",
+      "newItemType": "Ny elementtype"
     },
     "placeholder": {
       "objectId": "24-tegns hex-streng",
-      "jsonValue": "JSON-værdi"
+      "jsonValue": "JSON-værdi",
+      "uuid": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
     },
     "section": {
       "addField": "Tilføj felt"
@@ -266,6 +269,12 @@
     "validation": {
       "fieldExists": "Felt \"{{key}}\" findes allerede.",
       "fieldNameRequired": "Feltnavn er påkrævet."
+    },
+    "nested": {
+      "empty": "Ingen underfelter endnu. Tilføj et nedenfor."
+    },
+    "array": {
+      "empty": "Tomt array. Tilføj elementer nedenfor."
     }
   },
   "editor": {
