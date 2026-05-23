@@ -38,6 +38,7 @@
     "documents": "Documents",
     "aggregate": "Aggregate",
     "update": "Update",
+    "delete": "Delete",
     "schema": "Schema",
     "indexes": "Indexes",
     "stats": "Stats",
@@ -170,7 +171,7 @@
   "selection": {
     "count_one": "{{count}} document selected",
     "count_other": "{{count}} documents selected",
-    "button": { "export": "Export Selected", "exportJson": "Export JSON", "exportBson": "Export BSON", "delete": "Delete Selected", "clear": "✕ Clear" },
+    "button": { "export": "Export Selected", "exportJson": "Export JSON", "exportBson": "Export BSON", "delete": "Delete", "clear": "✕ Clear" },
     "confirmDelete_one": "Delete {{count}} selected document? This cannot be undone.",
     "confirmDelete_other": "Delete {{count}} selected documents? This cannot be undone."
   },
@@ -201,6 +202,13 @@
     "hint": { "ctrlEnter": "Ctrl+Enter" },
     "placeholder": { "result": "// Run updateMany to see results" },
     "error": { "invalidFormat": "Invalid format. Use (filter, update) or {\"filter\": {...}, \"update\": {...}}." }
+  },
+  "delete": {
+    "prompt": "Enter deleteMany arguments for this collection as (filter, options):",
+    "button": { "run": "▶ Run", "running": "Running…" },
+    "hint": { "ctrlEnter": "Ctrl+Enter" },
+    "placeholder": { "result": "// Run deleteMany to see results" },
+    "error": { "invalidFormat": "Invalid format. Use (filter, options) or {\"filter\": {...}, \"options\": {...}}." }
   },
   "schema": {
     "label": { "sampled": "Sampled", "document": "document", "field": "field", "nullable": "nullable" },
@@ -262,6 +270,7 @@
       "explain": "Explain plan for a find query",
       "explainAggregate": "Explain plan for an aggregation",
       "update": "Update multiple documents in this collection",
+      "delete": "Delete multiple documents in this collection",
       "replSetGetStatus": "Replica set status",
       "replSetGetConfig": "Replica set configuration",
       "isMaster": "Server role check (legacy)",

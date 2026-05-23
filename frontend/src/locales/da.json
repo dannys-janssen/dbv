@@ -94,6 +94,7 @@
     "documents": "Dokumenter",
     "aggregate": "Aggregering",
     "update": "Opdater",
+    "delete": "Slet",
     "schema": "Skema",
     "indexes": "Indekser",
     "stats": "Statistikker",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} dokumenter valgt",
     "button": {
       "export": "Eksporter valgte",
-      "delete": "Slet valgte",
+      "delete": "Slet",
       "clear": "✕ Ryd",
       "exportJson": "Eksporter JSON",
       "exportBson": "Eksporter BSON"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "Ugyldigt format. Brug (filter, update) eller {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Indtast deleteMany-argumenter for denne samling som (filter, options):",
+    "button": {
+      "run": "▶ Kør",
+      "running": "Kører…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Kør deleteMany for at se resultater"
+    },
+    "error": {
+      "invalidFormat": "Ugyldigt format. Brug (filter, options) eller {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "Hent/indstil database-profilerniveau",
       "explain": "Forklaringsplan for en find-forespørgsel",
       "explainAggregate": "Forklaringsplan for en aggregering",
-      "update": "Opdater flere dokumenter i denne samling"
+      "update": "Opdater flere dokumenter i denne samling",
+      "delete": "Slet flere dokumenter i denne samling"
     },
     "context": {
       "runningOn": "Kører på database:"

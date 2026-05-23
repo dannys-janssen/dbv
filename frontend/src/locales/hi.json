@@ -94,6 +94,7 @@
     "documents": "दस्तावेज़",
     "aggregate": "एकत्रीकरण",
     "update": "अद्यतन",
+    "delete": "मिटाएँ",
     "schema": "स्कीमा",
     "indexes": "अनुक्रमणिका",
     "stats": "आँकड़े",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} दस्तावेज़ चुने गए",
     "button": {
       "export": "चुने गए निर्यात करें",
-      "delete": "चुने गए मिटाएँ",
+      "delete": "मिटाएँ",
       "clear": "✕ साफ़ करें",
       "exportJson": "JSON निर्यात करें",
       "exportBson": "BSON निर्यात करें"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "अमान्य प्रारूप। (filter, update) या {\"filter\": {...}, \"update\": {...}} का उपयोग करें।"
+    }
+  },
+  "delete": {
+    "prompt": "इस कलेक्शन के लिए deleteMany आर्ग्युमेंट्स (filter, options) के रूप में दर्ज करें:",
+    "button": {
+      "run": "▶ चलाएँ",
+      "running": "चल रहा है…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// परिणाम देखने के लिए deleteMany चलाएँ"
+    },
+    "error": {
+      "invalidFormat": "अमान्य प्रारूप। (filter, options) या {\"filter\": {...}, \"options\": {...}} का उपयोग करें।"
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "डेटाबेस प्रोफाइलर स्तर प्राप्त/सेट करें",
       "explain": "खोज क्वेरी के लिए व्याख्या योजना",
       "explainAggregate": "एकत्रीकरण के लिए व्याख्या योजना",
-      "update": "इस कलेक्शन में कई डॉक्यूमेंट अपडेट करें"
+      "update": "इस कलेक्शन में कई डॉक्यूमेंट अपडेट करें",
+      "delete": "इस कलेक्शन में कई डॉक्यूमेंट हटाएँ"
     },
     "context": {
       "runningOn": "डेटाबेस पर चल रहा है:"

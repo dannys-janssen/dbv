@@ -94,6 +94,7 @@
     "documents": "Documenten",
     "aggregate": "Aggregatie",
     "update": "Bijwerken",
+    "delete": "Verwijderen",
     "schema": "Schema",
     "indexes": "Indexen",
     "stats": "Statistieken",
@@ -334,7 +335,7 @@
     "count_other": "{{count}} documenten geselecteerd",
     "button": {
       "export": "Selectie exporteren",
-      "delete": "Selectie verwijderen",
+      "delete": "Verwijderen",
       "clear": "✕ Wissen",
       "exportJson": "JSON exporteren",
       "exportBson": "BSON exporteren"
@@ -412,6 +413,22 @@
     },
     "error": {
       "invalidFormat": "Ongeldig formaat. Gebruik (filter, update) of {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Voer deleteMany-argumenten voor deze collectie in als (filter, options):",
+    "button": {
+      "run": "▶ Uitvoeren",
+      "running": "Bezig met uitvoeren…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Voer deleteMany uit om resultaten te zien"
+    },
+    "error": {
+      "invalidFormat": "Ongeldig formaat. Gebruik (filter, options) of {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -507,7 +524,8 @@
       "profile": "Databaseprofilerniveau opvragen/instellen",
       "explain": "Verklaringsplan voor een zoekquery",
       "explainAggregate": "Verklaringsplan voor een aggregatie",
-      "update": "Meerdere documenten in deze collectie bijwerken"
+      "update": "Meerdere documenten in deze collectie bijwerken",
+      "delete": "Meerdere documenten in deze collectie verwijderen"
     },
     "context": {
       "runningOn": "Uitvoeren op database:"

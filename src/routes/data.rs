@@ -5,7 +5,7 @@ use axum::{
 };
 use bson::{Document, doc};
 use futures::TryStreamExt;
-use mongodb::options::FindOptions;
+use mongodb::options::{DeleteOptions, FindOptions};
 use serde::Deserialize;
 use serde_json::{Value, json};
 
@@ -266,9 +266,17 @@ pub async fn delete_document(
     Ok(Json(json!({ "deleted": result.deleted_count })))
 }
 
-#[derive(Deserialize)]
-pub struct BulkDeleteBody {
-    pub ids: Vec<String>,
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum BulkDeleteBody {
+    Ids {
+        ids: Vec<String>,
+    },
+    DeleteMany {
+        filter: Value,
+        #[serde(default)]
+        options: Option<Value>,
+    },
 }
 
 pub async fn bulk_delete_documents(
@@ -277,13 +285,35 @@ pub async fn bulk_delete_documents(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<BulkDeleteBody>,
 ) -> Result<Json<Value>, AppError> {
-    if body.ids.is_empty() {
-        return Err(AppError::BadRequest("No IDs provided".into()));
-    }
-    let ids: Vec<bson::Bson> = body.ids.iter().map(|id| parse_id_bson(id)).collect();
     let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
-    let result = coll.delete_many(doc! { "_id": { "$in": &ids } }).await?;
-    Ok(Json(json!({ "deleted": result.deleted_count })))
+
+    match body {
+        BulkDeleteBody::Ids { ids } => {
+            if ids.is_empty() {
+                return Err(AppError::BadRequest("No IDs provided".into()));
+            }
+            let ids: Vec<bson::Bson> = ids.iter().map(|id| parse_id_bson(id)).collect();
+            let result = coll.delete_many(doc! { "_id": { "$in": &ids } }).await?;
+            Ok(Json(json!({ "deleted": result.deleted_count })))
+        }
+        BulkDeleteBody::DeleteMany { filter, options } => {
+            let filter_doc = json_to_doc(filter)?;
+            let delete_options = match options {
+                Some(opts) => {
+                    let opts_doc = json_to_doc(opts)?;
+                    bson::from_document::<DeleteOptions>(opts_doc).map_err(|e| {
+                        AppError::BadRequest(format!("Invalid deleteMany options: {e}"))
+                    })?
+                }
+                None => DeleteOptions::default(),
+            };
+            let result = coll
+                .delete_many(filter_doc)
+                .with_options(delete_options)
+                .await?;
+            Ok(Json(json!({ "deleted": result.deleted_count })))
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -549,5 +579,30 @@ mod tests {
     fn system_databases_does_not_contain_user_db() {
         assert!(!SYSTEM_DATABASES.contains(&"myapp"));
         assert!(!SYSTEM_DATABASES.contains(&"production"));
+    }
+
+    #[test]
+    fn bulk_delete_body_deserializes_ids_variant() {
+        let body: BulkDeleteBody = serde_json::from_value(json!({ "ids": ["a", "b"] })).unwrap();
+        match body {
+            BulkDeleteBody::Ids { ids } => assert_eq!(ids, vec!["a", "b"]),
+            other => panic!("Expected Ids variant, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn bulk_delete_body_deserializes_delete_many_variant() {
+        let body: BulkDeleteBody = serde_json::from_value(json!({
+            "filter": { "status": "inactive" },
+            "options": { "maxTimeMS": 30000 }
+        }))
+        .unwrap();
+        match body {
+            BulkDeleteBody::DeleteMany { filter, options } => {
+                assert_eq!(filter, json!({ "status": "inactive" }));
+                assert_eq!(options, Some(json!({ "maxTimeMS": 30000 })));
+            }
+            other => panic!("Expected DeleteMany variant, got {other:?}"),
+        }
     }
 }

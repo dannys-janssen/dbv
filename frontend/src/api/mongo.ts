@@ -88,6 +88,18 @@ export const bulkDeleteDocuments = (db: string, collection: string, ids: string[
     .delete(`/databases/${db}/collections/${collection}/documents`, { data: { ids } })
     .then((r) => r.data);
 
+export const deleteManyDocuments = (
+  db: string,
+  collection: string,
+  filter: Record<string, unknown>,
+  options: Record<string, unknown>
+) =>
+  api
+    .delete(`/databases/${db}/collections/${collection}/documents`, {
+      data: { filter, options },
+    })
+    .then((r) => r.data);
+
 export const aggregate = (
   db: string,
   collection: string,

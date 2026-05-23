@@ -94,6 +94,7 @@
     "documents": "문서",
     "aggregate": "집계",
     "update": "업데이트",
+    "delete": "삭제",
     "schema": "스키마",
     "indexes": "인덱스",
     "stats": "통계",
@@ -340,7 +341,7 @@
     "count_other": "{{count}}개의 문서 선택됨",
     "button": {
       "export": "선택 항목 내보내기",
-      "delete": "선택 항목 삭제",
+      "delete": "삭제",
       "clear": "✕ 지우기",
       "exportJson": "JSON 내보내기",
       "exportBson": "BSON 내보내기"
@@ -418,6 +419,22 @@
     },
     "error": {
       "invalidFormat": "잘못된 형식입니다. (filter, update) 또는 {\"filter\": {...}, \"update\": {...}}를 사용하세요."
+    }
+  },
+  "delete": {
+    "prompt": "이 컬렉션의 deleteMany 인수를 (filter, options) 형식으로 입력하세요:",
+    "button": {
+      "run": "▶ 실행",
+      "running": "실행 중…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// 결과를 보려면 deleteMany를 실행하세요"
+    },
+    "error": {
+      "invalidFormat": "잘못된 형식입니다. (filter, options) 또는 {\"filter\": {...}, \"options\": {...}}를 사용하세요."
     }
   },
   "schema": {
@@ -515,7 +532,8 @@
       "profile": "데이터베이스 프로파일러 레벨 가져오기/설정",
       "explain": "find 쿼리의 실행 계획",
       "explainAggregate": "집계의 실행 계획",
-      "update": "이 컬렉션의 여러 문서 업데이트"
+      "update": "이 컬렉션의 여러 문서 업데이트",
+      "delete": "이 컬렉션의 여러 문서 삭제"
     },
     "context": {
       "runningOn": "실행 중인 데이터베이스:"

@@ -94,6 +94,7 @@
     "documents": "Dokumenty",
     "aggregate": "Agregacja",
     "update": "Aktualizacja",
+    "delete": "Usuń",
     "schema": "Schemat",
     "indexes": "Indeksy",
     "stats": "Statystyki",
@@ -340,7 +341,7 @@
     "count_other": "{{count}} dokumenty wybrane",
     "button": {
       "export": "Eksportuj wybrane",
-      "delete": "Usuń wybrane",
+      "delete": "Usuń",
       "clear": "✕ Wyczyść",
       "exportJson": "Eksportuj JSON",
       "exportBson": "Eksportuj BSON"
@@ -418,6 +419,22 @@
     },
     "error": {
       "invalidFormat": "Nieprawidłowy format. Użyj (filter, update) lub {\"filter\": {...}, \"update\": {...}}."
+    }
+  },
+  "delete": {
+    "prompt": "Wprowadź argumenty deleteMany dla tej kolekcji jako (filter, options):",
+    "button": {
+      "run": "▶ Uruchom",
+      "running": "Trwa uruchamianie…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// Uruchom deleteMany, aby zobaczyć wyniki"
+    },
+    "error": {
+      "invalidFormat": "Nieprawidłowy format. Użyj (filter, options) lub {\"filter\": {...}, \"options\": {...}}."
     }
   },
   "schema": {
@@ -515,7 +532,8 @@
       "profile": "Pobierz/ustaw poziom profilera bazy danych",
       "explain": "Plan wyjaśnienia dla zapytania find",
       "explainAggregate": "Plan wyjaśnienia dla agregacji",
-      "update": "Zaktualizuj wiele dokumentów w tej kolekcji"
+      "update": "Zaktualizuj wiele dokumentów w tej kolekcji",
+      "delete": "Usuń wiele dokumentów w tej kolekcji"
     },
     "context": {
       "runningOn": "Uruchomione na bazie danych:"

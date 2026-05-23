@@ -61,6 +61,7 @@ const PALETTE: Category[] = [
       { name: "explain",          description: "Explain plan for a find query",   template: '{\n  "explain": {\n    "find": "collectionName",\n    "filter": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
       { name: "explainAggregate", description: "Explain plan for an aggregation", template: '{\n  "explain": {\n    "aggregate": "collectionName",\n    "pipeline": [],\n    "cursor": {}\n  },\n  "verbosity": "executionStats"\n}', admin: false },
       { name: "update", description: "Update multiple documents in this collection", template: '{\n  "update": "collectionName",\n  "updates": [\n    {\n      "q": { "status": "inactive" },\n      "u": { "$set": { "archived": true } },\n      "multi": true\n    }\n  ]\n}', admin: false },
+      { name: "delete", description: "Delete multiple documents in this collection", template: '{\n  "delete": "collectionName",\n  "deletes": [\n    {\n      "q": { "status": "inactive" },\n      "limit": 0\n    }\n  ]\n}', admin: false },
     ],
   },
   {

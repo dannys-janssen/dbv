@@ -94,6 +94,7 @@
     "documents": "دستاویزات",
     "aggregate": "مجموعی",
     "update": "تازہ کاری",
+    "delete": "حذف کریں",
     "schema": "اسکیما",
     "indexes": "اشاریے",
     "stats": "اعداد و شمار",
@@ -340,7 +341,7 @@
     "count_other": "{{count}} دستاویزات منتخب",
     "button": {
       "export": "منتخب برآمد کریں",
-      "delete": "منتخب حذف کریں",
+      "delete": "حذف کریں",
       "clear": "✕ صاف کریں",
       "exportJson": "JSON برآمد کریں",
       "exportBson": "BSON برآمد کریں"
@@ -418,6 +419,22 @@
     },
     "error": {
       "invalidFormat": "غلط فارمیٹ۔ (filter, update) یا {\"filter\": {...}, \"update\": {...}} استعمال کریں۔"
+    }
+  },
+  "delete": {
+    "prompt": "اس کلیکشن کے لیے deleteMany آرگیومنٹس کو (filter, options) کی صورت میں درج کریں:",
+    "button": {
+      "run": "▶ چلائیں",
+      "running": "چل رہا ہے…"
+    },
+    "hint": {
+      "ctrlEnter": "Ctrl+Enter"
+    },
+    "placeholder": {
+      "result": "// نتائج دیکھنے کے لیے deleteMany چلائیں"
+    },
+    "error": {
+      "invalidFormat": "غلط فارمیٹ۔ (filter, options) یا {\"filter\": {...}, \"options\": {...}} استعمال کریں۔"
     }
   },
   "schema": {
@@ -515,7 +532,8 @@
       "profile": "ڈیٹا بیس پروفائلر سطح حاصل/سیٹ کریں",
       "explain": "تلاش کے سوال کے لیے وضاحت کا منصوبہ",
       "explainAggregate": "مجموعی کے لیے وضاحت کا منصوبہ",
-      "update": "اس کلیکشن میں متعدد دستاویزات اپ ڈیٹ کریں"
+      "update": "اس کلیکشن میں متعدد دستاویزات اپ ڈیٹ کریں",
+      "delete": "اس کلیکشن میں متعدد دستاویزات حذف کریں"
     },
     "context": {
       "runningOn": "ڈیٹا بیس پر چل رہا ہے:"
