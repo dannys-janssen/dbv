@@ -13,6 +13,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Using the App](#using-the-app)
   - [Roles and Permissions](#roles-and-permissions)
 - [Developer Guide](#developer-guide)
+  - [Contributing](#contributing)
   - [Architecture](#architecture)
   - [Prerequisites](#prerequisites)
   - [Local Development](#local-development)
@@ -377,6 +378,10 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 ---
 
 ## Developer Guide
+
+### Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contributor workflow, validation commands, and pull request expectations.
 
 ### Architecture
 
