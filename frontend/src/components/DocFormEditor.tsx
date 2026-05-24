@@ -364,12 +364,12 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "8px 12px",
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 6,
-  color: "#f1f5f9",
-  fontSize: 15,
+  padding: "9px 12px",
+  background: "#ffffff",
+  border: "1px solid #cbd5e1",
+  borderRadius: 8,
+  color: "#0f172a",
+  fontSize: 14,
   boxSizing: "border-box",
   outline: "none",
 };
@@ -398,11 +398,11 @@ const typeTagStyle = (type: string): React.CSSProperties => {
   return {
     fontSize: 10,
     fontWeight: 700,
-    color: colors[type] ?? "#94a3b8",
-    background: "#0f172a",
-    border: `1px solid ${colors[type] ?? "#334155"}`,
-    borderRadius: 4,
-    padding: "1px 5px",
+    color: colors[type] ?? "#475569",
+    background: "#f8fafc",
+    border: `1px solid ${colors[type] ?? "#94a3b8"}`,
+    borderRadius: 999,
+    padding: "2px 8px",
     marginLeft: 6,
     verticalAlign: "middle",
     letterSpacing: "0.05em",
@@ -470,15 +470,15 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
   };
 
   return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
+    <div style={{ marginBottom: 12, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 10, gap: 8 }}>
         {/* Collapse/expand toggle for nested object and array fields */}
         {isNested && (
           <button
             onClick={() => setCollapsed((c) => !c)}
             aria-label={collapsed ? t("form.button.expand") : t("form.button.collapse")}
             title={collapsed ? t("form.button.expand") : t("form.button.collapse")}
-            style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 11, padding: "0 4px 0 0", lineHeight: 1, flexShrink: 0 }}
+            style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", color: "#64748b", cursor: "pointer", fontSize: 11, padding: "2px 5px", lineHeight: 1, flexShrink: 0, borderRadius: 6 }}
           >
             {collapsed ? "▶" : "▼"}
           </button>
@@ -487,7 +487,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
           {displayKey}
           <span style={typeTagStyle(field.type)}>{field.type}</span>
           {isNested && collapsed && (
-            <span style={{ fontSize: 11, color: "#475569", fontWeight: 400, marginLeft: 8 }}>
+            <span style={{ fontSize: 11, color: "#64748b", fontWeight: 500, marginLeft: 8 }}>
               {field.type === "array"
                 ? `[${field.arrayItems?.length ?? 0} ${t("form.label.items")}]`
                 : `{${field.children?.length ?? 0} ${t("form.label.fields")}}`}
@@ -505,8 +505,9 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
               ...inputStyle,
               width: "auto",
               fontSize: 11,
-              padding: "2px 6px",
+              padding: "4px 8px",
               marginLeft: 8,
+              borderRadius: 999,
             }}
           >
             {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
@@ -517,8 +518,8 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
 
         {/* Null toggle */}
         {!readOnly && (
-          <label style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8, fontSize: 11, color: "#64748b", cursor: "pointer" }}>
-            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "#64748b" }} aria-label={`${t("form.button.setNull")} ${field.key}`} />
+          <label style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8, fontSize: 11, color: "#475569", cursor: "pointer", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 999, padding: "3px 8px" }}>
+            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "#475569" }} aria-label={`${t("form.button.setNull")} ${field.key}`} />
             null
           </label>
         )}
@@ -531,12 +532,13 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
             aria-label={`${t("form.button.remove")} ${field.key}`}
             style={{
               marginLeft: 8,
-              background: "none",
-              border: "none",
-              color: "#ef4444",
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: 999,
+              color: "#dc2626",
               cursor: "pointer",
-              fontSize: 14,
-              padding: "0 4px",
+              fontSize: 12,
+              padding: "3px 8px",
               lineHeight: 1,
             }}
           >{t("form.button.remove")}</button>
@@ -548,19 +550,19 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
           type="text"
           readOnly
           value={readOnly ? (field.displayValue || field.key) : t("form.value.null")}
-          style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }}
+          style={{ ...inputStyle, opacity: 0.7, cursor: "not-allowed", background: "#f8fafc" }}
         />
       ) : field.type === "bool" ? (
-        <div style={{ display: "flex", gap: 16, padding: "6px 10px", background: "#1e293b", border: "1px solid #334155", borderRadius: 6 }}>
+        <div style={{ display: "flex", gap: 16, padding: "8px 10px", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8 }}>
           {(["true", "false"] as const).map((opt) => (
-            <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#f1f5f9", fontSize: 14, userSelect: "none" }}>
+            <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#334155", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
                 name={`bool-${field.key}`}
                 value={opt}
                 checked={field.displayValue === opt}
                 onChange={() => handleValue(opt)}
-                style={{ accentColor: "#3b82f6", cursor: "pointer" }}
+                style={{ accentColor: "#2563eb", cursor: "pointer" }}
               />
               {opt === "true" ? t("form.option.true") : t("form.option.false")}
             </label>
@@ -575,7 +577,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
                 type="date"
                 value={datePart}
                 onChange={(e) => handleValue(`${e.target.value}|${timePart || "00:00:00"}`)}
-                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
                 aria-label={`${t("form.label.date")} for ${field.key}`}
               />
               <input
@@ -583,10 +585,10 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
                 value={timePart}
                 onChange={(e) => handleValue(`${datePart}|${e.target.value}`)}
                 step="1"
-                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
                 aria-label={`${t("form.label.time")} for ${field.key}`}
               />
-              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }}>{t("form.label.utc")}</span>
+              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>{t("form.label.utc")}</span>
             </div>
           );
         })()
@@ -683,7 +685,7 @@ function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix
   };
 
   return (
-    <div style={{ paddingLeft: 14, borderLeft: "2px solid #1e3a5f", marginTop: 6, marginBottom: 4 }}>
+    <div style={{ padding: "8px 10px", border: "1px dashed #bfdbfe", borderRadius: 8, background: "#eff6ff", marginTop: 6, marginBottom: 4 }}>
       {children.length === 0 && (
         <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.nested.empty")}</div>
       )}
@@ -707,13 +709,13 @@ function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix
           value={newChildKey}
           onChange={(e) => { setNewChildKey(e.target.value); setAddError(""); }}
           onKeyDown={(e) => { if (e.key === "Enter") handleAddChild(); }}
-          style={{ ...inputStyle, flex: 2, fontSize: 12, padding: "4px 8px" }}
+          style={{ ...inputStyle, flex: 2, fontSize: 12, padding: "6px 8px" }}
           aria-label={t("form.label.newFieldName")}
         />
         <select
           value={newChildType}
           onChange={(e) => setNewChildType(e.target.value)}
-          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "4px 8px" }}
+          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "6px 8px" }}
           aria-label={t("form.label.newFieldType")}
         >
           {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
@@ -722,7 +724,7 @@ function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix
         </select>
         <button
           onClick={handleAddChild}
-          style={{ padding: "4px 10px", background: "#1e3a5f", border: "1px solid #3b82f6", borderRadius: 6, color: "#93c5fd", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+          style={{ padding: "6px 10px", background: "#ffffff", border: "1px solid #93c5fd", borderRadius: 8, color: "#1d4ed8", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
         >
           {t("buttons.add")}
         </button>
@@ -775,7 +777,7 @@ function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefi
   };
 
   return (
-    <div style={{ paddingLeft: 14, borderLeft: "2px solid #0e4429", marginTop: 6, marginBottom: 4 }}>
+    <div style={{ padding: "8px 10px", border: "1px dashed #bbf7d0", borderRadius: 8, background: "#f0fdf4", marginTop: 6, marginBottom: 4 }}>
       {arrayItems.length === 0 && (
         <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.array.empty")}</div>
       )}
@@ -799,7 +801,7 @@ function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefi
         <select
           value={newItemType}
           onChange={(e) => setNewItemType(e.target.value)}
-          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "4px 8px" }}
+          style={{ ...inputStyle, flex: 1, fontSize: 12, padding: "6px 8px" }}
           aria-label={t("form.label.newItemType")}
         >
           {["string", "int", "double", "long", "decimal", "bool", "date", "objectId", "uuid", "object", "array"].map((tp) => (
@@ -808,7 +810,7 @@ function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefi
         </select>
         <button
           onClick={handleAddItem}
-          style={{ padding: "4px 10px", background: "#14532d", border: "1px solid #22c55e", borderRadius: 6, color: "#86efac", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+          style={{ padding: "6px 10px", background: "#ffffff", border: "1px solid #86efac", borderRadius: 8, color: "#166534", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
         >
           {t("form.button.addItem")}
         </button>
@@ -942,7 +944,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   }
 
   return (
-    <div style={{ overflowY: "auto", maxHeight: "calc(90vh - 200px)", paddingRight: 4 }}>
+    <div style={{ overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
       {/* _id field at the top */}
       {idField && (
         <>
@@ -956,7 +958,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             onChange={handleChange}
             onRemove={handleRemove}
           />
-          <hr style={{ border: "none", borderTop: "1px solid #1e293b", margin: "8px 0 14px" }} />
+          <hr style={{ border: "none", borderTop: "1px solid #e2e8f0", margin: "8px 0 12px" }} />
         </>
       )}
 
@@ -975,8 +977,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
       ))}
 
       {/* Add new field */}
-      <div style={{ marginTop: 12, padding: "10px 12px", background: "#0f172a", borderRadius: 8, border: "1px dashed #334155" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      <div style={{ marginTop: 12, padding: "12px", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>
           {t("form.section.addField")}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1003,10 +1005,10 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             onClick={handleAddField}
             style={{
               padding: "6px 14px",
-              background: "#1e3a5f",
-              border: "1px solid #3b82f6",
-              borderRadius: 6,
-              color: "#93c5fd",
+              background: "#ffffff",
+              border: "1px solid #93c5fd",
+              borderRadius: 8,
+              color: "#1d4ed8",
               cursor: "pointer",
               fontSize: 13,
               fontWeight: 600,
