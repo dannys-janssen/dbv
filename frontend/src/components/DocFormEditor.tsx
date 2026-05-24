@@ -577,7 +577,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
                 type="date"
                 value={datePart}
                 onChange={(e) => handleValue(`${e.target.value}|${timePart || "00:00:00"}`)}
-                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
                 aria-label={`${t("form.label.date")} for ${field.key}`}
               />
               <input
@@ -585,7 +585,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
                 value={timePart}
                 onChange={(e) => handleValue(`${datePart}|${e.target.value}`)}
                 step="1"
-                style={{ ...inputStyle, flex: 1, colorScheme: "dark" }}
+                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
                 aria-label={`${t("form.label.time")} for ${field.key}`}
               />
               <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>{t("form.label.utc")}</span>
