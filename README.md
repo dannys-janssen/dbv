@@ -13,6 +13,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [Using the App](#using-the-app)
   - [Roles and Permissions](#roles-and-permissions)
 - [Developer Guide](#developer-guide)
+  - [Code of Conduct](#code-of-conduct)
   - [Contributing](#contributing)
   - [Architecture](#architecture)
   - [Prerequisites](#prerequisites)
@@ -378,6 +379,10 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 ---
 
 ## Developer Guide
+
+### Code of Conduct
+
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations and reporting guidance.
 
 ### Contributing
 

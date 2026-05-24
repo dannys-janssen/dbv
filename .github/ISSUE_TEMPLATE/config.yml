@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Code of conduct
+    url: https://github.com/dannys-janssen/dbv/blob/main/CODE_OF_CONDUCT.md
+    about: Review the community expectations and reporting guidance for this repository.
   - name: Security vulnerability report
     url: https://github.com/dannys-janssen/dbv/security/policy
     about: Review the security policy and report vulnerabilities privately instead of opening a public issue.
