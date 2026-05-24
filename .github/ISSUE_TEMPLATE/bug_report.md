@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+> Suspected security vulnerability? Please do **not** use this template. Follow the instructions in [`SECURITY.md`](../../SECURITY.md) and report it privately.
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
