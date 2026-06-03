@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import api from "../api/client";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { ThemeSelector } from "../components/ThemeSelector";
+import { useThemeMode } from "../context/useThemeMode";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -17,10 +18,12 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { mode } = useThemeMode();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const isDarkMode = mode === "dark";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +58,7 @@ export default function LoginPage() {
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
-        background: "#f0f4f8",
+        background: isDarkMode ? "#101828" : "#f0f4f8",
         fontFamily: FONT,
       }}
     >
@@ -63,11 +66,11 @@ export default function LoginPage() {
       <main>
       <div
         style={{
-          background: "#ffffff",
+          background: isDarkMode ? "#1e293b" : "#ffffff",
           borderRadius: "12px",
           padding: "40px",
           width: "380px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+          boxShadow: isDarkMode ? "0 4px 24px rgba(0,0,0,0.4)" : "0 4px 24px rgba(0,0,0,0.08)",
           boxSizing: "border-box",
         }}
       >
@@ -85,7 +88,7 @@ export default function LoginPage() {
             style={{
               width: "14px",
               height: "14px",
-              background: "#2563eb",
+              background: isDarkMode ? "#90caf9" : "#2563eb",
               borderRadius: "3px",
               flexShrink: 0,
             }}
@@ -94,7 +97,7 @@ export default function LoginPage() {
             style={{
               fontSize: "16px",
               fontWeight: 700,
-              color: "#0f172a",
+              color: isDarkMode ? "#f8fafc" : "#0f172a",
               fontFamily: FONT,
             }}
           >
@@ -106,7 +109,7 @@ export default function LoginPage() {
           style={{
             fontSize: "24px",
             fontWeight: 700,
-            color: "#0f172a",
+            color: isDarkMode ? "#f8fafc" : "#0f172a",
             margin: "0 0 4px 0",
             fontFamily: FONT,
           }}
@@ -116,7 +119,7 @@ export default function LoginPage() {
         <p
           style={{
             fontSize: "14px",
-            color: "#64748b",
+            color: isDarkMode ? "#cbd5e1" : "#64748b",
             margin: "0 0 28px 0",
             fontFamily: FONT,
           }}
@@ -132,7 +135,7 @@ export default function LoginPage() {
                 display: "block",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#374151",
+                color: isDarkMode ? "#e2e8f0" : "#374151",
                 marginBottom: "6px",
                 fontFamily: FONT,
               }}
@@ -149,12 +152,14 @@ export default function LoginPage() {
               style={{
                 width: "100%",
                 padding: "10px 12px",
-                border: "1px solid #e2e8f0",
+                border: `1px solid ${isDarkMode ? "#334155" : "#e2e8f0"}`,
                 borderRadius: "8px",
                 fontSize: "14px",
                 boxSizing: "border-box",
                 fontFamily: FONT,
                 outline: "none",
+                background: isDarkMode ? "#0f172a" : "#ffffff",
+                color: isDarkMode ? "#f8fafc" : "#0f172a",
                 opacity: loading ? 0.6 : 1,
               }}
             />
@@ -167,7 +172,7 @@ export default function LoginPage() {
                 display: "block",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#374151",
+                color: isDarkMode ? "#e2e8f0" : "#374151",
                 marginBottom: "6px",
                 fontFamily: FONT,
               }}
@@ -184,12 +189,14 @@ export default function LoginPage() {
               style={{
                 width: "100%",
                 padding: "10px 12px",
-                border: "1px solid #e2e8f0",
+                border: `1px solid ${isDarkMode ? "#334155" : "#e2e8f0"}`,
                 borderRadius: "8px",
                 fontSize: "14px",
                 boxSizing: "border-box",
                 fontFamily: FONT,
                 outline: "none",
+                background: isDarkMode ? "#0f172a" : "#ffffff",
+                color: isDarkMode ? "#f8fafc" : "#0f172a",
                 opacity: loading ? 0.6 : 1,
               }}
             />
@@ -216,8 +223,8 @@ export default function LoginPage() {
             aria-busy={loading}
             style={{
               width: "100%",
-              background: "#2563eb",
-              color: "#ffffff",
+              background: isDarkMode ? "#90caf9" : "#2563eb",
+              color: isDarkMode ? "#0f172a" : "#ffffff",
               padding: "12px",
               borderRadius: "8px",
               fontSize: "15px",
@@ -237,7 +244,7 @@ export default function LoginPage() {
           style={{
             textAlign: "center",
             fontSize: "12px",
-            color: "#94a3b8",
+            color: isDarkMode ? "#cbd5e1" : "#94a3b8",
             margin: "20px 0 0 0",
             fontFamily: FONT,
           }}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,6 +18,7 @@ import { useAuth } from "../context/useAuth";
 import CollectionView from "../components/CollectionView";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { ThemeSelector } from "../components/ThemeSelector";
+import { useThemeMode } from "../context/useThemeMode";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -67,70 +68,11 @@ const overlayStyle: React.CSSProperties = {
   zIndex: 100,
 };
 
-const modalBaseStyle: React.CSSProperties = {
-  background: "#ffffff",
-  borderRadius: "12px",
-  padding: "24px",
-  width: "480px",
-  maxWidth: "90vw",
-  boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-  fontFamily: FONT,
-};
-
-const modalTitleStyle: React.CSSProperties = {
-  fontSize: "16px",
-  fontWeight: 700,
-  color: "#0f172a",
-  margin: "0 0 4px 0",
-  fontFamily: FONT,
-};
-
-const modalSubtitleStyle: React.CSSProperties = {
-  fontSize: "13px",
-  color: "#64748b",
-  margin: "0 0 20px 0",
-  fontFamily: FONT,
-};
-
-const modalLabelStyle: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: 600,
-  color: "#374151",
-  marginBottom: "6px",
-  display: "block",
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  fontFamily: FONT,
-};
-
-const modalInputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 12px",
-  border: "1px solid #e2e8f0",
-  borderRadius: "8px",
-  fontSize: "14px",
-  boxSizing: "border-box",
-  marginBottom: "16px",
-  fontFamily: FONT,
-  outline: "none",
-};
-
 const modalFooterStyle: React.CSSProperties = {
   display: "flex",
   gap: "8px",
   justifyContent: "flex-end",
   marginTop: "8px",
-};
-
-const cancelBtnStyle: React.CSSProperties = {
-  background: "#ffffff",
-  border: "1px solid #e2e8f0",
-  color: "#374151",
-  padding: "8px 16px",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "14px",
-  fontFamily: FONT,
 };
 
 const primaryBtnStyle: React.CSSProperties = {
@@ -145,29 +87,6 @@ const primaryBtnStyle: React.CSSProperties = {
   fontFamily: FONT,
 };
 
-const sidebarSearchStyle: React.CSSProperties = {
-  width: "100%",
-  fontSize: "10px",
-  padding: "6px 8px",
-  background: "#243044",
-  border: "1px solid #2d3f5e",
-  color: "#e2e8f0",
-  borderRadius: "6px",
-  boxSizing: "border-box",
-  marginBottom: "8px",
-  fontFamily: FONT,
-  outline: "none",
-};
-
-const sectionLabelStyle: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "10px",
-  fontWeight: 600,
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  fontFamily: FONT,
-};
-
 interface Tab {
   id: string;
   db: string;
@@ -178,6 +97,134 @@ export default function BrowserPage() {
   const { logout, canWrite } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { mode } = useThemeMode();
+  const isDarkMode = mode === "dark";
+
+  const themeStyles = useMemo(() => {
+    const mainSurfaceBorder = isDarkMode ? "#334155" : "#e2e8f0";
+    const mainText = isDarkMode ? "#e2e8f0" : "#374151";
+    const mainMutedText = isDarkMode ? "#94a3b8" : "#64748b";
+    const sidebarMutedText = isDarkMode ? "#94a3b8" : "#475569";
+    const sidebarSearchBorder = isDarkMode ? "#2d3f5e" : "#cbd5e1";
+
+    return {
+      appBackground: isDarkMode ? "#0f172a" : "#f8fafc",
+      sidebarBackground: isDarkMode ? "#1a2236" : "#e2e8f0",
+      sidebarBorder: isDarkMode ? "#243044" : "#cbd5e1",
+      sidebarTitle: isDarkMode ? "#ffffff" : "#0f172a",
+      sidebarMutedText,
+      sidebarItemHover: isDarkMode ? "#1e2d47" : "#dbeafe",
+      sidebarItemText: isDarkMode ? "#cbd5e1" : "#334155",
+      mainContentBackground: isDarkMode ? "#111827" : "#f8fafc",
+      mainSurfaceBackground: isDarkMode ? "#1e293b" : "#f1f5f9",
+      mainSurfaceBorder,
+      mainText,
+      mainMutedText,
+      menuBackground: isDarkMode ? "#1e293b" : "#ffffff",
+      menuHoverBackground: isDarkMode ? "#334155" : "#f1f5f9",
+      modalBaseStyle: {
+        background: isDarkMode ? "#1e293b" : "#ffffff",
+        borderRadius: "12px",
+        padding: "24px",
+        width: "480px",
+        maxWidth: "90vw",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+      modalTitleStyle: {
+        fontSize: "16px",
+        fontWeight: 700,
+        color: isDarkMode ? "#f8fafc" : "#0f172a",
+        margin: "0 0 4px 0",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+      modalSubtitleStyle: {
+        fontSize: "13px",
+        color: mainMutedText,
+        margin: "0 0 20px 0",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+      modalLabelStyle: {
+        fontSize: "12px",
+        fontWeight: 600,
+        color: mainText,
+        marginBottom: "6px",
+        display: "block",
+        textTransform: "uppercase",
+        letterSpacing: "0.04em",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+      modalInputStyle: {
+        width: "100%",
+        padding: "10px 12px",
+        border: `1px solid ${mainSurfaceBorder}`,
+        borderRadius: "8px",
+        fontSize: "14px",
+        boxSizing: "border-box",
+        marginBottom: "16px",
+        fontFamily: FONT,
+        outline: "none",
+        background: isDarkMode ? "#0f172a" : "#ffffff",
+        color: isDarkMode ? "#f8fafc" : "#0f172a",
+      } as React.CSSProperties,
+      cancelBtnStyle: {
+        background: isDarkMode ? "#334155" : "#ffffff",
+        border: `1px solid ${mainSurfaceBorder}`,
+        color: mainText,
+        padding: "8px 16px",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontSize: "14px",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+      sidebarSearchStyle: {
+        width: "100%",
+        fontSize: "10px",
+        padding: "6px 8px",
+        background: isDarkMode ? "#243044" : "#ffffff",
+        border: `1px solid ${sidebarSearchBorder}`,
+        color: isDarkMode ? "#e2e8f0" : "#334155",
+        borderRadius: "6px",
+        boxSizing: "border-box",
+        marginBottom: "8px",
+        fontFamily: FONT,
+        outline: "none",
+      } as React.CSSProperties,
+      sectionLabelStyle: {
+        color: sidebarMutedText,
+        fontSize: "10px",
+        fontWeight: 600,
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        fontFamily: FONT,
+      } as React.CSSProperties,
+    };
+  }, [isDarkMode]);
+
+  const {
+    appBackground,
+    sidebarBackground,
+    sidebarBorder,
+    sidebarTitle,
+    sidebarMutedText,
+    sidebarItemHover,
+    sidebarItemText,
+    mainContentBackground,
+    mainSurfaceBackground,
+    mainSurfaceBorder,
+    mainText,
+    mainMutedText,
+    menuBackground,
+    menuHoverBackground,
+    modalBaseStyle,
+    modalTitleStyle,
+    modalSubtitleStyle,
+    modalLabelStyle,
+    modalInputStyle,
+    cancelBtnStyle,
+    sidebarSearchStyle,
+    sectionLabelStyle,
+  } = themeStyles;
 
   // ── Sidebar resize ──
   const [sidebarWidth, setSidebarWidth] = useState(420);
@@ -503,6 +550,7 @@ export default function BrowserPage() {
         height: "100vh",
         fontFamily: FONT,
         overflow: "hidden",
+        background: appBackground,
       }}
     >
       <a href="#main-content" className="skip-link">{t("a11y.skipToContent")}</a>
@@ -511,7 +559,7 @@ export default function BrowserPage() {
         style={{
           width: `${sidebarWidth}px`,
           minWidth: `${sidebarWidth}px`,
-          background: "#1a2236",
+          background: sidebarBackground,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -522,7 +570,7 @@ export default function BrowserPage() {
         <div
           style={{
             padding: "16px",
-            borderBottom: "1px solid #243044",
+            borderBottom: `1px solid ${sidebarBorder}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -531,7 +579,7 @@ export default function BrowserPage() {
           <span
             style={{
               fontWeight: "bold",
-              color: "#ffffff",
+              color: sidebarTitle,
               fontSize: "15px",
               fontFamily: FONT,
             }}
@@ -550,7 +598,7 @@ export default function BrowserPage() {
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: "#64748b",
+                color: sidebarMutedText,
                 fontSize: "12px",
                 fontFamily: FONT,
                 padding: "2px 6px",
@@ -565,7 +613,7 @@ export default function BrowserPage() {
         <div
           style={{
             padding: "8px 16px",
-            borderBottom: "1px solid #243044",
+            borderBottom: `1px solid ${sidebarBorder}`,
             display: "flex",
             flexDirection: "column",
             gap: "6px",
@@ -580,7 +628,7 @@ export default function BrowserPage() {
                 flexShrink: 0,
                 background:
                   connInfo === null
-                    ? "#64748b"
+                    ? sidebarMutedText
                     : connInfo.status === "ok"
                     ? "#22c55e"
                     : "#ef4444",
@@ -591,7 +639,7 @@ export default function BrowserPage() {
               style={{
                 flex: 1,
                 fontSize: "11px",
-                color: "#94a3b8",
+                color: sidebarMutedText,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -611,8 +659,8 @@ export default function BrowserPage() {
               disabled={connLoading}
               style={{
                 background: "none",
-                border: "1px solid #2d3f5e",
-                color: "#94a3b8",
+                border: `1px solid ${sidebarBorder}`,
+                color: sidebarMutedText,
                 padding: "3px 8px",
                 borderRadius: "4px",
                 cursor: "pointer",
@@ -636,8 +684,8 @@ export default function BrowserPage() {
               }}
               style={{
                 background: "none",
-                border: "1px solid #2d3f5e",
-                color: "#94a3b8",
+                border: `1px solid ${sidebarBorder}`,
+                color: sidebarMutedText,
                 padding: "3px 8px",
                 borderRadius: "4px",
                 cursor: "pointer",
@@ -652,10 +700,10 @@ export default function BrowserPage() {
         </div>
 
         {/* Database + Collection sections – side by side */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "row", overflow: "hidden", borderTop: "1px solid #243044" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "row", overflow: "hidden", borderTop: `1px solid ${sidebarBorder}` }}>
 
           {/* Database column */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", borderRight: "1px solid #243044", minWidth: 0 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", borderRight: `1px solid ${sidebarBorder}`, minWidth: 0 }}>
             <div
               style={{
                 padding: "8px 12px",
@@ -673,7 +721,7 @@ export default function BrowserPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#60a5fa",
+                    color: isDarkMode ? "#60a5fa" : "#2563eb",
                     fontSize: "16px",
                     lineHeight: 1,
                     padding: "0 2px",
@@ -697,7 +745,7 @@ export default function BrowserPage() {
               {filteredDatabases.length === 0 ? (
                 <p
                   style={{
-                    color: "#64748b",
+                    color: mainMutedText,
                     fontSize: "12px",
                     fontStyle: "italic",
                     padding: "8px 0",
@@ -731,7 +779,7 @@ export default function BrowserPage() {
                         background: isSelected
                           ? "#2563eb"
                           : isHovered
-                          ? "#1e2d47"
+                          ? sidebarItemHover
                           : "transparent",
                         marginBottom: "2px",
                       }}
@@ -741,7 +789,7 @@ export default function BrowserPage() {
                         style={{
                           flex: 1,
                           fontSize: "13px",
-                          color: isSelected ? "#ffffff" : "#cbd5e1",
+                          color: isSelected ? "#ffffff" : sidebarItemText,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -768,7 +816,7 @@ export default function BrowserPage() {
                             background: "transparent",
                             border: "none",
                             cursor: "pointer",
-                            color: "#94a3b8",
+                            color: sidebarMutedText,
                             fontSize: "14px",
                             padding: "0 2px",
                             lineHeight: 1,
@@ -829,7 +877,7 @@ export default function BrowserPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#60a5fa",
+                    color: isDarkMode ? "#60a5fa" : "#2563eb",
                     fontSize: "16px",
                     lineHeight: 1,
                     padding: "0 2px",
@@ -854,7 +902,7 @@ export default function BrowserPage() {
               {!selectedDb ? (
                 <p
                   style={{
-                    color: "#64748b",
+                    color: mainMutedText,
                     fontSize: "12px",
                     fontStyle: "italic",
                     padding: "8px 0",
@@ -867,7 +915,7 @@ export default function BrowserPage() {
               ) : filteredCollections.length === 0 ? (
                 <p
                   style={{
-                    color: "#64748b",
+                    color: mainMutedText,
                     fontSize: "12px",
                     fontStyle: "italic",
                     padding: "8px 0",
@@ -901,7 +949,7 @@ export default function BrowserPage() {
                         background: isSelected
                           ? "#2563eb"
                           : isHovered
-                          ? "#1e2d47"
+                          ? sidebarItemHover
                           : "transparent",
                         marginBottom: "2px",
                       }}
@@ -910,7 +958,7 @@ export default function BrowserPage() {
                         style={{
                           flex: 1,
                           fontSize: "13px",
-                          color: isSelected ? "#ffffff" : "#cbd5e1",
+                          color: isSelected ? "#ffffff" : sidebarItemText,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -973,7 +1021,7 @@ export default function BrowserPage() {
         id="main-content"
         style={{
           flex: 1,
-          background: "#f8fafc",
+          background: mainContentBackground,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -1020,8 +1068,8 @@ export default function BrowserPage() {
           role="tablist"
           aria-label={t("a11y.tabList")}
           style={{
-            background: "#f1f5f9",
-            borderBottom: "1px solid #e2e8f0",
+            background: mainSurfaceBackground,
+            borderBottom: `1px solid ${mainSurfaceBorder}`,
             display: "flex",
             alignItems: "stretch",
             overflowX: "auto",
@@ -1051,9 +1099,9 @@ export default function BrowserPage() {
                   gap: "6px",
                   padding: "8px 12px",
                   cursor: "pointer",
-                  background: isActive ? "#ffffff" : "transparent",
+                  background: isActive ? menuBackground : "transparent",
                   borderBottom: isActive ? "2px solid #2563eb" : "2px solid transparent",
-                  color: isActive ? "#0f172a" : "#64748b",
+                  color: isActive ? (isDarkMode ? "#f8fafc" : "#0f172a") : mainMutedText,
                   fontSize: "13px",
                   fontFamily: FONT,
                   whiteSpace: "nowrap",
@@ -1061,7 +1109,7 @@ export default function BrowserPage() {
                   flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = "#e2e8f0";
+                  if (!isActive) e.currentTarget.style.background = menuHoverBackground;
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) e.currentTarget.style.background = "transparent";
@@ -1078,7 +1126,7 @@ export default function BrowserPage() {
                       background: "none",
                       border: "none",
                       fontSize: "16px",
-                      color: "#94a3b8",
+                      color: mainMutedText,
                       lineHeight: 1,
                       padding: "0 2px",
                       cursor: "pointer",
@@ -1106,7 +1154,7 @@ export default function BrowserPage() {
               alignItems: "center",
               padding: "8px 12px",
               cursor: "pointer",
-              color: "#64748b",
+              color: mainMutedText,
               fontSize: "18px",
               lineHeight: 1,
               userSelect: "none",
@@ -1134,8 +1182,8 @@ export default function BrowserPage() {
                 top: tabContextMenu.y,
                 left: tabContextMenu.x,
                 zIndex: 200,
-                background: "#ffffff",
-                border: "1px solid #e2e8f0",
+                background: menuBackground,
+                border: `1px solid ${mainSurfaceBorder}`,
                 borderRadius: "8px",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
                 padding: "4px 0",
@@ -1146,8 +1194,8 @@ export default function BrowserPage() {
               <button
                 role="menuitem"
                 onClick={() => { closeOtherTabs(tabContextMenu.tabId); setTabContextMenu(null); }}
-                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: "#374151", cursor: "pointer" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; }}
+                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: mainText, cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = menuHoverBackground; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               >
                 {t("tabs.contextMenu.closeOthers")}
@@ -1155,8 +1203,8 @@ export default function BrowserPage() {
               <button
                 role="menuitem"
                 onClick={() => { closeAllTabs(); setTabContextMenu(null); }}
-                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: "#374151", cursor: "pointer" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; }}
+                style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 16px", border: "none", background: "transparent", fontSize: "13px", color: mainText, cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = menuHoverBackground; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               >
                 {t("tabs.contextMenu.closeAll")}
@@ -1297,9 +1345,9 @@ export default function BrowserPage() {
             <p style={modalSubtitleStyle}>{t("modals.dbStats.subtitle")}</p>
 
             {dbStatsLoading ? (
-              <p style={{ color: "#64748b", fontSize: "13px", margin: "8px 0 20px" }}>{t("ui.loading")}</p>
+              <p style={{ color: mainMutedText, fontSize: "13px", margin: "8px 0 20px" }}>{t("ui.loading")}</p>
             ) : !dbStats ? (
-              <p style={{ color: "#94a3b8", fontSize: "13px", margin: "8px 0 20px" }}>{t("modals.dbStats.unavailable")}</p>
+              <p style={{ color: mainMutedText, fontSize: "13px", margin: "8px 0 20px" }}>{t("modals.dbStats.unavailable")}</p>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
                 {([
@@ -1312,9 +1360,9 @@ export default function BrowserPage() {
                   { label: t("stats.label.indexSize"),    value: formatBytes(numVal(dbStats["indexSize"])) },
                   { label: t("stats.label.totalSize"),    value: formatBytes(numVal(dbStats["totalSize"])) },
                 ] as { label: string; value: string }[]).map((c) => (
-                  <div key={c.label} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "12px 14px" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>{c.label}</div>
-                    <div style={{ fontSize: "18px", fontWeight: 700, color: "#1e293b" }}>{c.value}</div>
+                  <div key={c.label} style={{ background: mainContentBackground, border: `1px solid ${mainSurfaceBorder}`, borderRadius: "8px", padding: "12px 14px" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 600, color: mainMutedText, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>{c.label}</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: isDarkMode ? "#f8fafc" : "#1e293b" }}>{c.value}</div>
                   </div>
                 ))}
               </div>
@@ -1358,21 +1406,21 @@ export default function BrowserPage() {
               value={newDefaultDb}
               onChange={(e) => setNewDefaultDb(e.target.value)}
             />
-            <label style={{ ...modalLabelStyle, marginTop: 8 }}>{t("modals.changeConnection.label.tlsCaFile")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.changeConnection.optional")}</span></label>
+            <label style={{ ...modalLabelStyle, marginTop: 8 }}>{t("modals.changeConnection.label.tlsCaFile")} <span style={{ fontWeight: 400, color: mainMutedText }}>{t("modals.changeConnection.optional")}</span></label>
             <input
               style={modalInputStyle}
               placeholder={t("modals.changeConnection.placeholder.tlsCaFile")}
               value={newTlsCaFile}
               onChange={(e) => setNewTlsCaFile(e.target.value)}
             />
-            <label style={modalLabelStyle}>{t("modals.changeConnection.label.tlsCertKeyFile")} <span style={{ fontWeight: 400, color: "#94a3b8" }}>{t("modals.changeConnection.optional")}</span></label>
+            <label style={modalLabelStyle}>{t("modals.changeConnection.label.tlsCertKeyFile")} <span style={{ fontWeight: 400, color: mainMutedText }}>{t("modals.changeConnection.optional")}</span></label>
             <input
               style={modalInputStyle}
               placeholder={t("modals.changeConnection.placeholder.tlsCertKeyFile")}
               value={newTlsCertKeyFile}
               onChange={(e) => setNewTlsCertKeyFile(e.target.value)}
             />
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "13px", color: "#374151", margin: "8px 0 12px", fontFamily: FONT }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "13px", color: mainText, margin: "8px 0 12px", fontFamily: FONT }}>
               <input
                 type="checkbox"
                 checked={newTlsAllowInvalid}
