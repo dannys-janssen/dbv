@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Editor from "@monaco-editor/react";
+import { useTheme } from "@mui/material/styles";
 import { runDbCommand } from "../api/mongo";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -94,6 +95,8 @@ interface Props {
 }
 
 export default function CommandsView({ db, collection, tabId }: Props) {
+  const muiTheme = useTheme();
+  const editorTheme = muiTheme.palette.mode === "dark" ? "vs-dark" : "vs";
   const [commandText, setCommandText] = useState('{\n  "ping": 1\n}');
   const [adminFlag, setAdminFlag]     = useState(false);
   const [running, setRunning]         = useState(false);
@@ -308,6 +311,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
             borderRadius: "6px", overflow: "hidden",
           }}>
             <Editor
+              theme={editorTheme}
               height={`${cmdHeight}px`}
               defaultLanguage="json"
               path={`dbv://command/${tabId}`}
@@ -369,6 +373,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
           ) : (
             <div style={{ flex: 1, border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
               <Editor
+                theme={editorTheme}
                 height="100%"
                 defaultLanguage="json"
                 value={result ?? t("aggregate.placeholder.result")}
