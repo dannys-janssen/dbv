@@ -20,5 +20,5 @@ export function LanguageSelector() {
         ))}
       </Select>
     </FormControl>
-  )
+  );
 }
