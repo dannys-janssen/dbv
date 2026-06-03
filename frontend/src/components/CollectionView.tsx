@@ -1959,11 +1959,16 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           )}
 
           {/* ── Commands tab ── */}
-          {view === "commands" && (
-            <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <CommandsView db={db} collection={col} tabId={tabId} />
-            </div>
-          )}
+          <div
+            style={{
+              flex: 1,
+              overflow: "hidden",
+              display: view === "commands" ? "flex" : "none",
+              flexDirection: "column",
+            }}
+          >
+            <CommandsView db={db} collection={col} tabId={tabId} />
+          </div>
         </div>
       )}
 
