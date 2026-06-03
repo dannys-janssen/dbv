@@ -279,7 +279,6 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   useEffect(() => {
     void loader.init().then((monaco) => {
-      monaco.editor.setTheme(editorTheme);
       const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
       const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
       const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
@@ -295,7 +294,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
         ],
       });
     });
-  }, [schema, tabId, visible, editorTheme]);
+  }, [schema, tabId, visible]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
@@ -838,7 +837,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                            <div style={{ border: hasFilter && !filterValid ? `1px solid ${muiTheme.palette.error.light}` : hasFilter ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://filter/${tabId}`} value={filterText}
                                 onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
@@ -855,7 +854,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                            <div style={{ border: hasSort && !sortValid ? `1px solid ${muiTheme.palette.error.light}` : hasSort ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://sort/${tabId}`} value={sortText}
                                 onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
@@ -875,7 +874,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                            <div style={{ border: hasProj && !projValid ? `1px solid ${muiTheme.palette.error.light}` : hasProj ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://projection/${tabId}`} value={projectionText}
                                 onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
                                 onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
@@ -933,7 +932,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.sql.parseError")}</span>
                             )}
                           </div>
-                          <div style={{ border: sqlError && sqlText.trim() ? "1px solid #fca5a5" : sqlText.trim() && sqlValid ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
+                          <div style={{ border: sqlError && sqlText.trim() ? `1px solid ${muiTheme.palette.error.light}` : sqlText.trim() && sqlValid ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                             <Editor theme={editorTheme}
                               height={`${sqlHeight}px`}
                               language="sql"
