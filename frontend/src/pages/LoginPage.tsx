@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../api/client";
 import { LanguageSelector } from "../components/LanguageSelector";
+import { ThemeSelector } from "../components/ThemeSelector";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -243,7 +244,8 @@ export default function LoginPage() {
         >
           {t("auth.login.footer")}
         </p>
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "12px" }}>
+          <ThemeSelector />
           <LanguageSelector />
         </div>
       </div>
@@ -251,4 +253,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

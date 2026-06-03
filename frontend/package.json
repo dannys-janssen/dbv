@@ -19,6 +19,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.5",
     "@monaco-editor/react": "^4.7.0",
     "axios": "^1.16.1",
     "i18next": "^26.3.0",

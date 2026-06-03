@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/useAuth";
 import CollectionView from "../components/CollectionView";
 import { LanguageSelector } from "../components/LanguageSelector";
+import { ThemeSelector } from "../components/ThemeSelector";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -538,6 +539,7 @@ export default function BrowserPage() {
             {t("brand.name")}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <ThemeSelector />
             <LanguageSelector />
             <button
               onClick={() => {
