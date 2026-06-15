@@ -160,12 +160,19 @@ export default function CommandsView({ db, collection, tabId }: Props) {
   const commandValid = (() => {
     try { JSON.parse(commandText); return true; } catch { return false; }
   })();
+  const borderColor = muiTheme.palette.divider;
+  const paperBg = muiTheme.palette.background.paper;
+  const sidebarBg = muiTheme.palette.background.default;
+  const mutedText = muiTheme.palette.text.secondary;
+  const primaryText = muiTheme.palette.text.primary;
+  const selectedBg = muiTheme.palette.action.selected;
+  const hoverBg = muiTheme.palette.action.hover;
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",
     cursor: "row-resize",
-    background: "linear-gradient(to bottom, #e2e8f0, #f1f5f9)",
-    borderTop: "1px solid #e2e8f0",
+    background: `linear-gradient(to bottom, ${muiTheme.palette.action.hover}, ${muiTheme.palette.background.default})`,
+    borderTop: `1px solid ${borderColor}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -198,10 +205,10 @@ export default function CommandsView({ db, collection, tabId }: Props) {
       <div style={{
         width: "240px",
         minWidth: "200px",
-        borderRight: "1px solid #e2e8f0",
+        borderRight: `1px solid ${borderColor}`,
         display: "flex",
         flexDirection: "column",
-        background: "#f8fafc",
+        background: sidebarBg,
         overflowY: "auto",
       }}>
         <div style={{ padding: "10px 12px 6px" }}>
@@ -214,8 +221,8 @@ export default function CommandsView({ db, collection, tabId }: Props) {
             style={{
               width: "100%", boxSizing: "border-box",
               padding: "6px 10px", borderRadius: "6px",
-              border: "1px solid #e2e8f0", fontSize: "12px",
-              fontFamily: FONT, background: "#fff", color: "#1e293b",
+              border: `1px solid ${borderColor}`, fontSize: "12px",
+              fontFamily: FONT, background: paperBg, color: primaryText,
               outline: "none",
             }}
           />
@@ -226,7 +233,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
             <h3 style={{
               padding: "8px 12px 4px",
               fontSize: "10px", fontWeight: 700,
-              color: "#94a3b8", textTransform: "uppercase",
+              color: mutedText, textTransform: "uppercase",
               letterSpacing: "0.06em", fontFamily: FONT,
               margin: 0,
             }}>
@@ -240,14 +247,20 @@ export default function CommandsView({ db, collection, tabId }: Props) {
                 style={{
                   display: "block", width: "100%", textAlign: "left",
                   padding: "7px 12px", border: "none",
-                  background: commandText.includes(`"${cmd.name}"`) ? "#e0f2fe" : "transparent",
+                  background: commandText.includes(`"${cmd.name}"`) ? selectedBg : "transparent",
                   cursor: "pointer", fontFamily: FONT,
                 }}
+                onMouseEnter={(e) => {
+                  if (!commandText.includes(`"${cmd.name}"`)) e.currentTarget.style.background = hoverBg;
+                }}
+                onMouseLeave={(e) => {
+                  if (!commandText.includes(`"${cmd.name}"`)) e.currentTarget.style.background = "transparent";
+                }}
               >
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "#1e293b" }}>{cmd.name}</div>
-                <div style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>{t(`commands.description.${cmd.name}`)}</div>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: primaryText }}>{cmd.name}</div>
+                <div style={{ fontSize: "11px", color: mutedText, marginTop: "1px" }}>{t(`commands.description.${cmd.name}`)}</div>
                 {cmd.admin && (
-                  <span style={{ fontSize: "10px", background: "#fef9c3", color: "#854d0e", borderRadius: "4px", padding: "0 5px", fontWeight: 600 }}>
+                  <span style={{ fontSize: "10px", background: muiTheme.palette.warning.light, color: muiTheme.palette.warning.dark, borderRadius: "4px", padding: "0 5px", fontWeight: 600 }}>
                     admin
                   </span>
                 )}
@@ -263,12 +276,12 @@ export default function CommandsView({ db, collection, tabId }: Props) {
         {/* Context bar */}
         <div style={{
           padding: "10px 16px",
-          borderBottom: "1px solid #e2e8f0",
+          borderBottom: `1px solid ${borderColor}`,
           display: "flex", alignItems: "center", gap: "12px",
-          background: "#fff", flexWrap: "wrap",
+          background: paperBg, flexWrap: "wrap",
         }}>
-          <div style={{ fontSize: "12px", color: "#475569", fontFamily: FONT }}>
-            {t("commands.context.runningOn")} <strong style={{ color: "#0f172a" }}>{adminFlag ? "admin" : db}</strong>
+          <div style={{ fontSize: "12px", color: mutedText, fontFamily: FONT }}>
+            {t("commands.context.runningOn")} <strong style={{ color: primaryText }}>{adminFlag ? "admin" : db}</strong>
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", userSelect: "none" }}>
             <input
@@ -289,8 +302,9 @@ export default function CommandsView({ db, collection, tabId }: Props) {
               marginLeft: "auto",
               padding: "7px 16px", borderRadius: "6px",
               border: "none", cursor: running || !commandValid ? "not-allowed" : "pointer",
-              background: running || !commandValid ? "#94a3b8" : "#2563eb",
-              color: "#fff", fontSize: "13px", fontWeight: 600,
+              background: running || !commandValid ? muiTheme.palette.action.disabledBackground : muiTheme.palette.primary.main,
+              color: running || !commandValid ? muiTheme.palette.text.disabled : muiTheme.palette.primary.contrastText,
+              fontSize: "13px", fontWeight: 600,
               fontFamily: FONT, display: "flex", alignItems: "center", gap: "6px",
             }}
           >
@@ -299,15 +313,15 @@ export default function CommandsView({ db, collection, tabId }: Props) {
         </div>
 
         {/* Editor */}
-        <div style={{ flex: "0 0 auto", borderBottom: "1px solid #e2e8f0" }}>
+        <div style={{ flex: "0 0 auto", borderBottom: `1px solid ${borderColor}` }}>
           <div style={{ padding: "6px 16px 4px" }}>
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: mutedText, textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
               {t("commands.label.command")}
             </span>
           </div>
           <div style={{
             margin: "0 16px 8px",
-            border: commandValid ? "1px solid #e2e8f0" : "1px solid #fca5a5",
+            border: commandValid ? `1px solid ${borderColor}` : `1px solid ${muiTheme.palette.error.light}`,
             borderRadius: "6px", overflow: "hidden",
           }}>
             <Editor
@@ -339,21 +353,21 @@ export default function CommandsView({ db, collection, tabId }: Props) {
         {/* Result */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", padding: "0 16px 12px" }}>
           <div style={{ padding: "6px 0 4px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: mutedText, textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: FONT }}>
               {t("commands.label.result")}
             </span>
             {error && (
-              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: "#fee2e2", color: "#dc2626", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.error.light, color: muiTheme.palette.error.contrastText, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.error")}
               </span>
             )}
             {result && !error && (
-              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: "#dcfce7", color: "#166534", borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.success.light, color: muiTheme.palette.success.contrastText, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.success")}
               </span>
             )}
             {duration !== null && !error && (
-              <span style={{ fontSize: "11px", color: "#64748b", fontFamily: FONT, marginLeft: "auto" }}>
+              <span style={{ fontSize: "11px", color: mutedText, fontFamily: FONT, marginLeft: "auto" }}>
                 {t("query.duration", { duration: duration < 1000 ? `${duration} ms` : `${(duration / 1000).toFixed(2)} s` })}
               </span>
             )}
@@ -362,8 +376,8 @@ export default function CommandsView({ db, collection, tabId }: Props) {
             <div
               role="alert"
               style={{
-                flex: 1, background: "#fef2f2", border: "1px solid #fca5a5",
-                borderRadius: "6px", padding: "12px", color: "#dc2626",
+                flex: 1, background: muiTheme.palette.error.light, border: `1px solid ${muiTheme.palette.error.main}`,
+                borderRadius: "6px", padding: "12px", color: muiTheme.palette.error.contrastText,
                 fontSize: "13px", fontFamily: "monospace", overflowY: "auto",
                 whiteSpace: "pre-wrap", wordBreak: "break-all",
               }}
@@ -371,7 +385,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
               {error}
             </div>
           ) : (
-            <div style={{ flex: 1, border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
+            <div style={{ flex: 1, border: `1px solid ${borderColor}`, borderRadius: "6px", overflow: "hidden" }}>
               <Editor
                 theme={editorTheme}
                 height="100%"
