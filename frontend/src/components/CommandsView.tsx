@@ -357,12 +357,12 @@ export default function CommandsView({ db, collection, tabId }: Props) {
               {t("commands.label.result")}
             </span>
             {error && (
-              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.error.light, color: muiTheme.palette.error.contrastText, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.error.light, color: muiTheme.palette.error.dark, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.error")}
               </span>
             )}
             {result && !error && (
-              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.success.light, color: muiTheme.palette.success.contrastText, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
+              <span role="status" aria-live="polite" style={{ fontSize: "11px", background: muiTheme.palette.success.light, color: muiTheme.palette.success.dark, borderRadius: "4px", padding: "1px 8px", fontWeight: 600 }}>
                 {t("badge.success")}
               </span>
             )}
@@ -377,7 +377,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
               role="alert"
               style={{
                 flex: 1, background: muiTheme.palette.error.light, border: `1px solid ${muiTheme.palette.error.main}`,
-                borderRadius: "6px", padding: "12px", color: muiTheme.palette.error.contrastText,
+                borderRadius: "6px", padding: "12px", color: muiTheme.palette.error.dark,
                 fontSize: "13px", fontFamily: "monospace", overflowY: "auto",
                 whiteSpace: "pre-wrap", wordBreak: "break-all",
               }}
