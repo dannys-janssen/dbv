@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import Editor, { loader } from "@monaco-editor/react";
 import { useTheme } from "@mui/material/styles";
 import { runDbCommand } from "../api/mongo";
+import { registerDbvMonacoThemes } from "../utils/monacoTheme";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
@@ -169,44 +170,14 @@ export default function CommandsView({ db, collection, tabId }: Props) {
   const hoverBg = muiTheme.palette.action.hover;
   const adminBadgeBg =
     muiTheme.palette.mode === "dark" ? muiTheme.palette.warning.main : muiTheme.palette.warning.light;
-  const adminBadgeText = muiTheme.palette.getContrastText(adminBadgeBg);
+  const adminBadgeText =
+    muiTheme.palette.mode === "dark" ? muiTheme.palette.warning.dark : muiTheme.palette.warning.contrastText;
 
   useEffect(() => {
     void loader.init().then((monaco) => {
-      monaco.editor.defineTheme("dbv-light", {
-        base: "vs",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": muiTheme.palette.background.paper,
-          "editor.foreground": muiTheme.palette.text.primary,
-          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
-          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
-          "editorGutter.background": muiTheme.palette.background.paper,
-          "editorWidget.background": muiTheme.palette.background.default,
-          "editorWidget.border": muiTheme.palette.divider,
-          "editor.selectionBackground": muiTheme.palette.action.selected,
-          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
-        },
-      });
-      monaco.editor.defineTheme("dbv-dark", {
-        base: "vs-dark",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": muiTheme.palette.background.paper,
-          "editor.foreground": muiTheme.palette.text.primary,
-          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
-          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
-          "editorGutter.background": muiTheme.palette.background.paper,
-          "editorWidget.background": muiTheme.palette.background.default,
-          "editorWidget.border": muiTheme.palette.divider,
-          "editor.selectionBackground": muiTheme.palette.action.selected,
-          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
-        },
-      });
+      registerDbvMonacoThemes(monaco);
     });
-  }, [muiTheme]);
+  }, []);
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",

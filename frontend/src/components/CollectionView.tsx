@@ -40,10 +40,20 @@ import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonForm
 import { parseSqlToMql } from "../utils/sqlToMql";
 import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
 import { buildDeleteManyRequest, parseDeleteManyInput } from "../utils/deleteMany";
+import { registerDbvMonacoThemes, type MonacoWithDefineTheme } from "../utils/monacoTheme";
 
 type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexes" | "stats" | "commands";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+interface MonacoJsonSchemaInstance extends MonacoWithDefineTheme {
+  languages: {
+    json: {
+      jsonDefaults: {
+        setDiagnosticsOptions: (options: unknown) => void;
+      };
+    };
+  };
+}
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -189,6 +199,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const muiTheme = useTheme();
   const isDark = muiTheme.palette.mode === "dark";
   const editorTheme = isDark ? "dbv-dark" : "dbv-light";
+  const [monacoReady, setMonacoReady] = useState(false);
+  const monacoRef = useRef<MonacoJsonSchemaInstance | null>(null);
 
   const [view, setView] = useState<View>("documents");
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
@@ -279,54 +291,29 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   useEffect(() => {
     void loader.init().then((monaco) => {
-      monaco.editor.defineTheme("dbv-light", {
-        base: "vs",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": muiTheme.palette.background.paper,
-          "editor.foreground": muiTheme.palette.text.primary,
-          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
-          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
-          "editorGutter.background": muiTheme.palette.background.paper,
-          "editorWidget.background": muiTheme.palette.background.default,
-          "editorWidget.border": muiTheme.palette.divider,
-          "editor.selectionBackground": muiTheme.palette.action.selected,
-          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
-        },
-      });
-      monaco.editor.defineTheme("dbv-dark", {
-        base: "vs-dark",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": muiTheme.palette.background.paper,
-          "editor.foreground": muiTheme.palette.text.primary,
-          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
-          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
-          "editorGutter.background": muiTheme.palette.background.paper,
-          "editorWidget.background": muiTheme.palette.background.default,
-          "editorWidget.border": muiTheme.palette.divider,
-          "editor.selectionBackground": muiTheme.palette.action.selected,
-          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
-        },
-      });
-      const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
-      const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
-      const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
-      const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
-      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-        validate: true,
-        schemas: [
-          { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
-          { uri: `http://dbv/filter-schema-${tabId}.json`,     fileMatch: [`dbv://filter/${tabId}`],     schema: filtSchema },
-          { uri: `http://dbv/sort-schema-${tabId}.json`,       fileMatch: [`dbv://sort/${tabId}`],       schema: sortSchema },
-          { uri: `http://dbv/projection-schema-${tabId}.json`, fileMatch: [`dbv://projection/${tabId}`], schema: projSchema },
-          { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
-        ],
-      });
+      monacoRef.current = monaco as MonacoJsonSchemaInstance;
+      registerDbvMonacoThemes(monaco);
+      setMonacoReady(true);
     });
-  }, [muiTheme, schema, tabId, visible]);
+  }, []);
+
+  useEffect(() => {
+    if (!monacoReady || !monacoRef.current) return;
+    const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
+    const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
+    const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
+    const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
+    monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      schemas: [
+        { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
+        { uri: `http://dbv/filter-schema-${tabId}.json`,     fileMatch: [`dbv://filter/${tabId}`],     schema: filtSchema },
+        { uri: `http://dbv/sort-schema-${tabId}.json`,       fileMatch: [`dbv://sort/${tabId}`],       schema: sortSchema },
+        { uri: `http://dbv/projection-schema-${tabId}.json`, fileMatch: [`dbv://projection/${tabId}`], schema: projSchema },
+        { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
+      ],
+    });
+  }, [monacoReady, schema, tabId, visible]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
