@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Editor from "@monaco-editor/react";
+import Editor, { loader } from "@monaco-editor/react";
 import { useTheme } from "@mui/material/styles";
 import { runDbCommand } from "../api/mongo";
 
@@ -96,7 +96,7 @@ interface Props {
 
 export default function CommandsView({ db, collection, tabId }: Props) {
   const muiTheme = useTheme();
-  const editorTheme = muiTheme.palette.mode === "dark" ? "vs-dark" : "vs";
+  const editorTheme = muiTheme.palette.mode === "dark" ? "dbv-dark" : "dbv-light";
   const [commandText, setCommandText] = useState('{\n  "ping": 1\n}');
   const [adminFlag, setAdminFlag]     = useState(false);
   const [running, setRunning]         = useState(false);
@@ -162,11 +162,51 @@ export default function CommandsView({ db, collection, tabId }: Props) {
   })();
   const borderColor = muiTheme.palette.divider;
   const paperBg = muiTheme.palette.background.paper;
-  const sidebarBg = muiTheme.palette.background.default;
+  const sidebarBg = muiTheme.palette.background.paper;
   const mutedText = muiTheme.palette.text.secondary;
   const primaryText = muiTheme.palette.text.primary;
   const selectedBg = muiTheme.palette.action.selected;
   const hoverBg = muiTheme.palette.action.hover;
+  const adminBadgeBg =
+    muiTheme.palette.mode === "dark" ? muiTheme.palette.warning.main : muiTheme.palette.warning.light;
+  const adminBadgeText = muiTheme.palette.getContrastText(adminBadgeBg);
+
+  useEffect(() => {
+    void loader.init().then((monaco) => {
+      monaco.editor.defineTheme("dbv-light", {
+        base: "vs",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": muiTheme.palette.background.paper,
+          "editor.foreground": muiTheme.palette.text.primary,
+          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
+          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
+          "editorGutter.background": muiTheme.palette.background.paper,
+          "editorWidget.background": muiTheme.palette.background.default,
+          "editorWidget.border": muiTheme.palette.divider,
+          "editor.selectionBackground": muiTheme.palette.action.selected,
+          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
+        },
+      });
+      monaco.editor.defineTheme("dbv-dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": muiTheme.palette.background.paper,
+          "editor.foreground": muiTheme.palette.text.primary,
+          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
+          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
+          "editorGutter.background": muiTheme.palette.background.paper,
+          "editorWidget.background": muiTheme.palette.background.default,
+          "editorWidget.border": muiTheme.palette.divider,
+          "editor.selectionBackground": muiTheme.palette.action.selected,
+          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
+        },
+      });
+    });
+  }, [muiTheme]);
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",
@@ -260,7 +300,7 @@ export default function CommandsView({ db, collection, tabId }: Props) {
                 <div style={{ fontSize: "12px", fontWeight: 600, color: primaryText }}>{cmd.name}</div>
                 <div style={{ fontSize: "11px", color: mutedText, marginTop: "1px" }}>{t(`commands.description.${cmd.name}`)}</div>
                 {cmd.admin && (
-                  <span style={{ fontSize: "10px", background: muiTheme.palette.warning.light, color: muiTheme.palette.warning.dark, borderRadius: "4px", padding: "0 5px", fontWeight: 600 }}>
+                  <span style={{ fontSize: "10px", background: adminBadgeBg, color: adminBadgeText, borderRadius: "4px", padding: "0 5px", fontWeight: 600 }}>
                     admin
                   </span>
                 )}

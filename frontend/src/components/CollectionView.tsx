@@ -188,7 +188,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const { t } = useTranslation();
   const muiTheme = useTheme();
   const isDark = muiTheme.palette.mode === "dark";
-  const editorTheme = isDark ? "vs-dark" : "vs";
+  const editorTheme = isDark ? "dbv-dark" : "dbv-light";
 
   const [view, setView] = useState<View>("documents");
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
@@ -279,6 +279,38 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   useEffect(() => {
     void loader.init().then((monaco) => {
+      monaco.editor.defineTheme("dbv-light", {
+        base: "vs",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": muiTheme.palette.background.paper,
+          "editor.foreground": muiTheme.palette.text.primary,
+          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
+          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
+          "editorGutter.background": muiTheme.palette.background.paper,
+          "editorWidget.background": muiTheme.palette.background.default,
+          "editorWidget.border": muiTheme.palette.divider,
+          "editor.selectionBackground": muiTheme.palette.action.selected,
+          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
+        },
+      });
+      monaco.editor.defineTheme("dbv-dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": muiTheme.palette.background.paper,
+          "editor.foreground": muiTheme.palette.text.primary,
+          "editorLineNumber.foreground": muiTheme.palette.text.secondary,
+          "editorLineNumber.activeForeground": muiTheme.palette.text.primary,
+          "editorGutter.background": muiTheme.palette.background.paper,
+          "editorWidget.background": muiTheme.palette.background.default,
+          "editorWidget.border": muiTheme.palette.divider,
+          "editor.selectionBackground": muiTheme.palette.action.selected,
+          "editor.inactiveSelectionBackground": muiTheme.palette.action.hover,
+        },
+      });
       const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
       const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
       const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
@@ -294,7 +326,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
         ],
       });
     });
-  }, [schema, tabId, visible]);
+  }, [muiTheme, schema, tabId, visible]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
@@ -791,7 +823,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 };
 
                 return (
-                  <div style={{ padding: "10px 20px", background: muiTheme.palette.background.default, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
+                  <div style={{ padding: "10px 20px", background: muiTheme.palette.background.paper, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                     {/* Mode toggle row */}
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                       <div
@@ -1165,10 +1197,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   documents.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "40px 20px" }}>
                       <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
-                      <p style={{ color: "#374151", margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
+                      <p style={{ color: muiTheme.palette.text.primary, margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
                         {t("documents.list.empty")}
                       </p>
-                      <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0, fontFamily: FONT }}>
+                      <p style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", margin: 0, fontFamily: FONT }}>
                         {filterText || projectionText ? t("documents.list.emptyWithFilter") : t("documents.list.emptyNoFilter")}
                       </p>
                     </div>
@@ -1178,7 +1210,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                         const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)));
                         const someSelected = selectedIds.size > 0 && !allSelected;
                         return (
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                         <input
                           type="checkbox"
                           checked={allSelected}
@@ -1191,7 +1223,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           }}
                           style={{ cursor: "pointer" }}
                         />
-                        <span style={{ fontSize: "12px", color: "#64748b", fontFamily: FONT }}>
+                        <span style={{ fontSize: "12px", color: muiTheme.palette.text.secondary, fontFamily: FONT }}>
                           {t("tree.checkbox.selectAllLabel")}
                         </span>
                       </div>
@@ -1201,8 +1233,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                         {documents.map((doc, index) => {
                           const id = getDocId(doc);
                           return (
-                            <div key={id || `doc-${index}`} style={{ border: `1px solid ${selectedIds.has(id) ? "#93c5fd" : "#e2e8f0"}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? "#eff6ff" : "#ffffff" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? "#dbeafe" : "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                            <div key={id || `doc-${index}`} style={{ border: `1px solid ${selectedIds.has(id) ? muiTheme.palette.primary.light : muiTheme.palette.divider}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? muiTheme.palette.action.selected : muiTheme.palette.background.paper }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? muiTheme.palette.action.selected : muiTheme.palette.action.hover, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                                 <input
                                   type="checkbox"
                                   checked={selectedIds.has(id)}
@@ -1217,19 +1249,19 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                   }
                                   style={{ cursor: "pointer" }}
                                 />
-                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: muiTheme.palette.secondary.main, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   {formatBsonValue(doc["_id"])}
                                 </span>
                                 <button
                                   onClick={() => openEdit(doc)}
-                                  style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                  style={{ background: "transparent", color: muiTheme.palette.text.primary, border: `1px solid ${muiTheme.palette.divider}`, padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
                                 >
                                   {t("buttons.edit")}
                                 </button>
                                 {canWrite && (
                                   <button
                                     onClick={() => void handleDelete(id)}
-                                    style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                    style={{ background: muiTheme.palette.error.light, color: muiTheme.palette.error.dark, border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
                                   >
                                     {t("buttons.delete")}
                                   </button>
