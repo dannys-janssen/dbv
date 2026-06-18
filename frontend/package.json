@@ -7,7 +7,7 @@
     "node": ">=24"
   },
   "overrides": {
-    "dompurify": ">=3.4.0"
+    "dompurify": ">=3.4.11"
   },
   "scripts": {
     "dev": "vite",
