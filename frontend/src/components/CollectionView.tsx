@@ -318,9 +318,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
       });
     } catch (error) {
       console.error("Failed to configure Monaco JSON diagnostics", error);
-      setMonacoReady(false);
     }
-  }, [monacoReady, schema, tabId, visible]);
+  }, [monacoReady, schema, tabId]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
