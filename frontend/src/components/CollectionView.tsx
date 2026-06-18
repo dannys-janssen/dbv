@@ -316,7 +316,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
         ],
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to configure Monaco JSON diagnostics", error);
       setMonacoReady(false);
     }
   }, [monacoReady, schema, tabId, visible]);
