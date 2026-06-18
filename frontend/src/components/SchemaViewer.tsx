@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useTheme, type Theme } from "@mui/material/styles";
 import type { SchemaField } from "../api/mongo";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -26,6 +27,8 @@ interface Props {
 
 export default function SchemaViewer({ fields, sampledDocs }: Props) {
   const { t } = useTranslation();
+  const muiTheme = useTheme();
+  const styles = getStyles(muiTheme);
   return (
     <div style={styles.container}>
       <p style={styles.meta}>
@@ -98,47 +101,49 @@ export default function SchemaViewer({ fields, sampledDocs }: Props) {
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  container: { overflowX: "auto" },
-  meta: { fontSize: "0.85rem", color: "#666", marginBottom: "0.75rem" },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" },
-  th: {
-    textAlign: "left",
-    padding: "0.5rem 0.75rem",
-    borderBottom: "2px solid #e5e7eb",
-    color: "#374151",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  },
-  row: { borderBottom: "1px solid #f3f4f6" },
-  td: { padding: "0.4rem 0.75rem", verticalAlign: "middle", textAlign: "left" },
-  fieldName: {
-    fontFamily: "monospace",
-    fontSize: "0.82rem",
-    background: "#f3f4f6",
-    color: "#1e293b",
-    padding: "0.1rem 0.35rem",
-    borderRadius: "3px",
-  },
-  badge: {
-    color: "#fff",
-    fontSize: "0.72rem",
-    padding: "0.1rem 0.4rem",
-    borderRadius: "3px",
-    fontWeight: 500,
-  },
-  coverageBar: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "0.4rem",
-    width: "120px",
-    justifyContent: "flex-end",
-  },
-  coverageFill: {
-    height: "6px",
-    borderRadius: "3px",
-    background: "#3b82f6",
-    minWidth: "2px",
-  },
-  coverageLabel: { fontSize: "0.8rem", color: "#374151", minWidth: "2.5rem", textAlign: "right" },
-};
+function getStyles(muiTheme: Theme): Record<string, React.CSSProperties> {
+  return {
+    container: { overflowX: "auto" },
+    meta: { fontSize: "0.85rem", color: muiTheme.palette.text.secondary, marginBottom: "0.75rem" },
+    table: { width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" },
+    th: {
+      textAlign: "left",
+      padding: "0.5rem 0.75rem",
+      borderBottom: `2px solid ${muiTheme.palette.divider}`,
+      color: muiTheme.palette.text.secondary,
+      fontWeight: 600,
+      whiteSpace: "nowrap",
+    },
+    row: { borderBottom: `1px solid ${muiTheme.palette.divider}` },
+    td: { padding: "0.4rem 0.75rem", verticalAlign: "middle", textAlign: "left", color: muiTheme.palette.text.primary },
+    fieldName: {
+      fontFamily: "monospace",
+      fontSize: "0.82rem",
+      background: muiTheme.palette.action.hover,
+      color: muiTheme.palette.text.primary,
+      padding: "0.1rem 0.35rem",
+      borderRadius: "3px",
+    },
+    badge: {
+      color: "#fff",
+      fontSize: "0.72rem",
+      padding: "0.1rem 0.4rem",
+      borderRadius: "3px",
+      fontWeight: 500,
+    },
+    coverageBar: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.4rem",
+      width: "120px",
+      justifyContent: "flex-end",
+    },
+    coverageFill: {
+      height: "6px",
+      borderRadius: "3px",
+      background: muiTheme.palette.primary.main,
+      minWidth: "2px",
+    },
+    coverageLabel: { fontSize: "0.8rem", color: muiTheme.palette.text.secondary, minWidth: "2.5rem", textAlign: "right" },
+  };
+}

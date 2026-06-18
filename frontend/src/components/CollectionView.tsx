@@ -24,6 +24,7 @@ import {
 } from "../api/mongo";
 import { useAuth } from "../context/useAuth";
 import Editor, { loader } from "@monaco-editor/react";
+import { useTheme } from "@mui/material/styles";
 import SchemaViewer from "../components/SchemaViewer";
 import DocTreeView from "../components/DocTreeView";
 import CommandsView from "../components/CommandsView";
@@ -39,10 +40,20 @@ import { formatBsonValue, normalizeBsonForReadonlyJson } from "../utils/bsonForm
 import { parseSqlToMql } from "../utils/sqlToMql";
 import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
 import { buildDeleteManyRequest, parseDeleteManyInput } from "../utils/deleteMany";
+import { registerDbvMonacoThemes, type MonacoWithDefineTheme } from "../utils/monacoTheme";
 
 type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexes" | "stats" | "commands";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+interface MonacoJsonSchemaInstance extends MonacoWithDefineTheme {
+  languages?: {
+    json?: {
+      jsonDefaults?: {
+        setDiagnosticsOptions: (options: unknown) => void;
+      };
+    };
+  };
+}
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -185,6 +196,11 @@ interface CollectionViewProps {
 export default function CollectionView({ db, col, visible, tabId }: CollectionViewProps) {
   const { canWrite } = useAuth();
   const { t } = useTranslation();
+  const muiTheme = useTheme();
+  const isDark = muiTheme.palette.mode === "dark";
+  const [monacoReady, setMonacoReady] = useState(false);
+  const editorTheme = monacoReady ? (isDark ? "dbv-dark" : "dbv-light") : (isDark ? "vs-dark" : "vs");
+  const monacoRef = useRef<MonacoJsonSchemaInstance | null>(null);
 
   const [view, setView] = useState<View>("documents");
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
@@ -275,11 +291,22 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
   useEffect(() => {
     void loader.init().then((monaco) => {
-      const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
-      const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
-      const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
-      const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
-      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      monacoRef.current = monaco as MonacoJsonSchemaInstance;
+      registerDbvMonacoThemes(monaco);
+      setMonacoReady(true);
+    }).catch(() => setMonacoReady(false));
+  }, []);
+
+  useEffect(() => {
+    if (!monacoReady || !monacoRef.current) return;
+    const jsonDefaults = monacoRef.current.languages?.json?.jsonDefaults;
+    if (!jsonDefaults || typeof jsonDefaults.setDiagnosticsOptions !== "function") return;
+    const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
+    const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
+    const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
+    const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
+    try {
+      jsonDefaults.setDiagnosticsOptions({
         validate: true,
         schemas: [
           { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
@@ -289,8 +316,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
         ],
       });
-    });
-  }, [schema, tabId, visible]);
+    } catch (error) {
+      console.error("Failed to configure Monaco JSON diagnostics", error);
+    }
+  }, [monacoReady, schema, tabId]);
 
   const loadIndexes = useCallback(() => {
     if (!db || !col) return;
@@ -646,8 +675,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
             style={{
               position: "sticky",
               top: 0,
-              background: "#ffffff",
-              borderBottom: "1px solid #e2e8f0",
+              background: muiTheme.palette.background.paper,
+              borderBottom: `1px solid ${muiTheme.palette.divider}`,
               padding: "12px 20px",
               display: "flex",
               justifyContent: "space-between",
@@ -664,9 +693,9 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 fontFamily: FONT,
               }}
             >
-              <span style={{ color: "#64748b" }}>{db}</span>
-              <span style={{ color: "#94a3b8" }}>›</span>
-              <span style={{ color: "#0f172a", fontWeight: 700 }}>
+              <span style={{ color: muiTheme.palette.text.secondary }}>{db}</span>
+              <span style={{ color: muiTheme.palette.text.secondary }}>›</span>
+              <span style={{ color: muiTheme.palette.text.primary, fontWeight: 700 }}>
                 {col}
               </span>
             </div>
@@ -688,8 +717,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           {/* View tab bar */}
           <div
             style={{
-              background: "#ffffff",
-              borderBottom: "1px solid #e2e8f0",
+              background: muiTheme.palette.background.paper,
+              borderBottom: `1px solid ${muiTheme.palette.divider}`,
               padding: "0 20px",
               display: "flex",
               flexDirection: "row",
@@ -711,9 +740,9 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     borderLeft: "none",
                     borderRight: "none",
                     borderBottom: isActive
-                      ? "2px solid #2563eb"
+                      ? `2px solid ${muiTheme.palette.primary.main}`
                       : "2px solid transparent",
-                    color: isActive ? "#2563eb" : "#64748b",
+                    color: isActive ? muiTheme.palette.primary.main : muiTheme.palette.text.secondary,
                     cursor: "pointer",
                     background: "transparent",
                     fontFamily: FONT,
@@ -726,8 +755,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   {tab === "documents" && isActive && (
                     <span
                       style={{
-                        background: "#f1f5f9",
-                        color: "#64748b",
+                        background: muiTheme.palette.action.selected,
+                        color: muiTheme.palette.text.secondary,
                         fontSize: "11px",
                         padding: "1px 6px",
                         borderRadius: "999px",
@@ -787,19 +816,19 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 };
 
                 return (
-                  <div style={{ padding: "10px 20px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                  <div style={{ padding: "10px 20px", background: muiTheme.palette.background.paper, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                     {/* Mode toggle row */}
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                       <div
                         role="group"
                         aria-label={t("query.mode.label")}
-                        style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}
+                        style={{ display: "flex", border: `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden" }}
                       >
                         <button
                           role="radio"
                           aria-checked={queryMode === "mql"}
                           onClick={() => setQueryMode("mql")}
-                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", cursor: "pointer", background: queryMode === "mql" ? "#2563eb" : "#fff", color: queryMode === "mql" ? "#fff" : "#64748b" }}
+                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", cursor: "pointer", background: queryMode === "mql" ? muiTheme.palette.primary.main : muiTheme.palette.background.paper, color: queryMode === "mql" ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary }}
                         >
                           MQL
                         </button>
@@ -807,12 +836,12 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           role="radio"
                           aria-checked={queryMode === "sql"}
                           onClick={() => setQueryMode("sql")}
-                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", borderLeft: "1px solid #e2e8f0", cursor: "pointer", background: queryMode === "sql" ? "#2563eb" : "#fff", color: queryMode === "sql" ? "#fff" : "#64748b" }}
+                          style={{ padding: "4px 12px", fontSize: "12px", fontWeight: 600, fontFamily: FONT, border: "none", borderLeft: `1px solid ${muiTheme.palette.divider}`, cursor: "pointer", background: queryMode === "sql" ? muiTheme.palette.primary.main : muiTheme.palette.background.paper, color: queryMode === "sql" ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary }}
                         >
                           SQL
                         </button>
                       </div>
-                      <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: FONT }}>
+                      <span style={{ fontSize: "11px", color: muiTheme.palette.text.secondary, fontFamily: FONT }}>
                         {queryMode === "sql" ? t("query.mode.sqlHint") : t("query.hint.ctrlEnter")}
                       </span>
                     </div>
@@ -833,10 +862,16 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasFilter && !filterValid ? "1px solid #fca5a5" : hasFilter ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://filter/${tabId}`} value={filterText}
+                            <div style={{ border: hasFilter && !filterValid ? `1px solid ${muiTheme.palette.error.light}` : hasFilter ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
+                              <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://filter/${tabId}`} value={filterText}
                                 onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -850,10 +885,16 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasSort && !sortValid ? "1px solid #fca5a5" : hasSort ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://sort/${tabId}`} value={sortText}
+                            <div style={{ border: hasSort && !sortValid ? `1px solid ${muiTheme.palette.error.light}` : hasSort ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
+                              <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://sort/${tabId}`} value={sortText}
                                 onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -870,10 +911,16 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.badge.invalidJson")}</span>
                               )}
                             </div>
-                            <div style={{ border: hasProj && !projValid ? "1px solid #fca5a5" : hasProj ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                              <Editor height={`${filterHeight}px`} language="json" path={`dbv://projection/${tabId}`} value={projectionText}
+                            <div style={{ border: hasProj && !projValid ? `1px solid ${muiTheme.palette.error.light}` : hasProj ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
+                              <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://projection/${tabId}`} value={projectionText}
                                 onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -928,8 +975,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               <span style={{ fontSize: "10px", background: "#fee2e2", color: "#dc2626", borderRadius: "999px", padding: "1px 7px", fontWeight: 600 }}>{t("query.sql.parseError")}</span>
                             )}
                           </div>
-                          <div style={{ border: sqlError && sqlText.trim() ? "1px solid #fca5a5" : sqlText.trim() && sqlValid ? "1px solid #93c5fd" : "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", background: "#ffffff" }}>
-                            <Editor
+                          <div style={{ border: sqlError && sqlText.trim() ? `1px solid ${muiTheme.palette.error.light}` : sqlText.trim() && sqlValid ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
+                            <Editor theme={editorTheme}
                               height={`${sqlHeight}px`}
                               language="sql"
                               path={`dbv://sql/${tabId}`}
@@ -937,7 +984,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               onChange={(v) => { setSqlText(v ?? ""); setPage(1); }}
                               options={{ ...monoOpts, suggest: { showSnippets: true, showWords: true } }}
                               onMount={(editor, monaco) => {
-                                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, applySql);
+                                const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                const keyCode = monaco?.KeyCode?.Enter;
+                                if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                  editor.addCommand(keyMod | keyCode, applySql);
+                                }
                               }}
                             />
                             <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -995,18 +1046,18 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px" }}>
                       <div style={{ flex: 1 }} />
                       {/* Layout toggle */}
-                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", height: "36px" }}>
+                      <div style={{ display: "flex", border: `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", height: "36px" }}>
                         <button
                           title={t("views.table.title")}
                           onClick={() => setDocLayout("table")}
-                          style={{ background: docLayout === "table" ? "#2563eb" : "transparent", color: docLayout === "table" ? "#fff" : "#64748b", border: "none", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          style={{ background: docLayout === "table" ? muiTheme.palette.primary.main : "transparent", color: docLayout === "table" ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary, border: "none", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
                           ☰
                         </button>
                         <button
                           title={t("views.tree.title")}
                           onClick={() => setDocLayout("tree")}
-                          style={{ background: docLayout === "tree" ? "#2563eb" : "transparent", color: docLayout === "tree" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
+                          style={{ background: docLayout === "tree" ? muiTheme.palette.primary.main : "transparent", color: docLayout === "tree" ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary, border: "none", borderLeft: `1px solid ${muiTheme.palette.divider}`, padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1" }}
                         >
                           ⊞
                         </button>
@@ -1014,22 +1065,22 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           title={t("views.json.title")}
                           aria-label={t("views.json.title")}
                           onClick={() => setDocLayout("json")}
-                          style={{ background: docLayout === "json" ? "#2563eb" : "transparent", color: docLayout === "json" ? "#fff" : "#64748b", border: "none", borderLeft: "1px solid #e2e8f0", padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1", fontFamily: "monospace" }}
+                          style={{ background: docLayout === "json" ? muiTheme.palette.primary.main : "transparent", color: docLayout === "json" ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary, border: "none", borderLeft: `1px solid ${muiTheme.palette.divider}`, padding: "0 10px", height: "100%", display: "flex", alignItems: "center", cursor: "pointer", fontSize: "14px", lineHeight: "1", fontFamily: "monospace" }}
                         >
                           {"{}"}
                         </button>
                       </div>
-                      <div style={{ display: "flex", border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden", height: "36px" }}>
+                      <div style={{ display: "flex", border: `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", height: "36px" }}>
                         <button
                           onClick={() => exportCollection(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                          style={{ background: "transparent", color: "#374151", padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", borderRight: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}
+                          style={{ background: "transparent", color: muiTheme.palette.text.primary, padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", borderRight: `1px solid ${muiTheme.palette.divider}`, cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportJson")}
                         >
                           {t("buttons.export")} JSON
                         </button>
                         <button
                           onClick={() => exportCollectionBson(db, col, filterText || undefined).catch((e: unknown) => alert("Export failed: " + (e as Error).message))}
-                          style={{ background: "transparent", color: "#374151", padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
+                          style={{ background: "transparent", color: muiTheme.palette.text.primary, padding: "0 12px", height: "100%", display: "flex", alignItems: "center", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT }}
                           title={t("buttons.exportBson")}
                         >
                           {t("buttons.export")} BSON
@@ -1037,11 +1088,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       </div>
                       {canWrite && (
                         <>
-                          <label style={{ background: "transparent", color: "#374151", padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: "1px solid #e2e8f0", cursor: "pointer", fontFamily: FONT }}>
+                          <label style={{ background: "transparent", color: muiTheme.palette.text.primary, padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: `1px solid ${muiTheme.palette.divider}`, cursor: "pointer", fontFamily: FONT }}>
                             {t("buttons.import")}
                             <input ref={importInputRef} type="file" accept=".json,.bson" style={{ display: "none" }} onChange={(e) => void handleImport(e)} />
                           </label>
-                          <button onClick={openCreate} style={{ background: "#2563eb", color: "#fff", padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
+                          <button onClick={openCreate} style={{ background: muiTheme.palette.primary.main, color: muiTheme.palette.primary.contrastText, padding: "0 14px", height: "36px", display: "flex", alignItems: "center", borderRadius: "6px", fontSize: "13px", border: "none", cursor: "pointer", fontFamily: FONT, fontWeight: 600 }}>
                             {t("documents.button.create")}
                           </button>
                         </>
@@ -1161,10 +1212,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   documents.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "40px 20px" }}>
                       <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
-                      <p style={{ color: "#374151", margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
+                      <p style={{ color: muiTheme.palette.text.primary, margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
                         {t("documents.list.empty")}
                       </p>
-                      <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0, fontFamily: FONT }}>
+                      <p style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", margin: 0, fontFamily: FONT }}>
                         {filterText || projectionText ? t("documents.list.emptyWithFilter") : t("documents.list.emptyNoFilter")}
                       </p>
                     </div>
@@ -1174,7 +1225,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                         const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(getDocId(d)));
                         const someSelected = selectedIds.size > 0 && !allSelected;
                         return (
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                         <input
                           type="checkbox"
                           checked={allSelected}
@@ -1187,7 +1238,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           }}
                           style={{ cursor: "pointer" }}
                         />
-                        <span style={{ fontSize: "12px", color: "#64748b", fontFamily: FONT }}>
+                        <span style={{ fontSize: "12px", color: muiTheme.palette.text.secondary, fontFamily: FONT }}>
                           {t("tree.checkbox.selectAllLabel")}
                         </span>
                       </div>
@@ -1197,8 +1248,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                         {documents.map((doc, index) => {
                           const id = getDocId(doc);
                           return (
-                            <div key={id || `doc-${index}`} style={{ border: `1px solid ${selectedIds.has(id) ? "#93c5fd" : "#e2e8f0"}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? "#eff6ff" : "#ffffff" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? "#dbeafe" : "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                            <div key={id || `doc-${index}`} style={{ border: `1px solid ${selectedIds.has(id) ? muiTheme.palette.primary.light : muiTheme.palette.divider}`, borderRadius: "8px", overflow: "hidden", background: selectedIds.has(id) ? muiTheme.palette.action.selected : muiTheme.palette.background.paper }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", background: selectedIds.has(id) ? muiTheme.palette.action.selected : muiTheme.palette.action.hover, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                                 <input
                                   type="checkbox"
                                   checked={selectedIds.has(id)}
@@ -1213,25 +1264,25 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                   }
                                   style={{ cursor: "pointer" }}
                                 />
-                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: "12px", color: muiTheme.palette.secondary.main, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   {formatBsonValue(doc["_id"])}
                                 </span>
                                 <button
                                   onClick={() => openEdit(doc)}
-                                  style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                  style={{ background: "transparent", color: muiTheme.palette.text.primary, border: `1px solid ${muiTheme.palette.divider}`, padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
                                 >
                                   {t("buttons.edit")}
                                 </button>
                                 {canWrite && (
                                   <button
                                     onClick={() => void handleDelete(id)}
-                                    style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+                                    style={{ background: muiTheme.palette.error.light, color: muiTheme.palette.error.dark, border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
                                   >
                                     {t("buttons.delete")}
                                   </button>
                                 )}
                               </div>
-                              <Editor
+                              <Editor theme={editorTheme}
                                 height="250px"
                                 defaultLanguage="json"
                                 path={`dbv://documents-readonly/${tabId}/${index}`}
@@ -1263,8 +1314,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     <thead>
                       <tr
                         style={{
-                          background: "#f8fafc",
-                          borderBottom: "2px solid #e2e8f0",
+                          background: muiTheme.palette.action.hover,
+                          borderBottom: `2px solid ${muiTheme.palette.divider}`,
                         }}
                       >
                         <th style={{ width: "40px", padding: "10px 12px", textAlign: "center" }}>
@@ -1288,7 +1339,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             width: "180px",
                             padding: "10px 12px",
                             textAlign: "left",
-                            color: "#64748b",
+                            color: muiTheme.palette.text.secondary,
                             fontWeight: 600,
                             textTransform: "uppercase",
                             letterSpacing: "0.05em",
@@ -1301,7 +1352,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           style={{
                             padding: "10px 12px",
                             textAlign: "left",
-                            color: "#64748b",
+                            color: muiTheme.palette.text.secondary,
                             fontWeight: 600,
                             textTransform: "uppercase",
                             letterSpacing: "0.05em",
@@ -1315,7 +1366,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             width: "100px",
                             padding: "10px 12px",
                             textAlign: "right",
-                            color: "#64748b",
+                            color: muiTheme.palette.text.secondary,
                             fontWeight: 600,
                             textTransform: "uppercase",
                             letterSpacing: "0.05em",
@@ -1346,7 +1397,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             </div>
                             <p
                               style={{
-                                color: "#374151",
+                                color: muiTheme.palette.text.primary,
                                 margin: "0 0 4px 0",
                                 fontWeight: 500,
                                 fontFamily: FONT,
@@ -1356,7 +1407,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             </p>
                             <p
                               style={{
-                                color: "#94a3b8",
+                                color: muiTheme.palette.text.secondary,
                                 fontSize: "12px",
                                 margin: 0,
                                 fontFamily: FONT,
@@ -1375,8 +1426,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                           return (
                             <tr
                               key={id}
-                              style={{ borderBottom: "1px solid #f1f5f9", background: isSelected ? "#eff6ff" : undefined }}
-                              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
+                              style={{ borderBottom: `1px solid ${muiTheme.palette.divider}`, background: isSelected ? muiTheme.palette.action.selected : undefined }}
+                              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = muiTheme.palette.action.hover; }}
                               onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = ""; }}
                             >
                               <td style={{ padding: "10px 12px", textAlign: "center" }}>
@@ -1432,8 +1483,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                   onClick={() => openEdit(doc)}
                                   style={{
                                     background: "transparent",
-                                    color: "#374151",
-                                    border: "1px solid #e2e8f0",
+                                    color: muiTheme.palette.text.primary,
+                                    border: `1px solid ${muiTheme.palette.divider}`,
                                     padding: "4px 10px",
                                     borderRadius: "4px",
                                     fontSize: "12px",
@@ -1448,8 +1499,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                   <button
                                     onClick={() => void handleDelete(id)}
                                     style={{
-                                      background: "#fee2e2",
-                                      color: "#dc2626",
+                                      background: muiTheme.palette.error.light,
+                                      color: muiTheme.palette.error.contrastText,
                                       border: "none",
                                       padding: "4px 10px",
                                       borderRadius: "4px",
@@ -1476,8 +1527,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 <div
                   style={{
                     padding: "12px 20px",
-                    background: "#ffffff",
-                    borderTop: "1px solid #e2e8f0",
+                    background: muiTheme.palette.background.paper,
+                    borderTop: `1px solid ${muiTheme.palette.divider}`,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
@@ -1486,7 +1537,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 >
                   <span
                     style={{
-                      color: "#64748b",
+                      color: muiTheme.palette.text.secondary,
                       fontSize: "13px",
                       fontFamily: FONT,
                     }}
@@ -1505,8 +1556,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       disabled={page === 1}
                       style={{
                         background: "transparent",
-                        color: page === 1 ? "#cbd5e1" : "#374151",
-                        border: "1px solid #e2e8f0",
+                        color: page === 1 ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
+                        border: `1px solid ${muiTheme.palette.divider}`,
                         padding: "6px 12px",
                         borderRadius: "6px",
                         fontSize: "13px",
@@ -1519,7 +1570,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     <span
                       style={{
                         fontSize: "13px",
-                        color: "#64748b",
+                        color: muiTheme.palette.text.secondary,
                         fontFamily: FONT,
                       }}
                     >
@@ -1530,8 +1581,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       disabled={documents.length < limitVal}
                       style={{
                         background: "transparent",
-                        color: documents.length < limitVal ? "#cbd5e1" : "#374151",
-                        border: "1px solid #e2e8f0",
+                        color: documents.length < limitVal ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
+                        border: `1px solid ${muiTheme.palette.divider}`,
                         padding: "6px 12px",
                         borderRadius: "6px",
                         fontSize: "13px",
@@ -1556,7 +1607,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   {t("aggregate.prompt")}
                 </p>
                 <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
-                  <Editor
+                  <Editor theme={editorTheme}
                     height={`${aggHeight}px`}
                     defaultLanguage="json"
                     path={`dbv://pipeline/${tabId}`}
@@ -1574,10 +1625,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runAggregate()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runAggregate()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1617,7 +1672,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
               {/* Results — fill remaining height */}
               {aggResults.length > 0 && (
                 <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
-                  <Editor
+                  <Editor theme={editorTheme}
                     height="100%"
                     defaultLanguage="json"
                     value={JSON.stringify(aggResults, null, 2)}
@@ -1644,7 +1699,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   {t("update.prompt")}
                 </p>
                 <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
-                  <Editor
+                  <Editor theme={editorTheme}
                     height={`${aggHeight}px`}
                     defaultLanguage="json"
                     path={`dbv://update/${tabId}`}
@@ -1662,10 +1717,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runUpdateMany()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runUpdateMany()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1698,7 +1757,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 )}
               </div>
               <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
-                <Editor
+                <Editor theme={editorTheme}
                   height="100%"
                   defaultLanguage="json"
                   value={updateManyResult ? JSON.stringify(updateManyResult, null, 2) : t("update.placeholder.result")}
@@ -1724,7 +1783,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   {t("delete.prompt")}
                 </p>
                 <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", overflow: "hidden" }}>
-                  <Editor
+                  <Editor theme={editorTheme}
                     height={`${aggHeight}px`}
                     defaultLanguage="json"
                     path={`dbv://delete/${tabId}`}
@@ -1742,10 +1801,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runDeleteMany()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runDeleteMany()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1778,7 +1841,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 )}
               </div>
               <div style={{ flex: 1, overflow: "hidden", borderTop: "1px solid #e2e8f0" }}>
-                <Editor
+                <Editor theme={editorTheme}
                   height="100%"
                   defaultLanguage="json"
                   value={deleteManyResult ? JSON.stringify(deleteManyResult, null, 2) : t("delete.placeholder.result")}
@@ -1800,7 +1863,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           {view === "schema" && (
             <div style={{ padding: "20px", fontFamily: FONT }}>
               {schemaLoading ? (
-                <p style={{ color: "#64748b", fontSize: "13px" }}>
+                <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px" }}>
                   {t("schema.inferring")}
                 </p>
               ) : schema ? (
@@ -1809,7 +1872,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   sampledDocs={schema.sampled_documents}
                 />
               ) : (
-                <p style={{ color: "#94a3b8", fontSize: "13px" }}>
+                <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px" }}>
                   {t("schema.unavailable")}
                 </p>
               )}
@@ -1820,54 +1883,54 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           {view === "indexes" && (
             <div style={{ padding: "20px", fontFamily: FONT }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>
+                <span style={{ fontSize: "13px", color: muiTheme.palette.text.secondary, flex: 1 }}>
                   {indexesLoading ? t("indexes.label.loading") : t("indexes.label.count", { count: indexes.length })}
                 </span>
                 <button
                   onClick={() => { setIndexName(""); setIndexKeys([{ field: "", direction: 1 }]); setIndexUnique(false); setIndexSparse(false); setIndexBackground(true); setIndexTtl(""); setIndexPartialFilter(""); setNewIndexOpen(true); }}
-                  style={{ padding: "6px 14px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
+                  style={{ padding: "6px 14px", background: muiTheme.palette.primary.main, color: muiTheme.palette.primary.contrastText, border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
                 >
                   {t("indexes.button.create")}
                 </button>
               </div>
 
               {indexes.length === 0 && !indexesLoading ? (
-                <p style={{ color: "#94a3b8", fontSize: "13px" }}>{t("indexes.list.empty")}</p>
+                <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px" }}>{t("indexes.list.empty")}</p>
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                     <thead>
-                      <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                      <tr style={{ background: muiTheme.palette.action.hover, borderBottom: `2px solid ${muiTheme.palette.divider}` }}>
                         {[t("table.header.name"), t("table.header.keys"), t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl"), t("table.header.partialFilter"), ""].map((h) => (
-                          <th key={h} style={{ padding: "8px 12px", textAlign: [t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl")].includes(h) ? "center" : "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                          <th key={h} style={{ padding: "8px 12px", textAlign: [t("table.header.unique"), t("table.header.sparse"), t("table.header.ttl")].includes(h) ? "center" : "left", color: muiTheme.palette.text.secondary, fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {indexes.map((idx) => (
-                        <tr key={idx.name} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                          <td style={{ padding: "8px 12px", color: "#1e293b", fontWeight: 500, textAlign: "left" }}>{idx.name}</td>
+                        <tr key={idx.name} style={{ borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
+                          <td style={{ padding: "8px 12px", color: muiTheme.palette.text.primary, fontWeight: 500, textAlign: "left" }}>{idx.name}</td>
                           <td style={{ padding: "8px 12px", textAlign: "left" }}>
-                            <code style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", fontSize: "12px", color: "#334155" }}>
+                            <code style={{ background: muiTheme.palette.action.hover, padding: "2px 6px", borderRadius: "4px", fontSize: "12px", color: muiTheme.palette.text.primary }}>
                               {Object.entries(idx.keys).map(([f, d]) => `${f}: ${d}`).join(", ")}
                             </code>
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.unique ? "#16a34a" : "#94a3b8" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.unique ? muiTheme.palette.success.main : muiTheme.palette.text.secondary }}>
                             {idx.unique ? "✓" : "—"}
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.sparse ? "#16a34a" : "#94a3b8" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: idx.sparse ? muiTheme.palette.success.main : muiTheme.palette.text.secondary }}>
                             {idx.sparse ? "✓" : "—"}
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: "#64748b" }}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: muiTheme.palette.text.secondary }}>
                             {idx.ttl !== undefined ? idx.ttl : "—"}
                           </td>
                           <td style={{ padding: "8px 12px", textAlign: "left", maxWidth: "200px" }}>
                             {idx.partialFilterExpression ? (
-                              <code style={{ background: "#f0f9ff", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#0369a1", wordBreak: "break-word" }}>
+                              <code style={{ background: muiTheme.palette.action.hover, padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: muiTheme.palette.text.primary, wordBreak: "break-word" }}>
                                 {JSON.stringify(idx.partialFilterExpression)}
                               </code>
                             ) : (
-                              <span style={{ color: "#94a3b8" }}>—</span>
+                              <span style={{ color: muiTheme.palette.text.secondary }}>—</span>
                             )}
                           </td>
                           <td style={{ padding: "8px 12px", textAlign: "center" }}>
@@ -1879,7 +1942,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                     .then(loadIndexes)
                                     .catch((e: unknown) => alert("Error: " + (e as Error).message));
                                 }}
-                                style={{ padding: "3px 10px", background: "#fff", border: "1px solid #fca5a5", color: "#dc2626", borderRadius: "5px", cursor: "pointer", fontSize: "12px", fontWeight: 500 }}
+                                style={{ padding: "3px 10px", background: muiTheme.palette.background.paper, border: `1px solid ${muiTheme.palette.error.main}`, color: muiTheme.palette.error.main, borderRadius: "5px", cursor: "pointer", fontSize: "12px", fontWeight: 500 }}
                               >
                                 {t("buttons.drop")}
                               </button>
@@ -1898,14 +1961,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
           {view === "stats" && (
             <div style={{ padding: "20px", fontFamily: FONT }}>
               {colStatsLoading ? (
-                <p style={{ color: "#64748b", fontSize: "13px" }}>{t("stats.loading")}</p>
+                <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px" }}>{t("stats.loading")}</p>
               ) : !colStats ? (
-                <p style={{ color: "#94a3b8", fontSize: "13px" }}>{t("stats.unavailable")}</p>
+                <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px" }}>{t("stats.unavailable")}</p>
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                    <span style={{ fontSize: "13px", color: "#64748b", flex: 1 }}>{t("stats.title")}</span>
-                    <button onClick={loadColStats} style={{ padding: "5px 12px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", fontSize: "12px", color: "#374151", fontFamily: FONT }}>{t("buttons.refresh")}</button>
+                    <span style={{ fontSize: "13px", color: muiTheme.palette.text.secondary, flex: 1 }}>{t("stats.title")}</span>
+                    <button onClick={loadColStats} style={{ padding: "5px 12px", background: muiTheme.palette.background.paper, border: `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", cursor: "pointer", fontSize: "12px", color: muiTheme.palette.text.primary, fontFamily: FONT }}>{t("buttons.refresh")}</button>
                   </div>
                   {(() => {
                     const s = colStats;
@@ -1920,10 +1983,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     return (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px", marginBottom: "24px" }}>
                         {cards.map((c) => (
-                          <div key={c.label} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "14px 16px" }}>
-                            <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{c.label}</div>
-                            <div style={{ fontSize: "22px", fontWeight: 700, color: "#1e293b" }}>{c.value}</div>
-                            {c.sub && <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>{c.sub}</div>}
+                          <div key={c.label} style={{ background: muiTheme.palette.background.paper, border: `1px solid ${muiTheme.palette.divider}`, borderRadius: "8px", padding: "14px 16px" }}>
+                            <div style={{ fontSize: "11px", fontWeight: 600, color: muiTheme.palette.text.secondary, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{c.label}</div>
+                            <div style={{ fontSize: "22px", fontWeight: 700, color: muiTheme.palette.text.primary }}>{c.value}</div>
+                            {c.sub && <div style={{ fontSize: "11px", color: muiTheme.palette.text.secondary, marginTop: "2px" }}>{c.sub}</div>}
                           </div>
                         ))}
                       </div>
@@ -1932,21 +1995,21 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
                   {colStats["indexSizes"] && typeof colStats["indexSizes"] === "object" && (
                     <>
-                      <h4 style={{ fontSize: "13px", fontWeight: 600, color: "#374151", margin: "0 0 10px 0" }}>{t("stats.section.indexSizes")}</h4>
+                      <h4 style={{ fontSize: "13px", fontWeight: 600, color: muiTheme.palette.text.primary, margin: "0 0 10px 0" }}>{t("stats.section.indexSizes")}</h4>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                         <thead>
-                          <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                            <th style={{ padding: "6px 12px", textAlign: "left", color: "#475569", fontWeight: 600 }}>{t("table.header.index")}</th>
-                            <th style={{ padding: "6px 12px", textAlign: "right", color: "#475569", fontWeight: 600 }}>{t("table.header.size")}</th>
+                          <tr style={{ background: muiTheme.palette.action.hover, borderBottom: `2px solid ${muiTheme.palette.divider}` }}>
+                            <th style={{ padding: "6px 12px", textAlign: "left", color: muiTheme.palette.text.secondary, fontWeight: 600 }}>{t("table.header.index")}</th>
+                            <th style={{ padding: "6px 12px", textAlign: "right", color: muiTheme.palette.text.secondary, fontWeight: 600 }}>{t("table.header.size")}</th>
                           </tr>
                         </thead>
                         <tbody>
                           {Object.entries(colStats["indexSizes"] as Record<string, unknown>).map(([name, size]) => (
-                            <tr key={name} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                              <td style={{ padding: "6px 12px", color: "#1e293b", textAlign: "left" }}>
-                                <code style={{ background: "#f1f5f9", color: "#334155", padding: "1px 5px", borderRadius: "3px", fontSize: "12px" }}>{name}</code>
+                            <tr key={name} style={{ borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
+                              <td style={{ padding: "6px 12px", color: muiTheme.palette.text.primary, textAlign: "left" }}>
+                                <code style={{ background: muiTheme.palette.action.hover, color: muiTheme.palette.text.primary, padding: "1px 5px", borderRadius: "3px", fontSize: "12px" }}>{name}</code>
                               </td>
-                              <td style={{ padding: "6px 12px", textAlign: "right", color: "#64748b" }}>{formatBytes(numVal(size))}</td>
+                              <td style={{ padding: "6px 12px", textAlign: "right", color: muiTheme.palette.text.secondary }}>{formatBytes(numVal(size))}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1981,7 +2044,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
               <h3 style={{ ...modalTitleStyle, marginBottom: 0 }}>
                 {editingId ? t("modals.editDocument.title") : t("modals.newDocument.title")}
               </h3>
-              <div style={{ display: "flex", background: "#0f172a", borderRadius: 6, border: "1px solid #334155", overflow: "hidden" }}>
+              <div style={{ display: "flex", background: muiTheme.palette.action.selected, borderRadius: 6, border: `1px solid ${muiTheme.palette.divider}`, overflow: "hidden" }}>
                 {(["form", "json"] as const).map((m) => (
                   <button
                     key={m}
@@ -1992,8 +2055,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       fontWeight: 600,
                       cursor: "pointer",
                       border: "none",
-                      background: editorMode === m ? "#1e3a5f" : "transparent",
-                      color: editorMode === m ? "#93c5fd" : "#64748b",
+                      background: editorMode === m ? muiTheme.palette.primary.main : "transparent",
+                      color: editorMode === m ? muiTheme.palette.primary.contrastText : muiTheme.palette.text.secondary,
                       transition: "background 0.15s",
                     }}
                   >
@@ -2016,7 +2079,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 isEditing={editingId !== null}
               />
             ) : (
-              <Editor
+              <Editor theme={editorTheme}
                 height="500px"
                 defaultLanguage="json"
                 path={`dbv://document/${tabId}`}

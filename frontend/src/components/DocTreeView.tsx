@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@mui/material/styles";
 import { formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel } from "../utils/bsonFormat";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -16,6 +17,7 @@ interface TreeNodeProps {
 }
 
 function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
+  const muiTheme = useTheme();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const indent = depth * 18;
 
@@ -32,7 +34,7 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
           paddingLeft: indent + 18,
         }}
       >
-        <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace", minWidth: 0 }}>
+        <span style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", fontFamily: "monospace", minWidth: 0 }}>
           {String(nodeKey)}:
         </span>
         <span style={{ color: bsonTypeColor(value), fontSize: "12px", fontFamily: "monospace", wordBreak: "break-all" }}>
@@ -71,10 +73,10 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
           }
         }}
       >
-        <span aria-hidden="true" style={{ width: "16px", textAlign: "center", fontSize: "10px", color: "#94a3b8", flexShrink: 0 }}>
+        <span aria-hidden="true" style={{ width: "16px", textAlign: "center", fontSize: "10px", color: muiTheme.palette.text.secondary, flexShrink: 0 }}>
           {isExpanded ? "▼" : "▶"}
         </span>
-        <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>
+        <span style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", fontFamily: "monospace" }}>
           {String(nodeKey)}:
         </span>
         <span style={{ color: bsonTypeColor(value), fontSize: "11px", fontFamily: "monospace", opacity: 0.8 }}>
@@ -82,7 +84,7 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
         </span>
       </div>
       {isExpanded && (
-        <div id={contentId} style={{ borderLeft: "1px dashed #e2e8f0", marginLeft: indent + 8 }}>
+        <div id={contentId} style={{ borderLeft: `1px dashed ${muiTheme.palette.divider}`, marginLeft: indent + 8 }}>
           {children.map(({ k, v }) => (
             <TreeNode
               key={String(k)}
@@ -110,6 +112,7 @@ interface DocCardProps {
 
 function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocCardProps) {
   const { t } = useTranslation();
+  const muiTheme = useTheme();
   const [open, setOpen] = useState(false);
   // treeKey changes whenever expand-all / collapse-all is clicked, forcing
   // TreeNode remount so they reinitialise with the correct defaultExpanded.
@@ -124,10 +127,10 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
   return (
     <div
       style={{
-        border: `1px solid ${isSelected ? "#93c5fd" : "#e2e8f0"}`,
+        border: `1px solid ${isSelected ? muiTheme.palette.primary.light : muiTheme.palette.divider}`,
         borderRadius: "8px",
         marginBottom: "8px",
-        background: isSelected ? "#eff6ff" : "#ffffff",
+        background: isSelected ? muiTheme.palette.action.selected : muiTheme.palette.background.paper,
         overflow: "hidden",
         transition: "border-color 0.15s",
       }}
@@ -143,8 +146,8 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           alignItems: "center",
           gap: "8px",
           padding: "8px 12px",
-          background: isSelected ? "#dbeafe" : "#f8fafc",
-          borderBottom: open ? "1px solid #e2e8f0" : "none",
+          background: isSelected ? muiTheme.palette.action.selected : muiTheme.palette.action.hover,
+          borderBottom: open ? `1px solid ${muiTheme.palette.divider}` : "none",
           cursor: "pointer",
         }}
         onClick={() => setOpen((o) => !o)}
@@ -164,29 +167,29 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
           />
         </div>
 
-        <span aria-hidden="true" style={{ fontSize: "10px", color: "#94a3b8", width: "14px", textAlign: "center", flexShrink: 0 }}>
+        <span aria-hidden="true" style={{ fontSize: "10px", color: muiTheme.palette.text.secondary, width: "14px", textAlign: "center", flexShrink: 0 }}>
           {open ? "▼" : "▶"}
         </span>
 
-        <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#6366f1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span style={{ fontFamily: "monospace", fontSize: "12px", color: muiTheme.palette.secondary.main, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {formatBsonValue(idValue)}
         </span>
 
-        <span style={{ fontSize: "11px", color: "#94a3b8", background: "#f1f5f9", borderRadius: "10px", padding: "1px 7px", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: "11px", color: muiTheme.palette.text.secondary, background: muiTheme.palette.action.hover, borderRadius: "10px", padding: "1px 7px", whiteSpace: "nowrap" }}>
           {t("documents.fieldCount", { count: fields.length + 1 })}
         </span>
 
         <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
           <button
             onClick={onEdit}
-            style={{ background: "transparent", color: "#374151", border: "1px solid #e2e8f0", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+            style={{ background: "transparent", color: muiTheme.palette.text.primary, border: `1px solid ${muiTheme.palette.divider}`, padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
           >
             {t("buttons.edit")}
           </button>
           {canWrite && (
             <button
               onClick={onDelete}
-              style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
+              style={{ background: muiTheme.palette.error.light, color: muiTheme.palette.error.dark, border: "none", padding: "3px 10px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", fontFamily: FONT }}
             >
               {t("buttons.delete")}
             </button>
@@ -198,16 +201,16 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
       {open && (
         <div id={`doc-body-${String(idValue)}`} style={{ padding: "6px 12px 10px" }}>
           {/* Expand / collapse all bar */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "6px", paddingBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "6px", paddingBottom: "6px", borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
             <button
               onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: true, key: s.key + 1 })); }}
-              style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
+              style={{ background: "none", border: "none", color: muiTheme.palette.secondary.main, fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
               {t("tree.button.expandAll")}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setTreeState((s) => ({ expanded: false, key: s.key + 1 })); }}
-              style={{ background: "none", border: "none", color: "#6366f1", fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
+              style={{ background: "none", border: "none", color: muiTheme.palette.secondary.main, fontSize: "11px", cursor: "pointer", padding: 0, fontFamily: FONT }}
             >
               {t("tree.button.collapseAll")}
             </button>
@@ -215,7 +218,7 @@ function DocCard({ doc, isSelected, canWrite, onSelect, onEdit, onDelete }: DocC
 
           {/* _id row (always first, always shown as primitive) */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "6px", padding: "2px 0", paddingLeft: 18 }}>
-            <span style={{ color: "#64748b", fontSize: "12px", fontFamily: "monospace" }}>_id:</span>
+            <span style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", fontFamily: "monospace" }}>_id:</span>
             <span style={{ color: bsonTypeColor(idValue), fontSize: "12px", fontFamily: "monospace" }}>
               {formatBsonValue(idValue)}
             </span>
@@ -266,9 +269,10 @@ export default function DocTreeView({
   filterText,
 }: DocTreeViewProps) {
   const { t } = useTranslation();
+  const muiTheme = useTheme();
   if (loading) {
     return (
-      <p style={{ color: "#64748b", fontSize: "13px", padding: "20px 0", fontFamily: FONT }}>
+      <p style={{ color: muiTheme.palette.text.secondary, fontSize: "13px", padding: "20px 0", fontFamily: FONT }}>
         {t("ui.loading")}
       </p>
     );
@@ -278,10 +282,10 @@ export default function DocTreeView({
     return (
       <div style={{ textAlign: "center", padding: "40px 20px" }}>
         <div style={{ fontSize: "32px", marginBottom: "8px" }}>📭</div>
-        <p style={{ color: "#374151", margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
+        <p style={{ color: muiTheme.palette.text.primary, margin: "0 0 4px 0", fontWeight: 500, fontFamily: FONT }}>
           {t("documents.list.empty")}
         </p>
-        <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0, fontFamily: FONT }}>
+        <p style={{ color: muiTheme.palette.text.secondary, fontSize: "12px", margin: 0, fontFamily: FONT }}>
           {filterText ? t("documents.list.emptyWithFilter") : t("documents.list.emptyNoFilter")}
         </p>
       </div>
@@ -294,7 +298,7 @@ export default function DocTreeView({
   return (
     <div role="tree">
       {/* Select-all bar */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: "1px solid #f1f5f9" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 2px", marginBottom: "6px", borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
         <input
           type="checkbox"
           checked={allSelected}
@@ -302,7 +306,7 @@ export default function DocTreeView({
           onChange={(e) => onSelectAll(e.target.checked)}
           style={{ cursor: "pointer" }}
         />
-        <span style={{ fontSize: "12px", color: "#64748b", fontFamily: FONT }}>
+        <span style={{ fontSize: "12px", color: muiTheme.palette.text.secondary, fontFamily: FONT }}>
           {t("tree.checkbox.selectAllLabel")}
         </span>
       </div>
