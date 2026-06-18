@@ -355,10 +355,14 @@ export default function CommandsView({ db, collection, tabId }: Props) {
                 quickSuggestions: { other: true, comments: false, strings: true },
               }}
               onMount={(editor, monaco) => {
-                editor.addCommand(
-                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                  () => void executeCommand()
-                );
+                const keyMod = monaco?.KeyMod?.CtrlCmd;
+                const keyCode = monaco?.KeyCode?.Enter;
+                if (typeof keyMod === "number" && typeof keyCode === "number") {
+                  editor.addCommand(
+                    keyMod | keyCode,
+                    () => void executeCommand()
+                  );
+                }
               }}
             />
             <div title={t("query.resize.title")} style={resizeHandleStyle} onMouseDown={startCmdResize} />

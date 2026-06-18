@@ -300,21 +300,25 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   useEffect(() => {
     if (!monacoReady || !monacoRef.current) return;
     const jsonDefaults = monacoRef.current.languages?.json?.jsonDefaults;
-    if (!jsonDefaults) return;
+    if (!jsonDefaults || typeof jsonDefaults.setDiagnosticsOptions !== "function") return;
     const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
     const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
     const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
     const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
-    jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      schemas: [
-        { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
-        { uri: `http://dbv/filter-schema-${tabId}.json`,     fileMatch: [`dbv://filter/${tabId}`],     schema: filtSchema },
-        { uri: `http://dbv/sort-schema-${tabId}.json`,       fileMatch: [`dbv://sort/${tabId}`],       schema: sortSchema },
-        { uri: `http://dbv/projection-schema-${tabId}.json`, fileMatch: [`dbv://projection/${tabId}`], schema: projSchema },
-        { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
-      ],
-    });
+    try {
+      jsonDefaults.setDiagnosticsOptions({
+        validate: true,
+        schemas: [
+          { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },
+          { uri: `http://dbv/filter-schema-${tabId}.json`,     fileMatch: [`dbv://filter/${tabId}`],     schema: filtSchema },
+          { uri: `http://dbv/sort-schema-${tabId}.json`,       fileMatch: [`dbv://sort/${tabId}`],       schema: sortSchema },
+          { uri: `http://dbv/projection-schema-${tabId}.json`, fileMatch: [`dbv://projection/${tabId}`], schema: projSchema },
+          { uri: `http://dbv/pipeline-schema-${tabId}.json`,   fileMatch: [`dbv://pipeline/${tabId}`],   schema: PIPELINE_SCHEMA },
+        ],
+      });
+    } catch {
+      setMonacoReady(false);
+    }
   }, [monacoReady, schema, tabId, visible]);
 
   const loadIndexes = useCallback(() => {
@@ -861,7 +865,13 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             <div style={{ border: hasFilter && !filterValid ? `1px solid ${muiTheme.palette.error.light}` : hasFilter ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://filter/${tabId}`} value={filterText}
                                 onChange={(v) => { setFilterText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -878,7 +888,13 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             <div style={{ border: hasSort && !sortValid ? `1px solid ${muiTheme.palette.error.light}` : hasSort ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://sort/${tabId}`} value={sortText}
                                 onChange={(v) => { setSortText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -898,7 +914,13 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                             <div style={{ border: hasProj && !projValid ? `1px solid ${muiTheme.palette.error.light}` : hasProj ? `1px solid ${muiTheme.palette.primary.light}` : `1px solid ${muiTheme.palette.divider}`, borderRadius: "6px", overflow: "hidden", background: muiTheme.palette.background.paper }}>
                               <Editor theme={editorTheme} height={`${filterHeight}px`} language="json" path={`dbv://projection/${tabId}`} value={projectionText}
                                 onChange={(v) => { setProjectionText(v ?? ""); setPage(1); }} options={monoOpts}
-                                onMount={(editor, monaco) => { editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => loadDocumentsRef.current()); }} />
+                                onMount={(editor, monaco) => {
+                                  const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                  const keyCode = monaco?.KeyCode?.Enter;
+                                  if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                    editor.addCommand(keyMod | keyCode, () => loadDocumentsRef.current());
+                                  }
+                                }} />
                               <div title={t("query.resize.title")} style={resizeHandleStyle}
                                 onMouseDown={startFilterResize} />
                             </div>
@@ -962,7 +984,11 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                               onChange={(v) => { setSqlText(v ?? ""); setPage(1); }}
                               options={{ ...monoOpts, suggest: { showSnippets: true, showWords: true } }}
                               onMount={(editor, monaco) => {
-                                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, applySql);
+                                const keyMod = monaco?.KeyMod?.CtrlCmd;
+                                const keyCode = monaco?.KeyCode?.Enter;
+                                if (typeof keyMod === "number" && typeof keyCode === "number") {
+                                  editor.addCommand(keyMod | keyCode, applySql);
+                                }
                               }}
                             />
                             <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1599,10 +1625,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runAggregate()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runAggregate()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1687,10 +1717,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runUpdateMany()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runUpdateMany()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
@@ -1767,10 +1801,14 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       quickSuggestions: { other: true, comments: false, strings: true },
                     }}
                     onMount={(editor, monaco) => {
-                      editor.addCommand(
-                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                        () => void runDeleteMany()
-                      );
+                      const keyMod = monaco?.KeyMod?.CtrlCmd;
+                      const keyCode = monaco?.KeyCode?.Enter;
+                      if (typeof keyMod === "number" && typeof keyCode === "number") {
+                        editor.addCommand(
+                          keyMod | keyCode,
+                          () => void runDeleteMany()
+                        );
+                      }
                     }}
                   />
                   <div title={t("query.resize.title")} style={resizeHandleStyle}
