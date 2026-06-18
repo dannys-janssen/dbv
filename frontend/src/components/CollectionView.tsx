@@ -46,9 +46,9 @@ type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexe
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 interface MonacoJsonSchemaInstance extends MonacoWithDefineTheme {
-  languages: {
-    json: {
-      jsonDefaults: {
+  languages?: {
+    json?: {
+      jsonDefaults?: {
         setDiagnosticsOptions: (options: unknown) => void;
       };
     };
@@ -198,8 +198,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const { t } = useTranslation();
   const muiTheme = useTheme();
   const isDark = muiTheme.palette.mode === "dark";
-  const editorTheme = isDark ? "dbv-dark" : "dbv-light";
   const [monacoReady, setMonacoReady] = useState(false);
+  const editorTheme = monacoReady ? (isDark ? "dbv-dark" : "dbv-light") : (isDark ? "vs-dark" : "vs");
   const monacoRef = useRef<MonacoJsonSchemaInstance | null>(null);
 
   const [view, setView] = useState<View>("documents");
@@ -294,16 +294,18 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
       monacoRef.current = monaco as MonacoJsonSchemaInstance;
       registerDbvMonacoThemes(monaco);
       setMonacoReady(true);
-    });
+    }).catch(() => setMonacoReady(false));
   }, []);
 
   useEffect(() => {
     if (!monacoReady || !monacoRef.current) return;
+    const jsonDefaults = monacoRef.current.languages?.json?.jsonDefaults;
+    if (!jsonDefaults) return;
     const docSchema  = schema ? buildDocumentSchema(schema)  : { type: "object" };
     const filtSchema = schema ? buildFilterSchema(schema)    : { type: "object" };
     const sortSchema = schema ? buildSortSchema(schema)      : { type: "object" };
     const projSchema = schema ? buildProjectionSchema(schema): { type: "object" };
-    monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+    jsonDefaults.setDiagnosticsOptions({
       validate: true,
       schemas: [
         { uri: `http://dbv/document-schema-${tabId}.json`,   fileMatch: [`dbv://document/${tabId}`],   schema: docSchema },

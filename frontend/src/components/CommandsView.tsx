@@ -97,7 +97,10 @@ interface Props {
 
 export default function CommandsView({ db, collection, tabId }: Props) {
   const muiTheme = useTheme();
-  const editorTheme = muiTheme.palette.mode === "dark" ? "dbv-dark" : "dbv-light";
+  const [monacoReady, setMonacoReady] = useState(false);
+  const editorTheme = monacoReady
+    ? (muiTheme.palette.mode === "dark" ? "dbv-dark" : "dbv-light")
+    : (muiTheme.palette.mode === "dark" ? "vs-dark" : "vs");
   const [commandText, setCommandText] = useState('{\n  "ping": 1\n}');
   const [adminFlag, setAdminFlag]     = useState(false);
   const [running, setRunning]         = useState(false);
@@ -176,7 +179,8 @@ export default function CommandsView({ db, collection, tabId }: Props) {
   useEffect(() => {
     void loader.init().then((monaco) => {
       registerDbvMonacoThemes(monaco);
-    });
+      setMonacoReady(true);
+    }).catch(() => setMonacoReady(false));
   }, []);
 
   const resizeHandleStyle: React.CSSProperties = {
