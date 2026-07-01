@@ -591,7 +591,7 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
             <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#334155", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
-                name={`bool-${field.key}`}
+                name={`bool-${pathPrefix ? `${pathPrefix}.${field.key}` : field.key}`}
                 value={opt}
                 checked={field.displayValue === opt}
                 onChange={() => handleValue(opt)}
