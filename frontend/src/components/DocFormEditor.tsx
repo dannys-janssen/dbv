@@ -17,7 +17,7 @@
  * an updated JSON string on every change.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CollectionSchema } from "../api/mongo";
 
@@ -431,11 +431,44 @@ interface FieldRowProps {
   onRemove: (key: string) => void;
 }
 
-// All three sub-components (FieldRow, NestedObjectEditor, NestedArrayEditor) are
-// defined as function declarations so they can mutually reference each other via
-// JSX without triggering TypeScript's "used before declaration" error.
+// ── NestedObjectEditor (interface, forward reference) ─────────────────────────
 
-function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath, onChange, onRemove }: FieldRowProps): React.ReactElement {
+interface NestedObjectEditorProps {
+  parentKey: string;
+  children: FieldState[];
+  isEditing: boolean;
+  schema: CollectionSchema | null | undefined;
+  /** Full schema path of the parent object, e.g. "address". */
+  pathPrefix: string;
+  onChange: (key: string, update: Partial<FieldState>) => void;
+}
+
+// ── NestedArrayEditor (interface, forward reference) ──────────────────────────
+
+interface NestedArrayEditorProps {
+  parentKey: string;
+  arrayItems: FieldState[];
+  isEditing: boolean;
+  schema: CollectionSchema | null | undefined;
+  /** Full schema path of the parent array, e.g. "tags" or "items". */
+  pathPrefix: string;
+  onChange: (key: string, update: Partial<FieldState>) => void;
+}
+
+// All three sub-components are wrapped with React.memo for performance.
+// Forward-declare the variables here (as `let`) so that each component's
+// function body can reference the memoized wrappers even though the actual
+// React.memo(...) calls happen after all three implementations are defined.
+// This preserves the mutual-reference capability of function declarations
+// while still benefiting from memoization.
+// eslint-disable-next-line prefer-const
+let FieldRow: React.ComponentType<FieldRowProps>;
+// eslint-disable-next-line prefer-const
+let NestedObjectEditor: React.ComponentType<NestedObjectEditorProps>;
+// eslint-disable-next-line prefer-const
+let NestedArrayEditor: React.ComponentType<NestedArrayEditorProps>;
+
+function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaPath, onChange, onRemove }: FieldRowProps): React.ReactElement {
   const { t } = useTranslation();
   const readOnly = isId && isEditing;
   // Full schema path for this field — used as the pathPrefix for nested editors.
@@ -558,7 +591,7 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
             <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#334155", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
-                name={`bool-${field.key}`}
+                name={`bool-${pathPrefix ? `${pathPrefix}.${field.key}` : field.key}`}
                 value={opt}
                 checked={field.displayValue === opt}
                 onChange={() => handleValue(opt)}
@@ -637,31 +670,27 @@ function FieldRow({ field, isId, isEditing, schema, pathPrefix = "", schemaPath,
 
 // ── NestedObjectEditor ────────────────────────────────────────────────────────
 
-interface NestedObjectEditorProps {
-  parentKey: string;
-  children: FieldState[];
-  isEditing: boolean;
-  schema: CollectionSchema | null | undefined;
-  /** Full schema path of the parent object, e.g. "address". */
-  pathPrefix: string;
-  onChange: (key: string, update: Partial<FieldState>) => void;
-}
-
-function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix, onChange }: NestedObjectEditorProps): React.ReactElement {
+function NestedObjectEditorImpl({ parentKey, children, isEditing, schema, pathPrefix, onChange }: NestedObjectEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const [newChildKey, setNewChildKey] = useState("");
   const [newChildType, setNewChildType] = useState("string");
   const [addError, setAddError] = useState("");
 
-  const handleChildChange = (childKey: string, update: Partial<FieldState>) => {
-    const newChildren = children.map((c) => (c.key === childKey ? { ...c, ...update } : c));
-    onChange(parentKey, { children: newChildren });
-  };
+  // Keep a ref to the latest children so that the change/remove callbacks
+  // remain stable (don't capture children in their closure). This prevents
+  // sibling FieldRow components from re-rendering when one sibling changes.
+  const childrenRef = useRef(children);
+  childrenRef.current = children;
 
-  const handleChildRemove = (childKey: string) => {
-    const newChildren = children.filter((c) => c.key !== childKey);
+  const handleChildChange = useCallback((childKey: string, update: Partial<FieldState>) => {
+    const newChildren = childrenRef.current.map((c) => (c.key === childKey ? { ...c, ...update } : c));
     onChange(parentKey, { children: newChildren });
-  };
+  }, [onChange, parentKey]);
+
+  const handleChildRemove = useCallback((childKey: string) => {
+    const newChildren = childrenRef.current.filter((c) => c.key !== childKey);
+    onChange(parentKey, { children: newChildren });
+  }, [onChange, parentKey]);
 
   const handleAddChild = () => {
     const key = newChildKey.trim();
@@ -736,32 +765,28 @@ function NestedObjectEditor({ parentKey, children, isEditing, schema, pathPrefix
 
 // ── NestedArrayEditor ─────────────────────────────────────────────────────────
 
-interface NestedArrayEditorProps {
-  parentKey: string;
-  arrayItems: FieldState[];
-  isEditing: boolean;
-  schema: CollectionSchema | null | undefined;
-  /** Full schema path of the parent array, e.g. "tags" or "items". */
-  pathPrefix: string;
-  onChange: (key: string, update: Partial<FieldState>) => void;
-}
-
-function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefix, onChange }: NestedArrayEditorProps): React.ReactElement {
+function NestedArrayEditorImpl({ parentKey, arrayItems, isEditing, schema, pathPrefix, onChange }: NestedArrayEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const [newItemType, setNewItemType] = useState("string");
 
-  const handleItemChange = (itemKey: string, update: Partial<FieldState>) => {
-    const newItems = arrayItems.map((item) => (item.key === itemKey ? { ...item, ...update } : item));
-    onChange(parentKey, { arrayItems: newItems });
-  };
+  // Keep a ref to the latest arrayItems so that the change/remove callbacks
+  // remain stable (don't capture arrayItems in their closure). This prevents
+  // sibling FieldRow components from re-rendering when one item changes.
+  const arrayItemsRef = useRef(arrayItems);
+  arrayItemsRef.current = arrayItems;
 
-  const handleItemRemove = (itemKey: string) => {
+  const handleItemChange = useCallback((itemKey: string, update: Partial<FieldState>) => {
+    const newItems = arrayItemsRef.current.map((item) => (item.key === itemKey ? { ...item, ...update } : item));
+    onChange(parentKey, { arrayItems: newItems });
+  }, [onChange, parentKey]);
+
+  const handleItemRemove = useCallback((itemKey: string) => {
     // Remove the item and re-index remaining items.
-    const newItems = arrayItems
+    const newItems = arrayItemsRef.current
       .filter((item) => item.key !== itemKey)
       .map((item, i) => ({ ...item, key: String(i) }));
     onChange(parentKey, { arrayItems: newItems });
-  };
+  }, [onChange, parentKey]);
 
   const handleAddItem = () => {
     const newItem: FieldState = {
@@ -818,6 +843,17 @@ function NestedArrayEditor({ parentKey, arrayItems, isEditing, schema, pathPrefi
     </div>
   );
 }
+
+// ── Memoized wrappers ─────────────────────────────────────────────────────────
+
+// Wrap all three sub-components with React.memo so that React skips
+// re-rendering a FieldRow (or nested editor) when its props are unchanged.
+// Combined with the stable useCallback handlers above, this limits re-renders
+// to only the field that was actually edited and its ancestors, rather than
+// re-rendering the entire form tree on every keystroke.
+FieldRow = React.memo(FieldRowImpl);
+NestedObjectEditor = React.memo(NestedObjectEditorImpl);
+NestedArrayEditor = React.memo(NestedArrayEditorImpl);
 
 // ── main component ────────────────────────────────────────────────────────────
 
@@ -896,7 +932,12 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   const handleChange = useCallback((key: string, update: Partial<FieldState>) => {
     setFields((prev) => {
       const next = prev.map((f) => (f.key === key ? { ...f, ...update } : f));
-      onChange(serialise(next));
+      const json = serialise(next);
+      // Update prevValue before notifying the parent so that the useEffect
+      // below does not treat the parent's re-render as an external value
+      // change and avoids rebuilding the entire field tree on every keystroke.
+      prevValue.current = json;
+      onChange(json);
       return next;
     });
   }, [onChange, serialise]);
@@ -904,7 +945,9 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   const handleRemove = useCallback((key: string) => {
     setFields((prev) => {
       const next = prev.filter((f) => f.key !== key);
-      onChange(serialise(next));
+      const json = serialise(next);
+      prevValue.current = json;
+      onChange(json);
       return next;
     });
   }, [onChange, serialise]);
@@ -925,7 +968,9 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
     };
     setFields((prev) => {
       const next = [...prev, newField];
-      onChange(serialise(next));
+      const json = serialise(next);
+      prevValue.current = json;
+      onChange(json);
       return next;
     });
     setNewFieldKey("");
