@@ -333,6 +333,26 @@ git ls-remote --tags origin "refs/tags/${TAG}"
 
 If the output is empty the push failed — retry or ask the user to push manually.
 
+### 10e. Create the GitHub Release
+
+A git tag alone does **not** create a GitHub Release (the release notes visible on the
+releases page). Create one explicitly using `gh release create` with `--generate-notes`
+so GitHub auto-populates "What's Changed" from merged PRs since the previous tag:
+
+```bash
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+gh release create "${TAG}" \
+  --repo "${REPO}" \
+  --title "${TAG}" \
+  --generate-notes \
+  --latest
+echo "GitHub Release created: https://github.com/${REPO}/releases/tag/${TAG}"
+```
+
+Verify by opening the URL printed above and confirming the "What's Changed" section
+is populated. If `--generate-notes` produces no content (e.g. no PRs since last tag),
+add `--notes "See [wiki release notes](https://github.com/${REPO}/wiki/Release-${TAG})"` instead.
+
 ## 11. Report back
 
 Print a full summary:
@@ -344,6 +364,7 @@ Print a full summary:
 ✅ Wiki page created: Release-v<VERSION>
 ✅ PR opened: <PR_URL>
 ✅ Tag v<VERSION> pushed → Docker build triggered
+✅ GitHub Release created: https://github.com/<OWNER>/dbv/releases/tag/v<VERSION>
 
 Docker images will be published at:
   ghcr.io/<OWNER>/dbv:v<VERSION>
