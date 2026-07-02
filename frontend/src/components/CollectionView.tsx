@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getDocuments,
@@ -198,6 +198,38 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const { t } = useTranslation();
   const muiTheme = useTheme();
   const isDark = muiTheme.palette.mode === "dark";
+  const themedModalBaseStyle = useMemo(
+    () => ({
+      ...modalBaseStyle,
+      background: muiTheme.palette.background.paper,
+      border: `1px solid ${muiTheme.palette.divider}`,
+      boxShadow: isDark ? "0 20px 60px rgba(0,0,0,0.7)" : modalBaseStyle.boxShadow,
+    }),
+    [isDark, muiTheme.palette.background.paper, muiTheme.palette.divider],
+  );
+  const themedModalTitleStyle = useMemo(
+    () => ({
+      ...modalTitleStyle,
+      color: muiTheme.palette.text.primary,
+    }),
+    [muiTheme.palette.text.primary],
+  );
+  const themedModalSubtitleStyle = useMemo(
+    () => ({
+      ...modalSubtitleStyle,
+      color: muiTheme.palette.text.secondary,
+    }),
+    [muiTheme.palette.text.secondary],
+  );
+  const themedCancelBtnStyle = useMemo(
+    () => ({
+      ...cancelBtnStyle,
+      background: muiTheme.palette.background.paper,
+      border: `1px solid ${muiTheme.palette.divider}`,
+      color: muiTheme.palette.text.primary,
+    }),
+    [muiTheme.palette.background.paper, muiTheme.palette.divider, muiTheme.palette.text.primary],
+  );
   const [monacoReady, setMonacoReady] = useState(false);
   const editorTheme = monacoReady ? (isDark ? "dbv-dark" : "dbv-light") : (isDark ? "vs-dark" : "vs");
   const monacoRef = useRef<MonacoJsonSchemaInstance | null>(null);
@@ -2038,10 +2070,10 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
       {/* ── Editor modal ── */}
       {editorOpen && (
         <div style={overlayStyle}>
-          <div style={{ ...modalBaseStyle, width: "min(900px, 92vw)", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+          <div style={{ ...themedModalBaseStyle, width: "min(900px, 92vw)", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
             {/* Header row: title + Form/JSON toggle */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-              <h3 style={{ ...modalTitleStyle, marginBottom: 0 }}>
+              <h3 style={{ ...themedModalTitleStyle, marginBottom: 0 }}>
                 {editingId ? t("modals.editDocument.title") : t("modals.newDocument.title")}
               </h3>
               <div style={{ display: "flex", background: muiTheme.palette.action.selected, borderRadius: 6, border: `1px solid ${muiTheme.palette.divider}`, overflow: "hidden" }}>
@@ -2065,7 +2097,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 ))}
               </div>
             </div>
-            <p style={modalSubtitleStyle}>
+            <p style={themedModalSubtitleStyle}>
               {editorMode === "form"
                 ? t("editor.mode.form.subtitle")
                 : t("editor.mode.json.subtitle")}
@@ -2079,19 +2111,21 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 isEditing={editingId !== null}
               />
             ) : (
-              <Editor theme={editorTheme}
-                height="500px"
-                defaultLanguage="json"
-                path={`dbv://document/${tabId}`}
-                value={editorValue}
-                onChange={(v) => setEditorValue(v ?? "{}")}
-              />
+              <div style={{ border: `1px solid ${muiTheme.palette.divider}`, borderRadius: 8, overflow: "hidden" }}>
+                <Editor theme={editorTheme}
+                  height="500px"
+                  defaultLanguage="json"
+                  path={`dbv://document/${tabId}`}
+                  value={editorValue}
+                  onChange={(v) => setEditorValue(v ?? "{}")}
+                />
+              </div>
             )}
 
             <div style={modalFooterStyle}>
               <button
                 onClick={() => setEditorOpen(false)}
-                style={cancelBtnStyle}
+                style={themedCancelBtnStyle}
               >
                 {t("buttons.cancel")}
               </button>
