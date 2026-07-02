@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTheme } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import type { CollectionSchema } from "../api/mongo";
 
@@ -867,7 +867,7 @@ interface DocFormEditorProps {
 
 const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, isEditing }) => {
   const { t } = useTranslation();
-  const muiTheme = useTheme();
+  const theme = useTheme();
   const [fields, setFields] = useState<FieldState[]>([]);
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState("string");
@@ -984,31 +984,31 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
 
   if (fieldCount === 0 && !schema) {
     return (
-      <div style={{ color: muiTheme.palette.text.secondary, fontSize: 13, padding: "16px 0" }}>
+      <div style={{ color: theme.palette.text.secondary, fontSize: 13, padding: "16px 0" }}>
         {t("editor.form.noSchema")}
       </div>
     );
   }
 
   const formThemeVars = {
-    "--dbv-form-label": muiTheme.palette.text.primary,
-    "--dbv-form-input-bg": muiTheme.palette.background.paper,
-    "--dbv-form-input-border": muiTheme.palette.divider,
-    "--dbv-form-input-text": muiTheme.palette.text.primary,
-    "--dbv-form-card-bg": muiTheme.palette.action.hover,
-    "--dbv-form-border": muiTheme.palette.divider,
-    "--dbv-form-muted": muiTheme.palette.text.secondary,
-    "--dbv-form-chip-bg": muiTheme.palette.action.selected,
-    "--dbv-form-accent": muiTheme.palette.primary.main,
-    "--dbv-form-error": muiTheme.palette.error.main,
-    "--dbv-form-nested-object-bg": muiTheme.palette.mode === "dark" ? "#0f1f38" : "#eff6ff",
-    "--dbv-form-nested-object-border": muiTheme.palette.mode === "dark" ? "#355e9a" : "#93c5fd",
-    "--dbv-form-nested-array-bg": muiTheme.palette.mode === "dark" ? "#10251a" : "#f0fdf4",
-    "--dbv-form-nested-array-border": muiTheme.palette.mode === "dark" ? "#3f7c57" : "#86efac",
+    "--dbv-form-label": theme.palette.text.primary,
+    "--dbv-form-input-bg": theme.palette.background.paper,
+    "--dbv-form-input-border": theme.palette.divider,
+    "--dbv-form-input-text": theme.palette.text.primary,
+    "--dbv-form-card-bg": theme.palette.action.hover,
+    "--dbv-form-border": theme.palette.divider,
+    "--dbv-form-muted": theme.palette.text.secondary,
+    "--dbv-form-chip-bg": theme.palette.action.selected,
+    "--dbv-form-accent": theme.palette.primary.main,
+    "--dbv-form-error": theme.palette.error.main,
+    "--dbv-form-nested-object-bg": alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.14 : 0.08),
+    "--dbv-form-nested-object-border": alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.45 : 0.35),
+    "--dbv-form-nested-array-bg": alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.14 : 0.08),
+    "--dbv-form-nested-array-border": alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.45 : 0.35),
   } as React.CSSProperties;
 
   return (
-    <div style={{ ...formThemeVars, colorScheme: muiTheme.palette.mode, overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
+    <div style={{ ...formThemeVars, colorScheme: theme.palette.mode, overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
       {/* _id field at the top */}
       {idField && (
         <>
