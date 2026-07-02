@@ -13,7 +13,7 @@ info:
     **Roles:**
     - `dbv-viewer` — read-only (GET endpoints, export, aggregate, schema, stats)
     - `dbv-admin` — read + write (all endpoints)
-  version: "0.2.9"
+  version: "0.3.0"
   license:
     name: MIT
 
