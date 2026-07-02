@@ -2,9 +2,10 @@
 name: release
 description: >
   Creates a new versioned release for the dbv project. Use this skill when asked to
-  "cut a release", "bump the version", "create a new release", or "release vX.Y.Z".
-  It bumps versions across all relevant files, updates the README, publishes a GitHub
-  wiki release-notes page, and opens a pull request against main.
+  "cut a release", "bump the version", "create a new release", "release vX.Y.Z", or
+  "tag a release". It bumps versions across all relevant files, updates the README,
+  publishes a GitHub wiki release-notes page, opens a pull request against main, and
+  after the PR is merged it creates and pushes the git tag that triggers Docker publishing.
 allowed-tools: shell
 ---
 
@@ -263,23 +264,78 @@ Release notes published to the [project wiki](https://github.com/$(gh repo view 
 
 ## After Merge
 
-Once this PR is merged into \`main\`, create and push the release tag to trigger Docker publishing:
-
-\`\`\`bash
-git checkout main && git pull
-git tag v<VERSION>
-git push origin v<VERSION>
-\`\`\`
-
-This triggers the Docker workflow which publishes:
-- \`ghcr.io/$(gh repo view --json owner -q .owner.login)/dbv:v<VERSION>\`
-- \`ghcr.io/$(gh repo view --json owner -q .owner.login)/dbv:<MAJOR>.<MINOR>.<PATCH>\` (and shortened semver variants)
-- \`ghcr.io/$(gh repo view --json owner -q .owner.login)/dbv:latest\`"
+Once this PR is merged into \`main\`, invoke this skill again with \`tag v<VERSION>\` to create and push the release tag, which triggers Docker image publishing."
 ```
 
-## 10. Report back
+## 10. Tag the release
 
-Print a summary of everything that was done:
+After the PR is merged (or if the user asks you to tag an already-merged release), run
+the tagging step. **Do not tag before the PR is merged into main.**
+
+### 10a. Check if the tag already exists
+
+```bash
+VERSION="<VERSION>"   # bare semver, e.g. 0.3.0
+TAG="v${VERSION}"
+
+# Check remote tags
+if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "${TAG}"; then
+  echo "Tag ${TAG} already exists on origin — nothing to do."
+  exit 0
+fi
+
+# Check local tags
+if git tag --list "${TAG}" | grep -q "${TAG}"; then
+  echo "Tag ${TAG} exists locally but not yet pushed — will push it."
+  git push origin "${TAG}"
+  exit 0
+fi
+```
+
+### 10b. Verify the PR is merged and the commit is on main
+
+```bash
+# Confirm the release branch was merged
+PR_STATE=$(gh pr list --repo "$(gh repo view --json nameWithOwner -q .nameWithOwner)" \
+  --head "release/${TAG}" --state merged --json state --jq '.[0].state // "not_found"')
+
+if [ "$PR_STATE" != "MERGED" ]; then
+  echo "ERROR: release/${TAG} has not been merged into main yet."
+  echo "Merge the PR first, then run the tag step."
+  exit 1
+fi
+
+# Pull latest main and verify the version in Cargo.toml matches
+git checkout main
+git pull origin main
+CURRENT_VER=$(grep '^version' Cargo.toml | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+if [ "$CURRENT_VER" != "${VERSION}" ]; then
+  echo "ERROR: Cargo.toml on main shows ${CURRENT_VER}, expected ${VERSION}."
+  echo "Ensure the correct release PR has been merged before tagging."
+  exit 1
+fi
+```
+
+### 10c. Create and push the tag
+
+```bash
+git tag -a "${TAG}" -m "Release ${TAG}"
+git push origin "${TAG}"
+echo "Tag ${TAG} pushed — Docker workflow will publish ghcr.io/<OWNER>/dbv:${TAG}"
+```
+
+### 10d. Verify the tag was accepted
+
+```bash
+git ls-remote --tags origin "refs/tags/${TAG}"
+```
+
+If the output is empty the push failed — retry or ask the user to push manually.
+
+## 11. Report back
+
+Print a full summary:
 
 ```
 ✅ Version bumped to v<VERSION>
@@ -287,9 +343,12 @@ Print a summary of everything that was done:
 ✅ Files updated: Cargo.toml, Cargo.lock, Chart.yaml, openapi.yaml, README.md
 ✅ Wiki page created: Release-v<VERSION>
 ✅ PR opened: <PR_URL>
+✅ Tag v<VERSION> pushed → Docker build triggered
 
-Next step (after PR is merged):
-  git checkout main && git pull
-  git tag v<VERSION>
-  git push origin v<VERSION>
+Docker images will be published at:
+  ghcr.io/<OWNER>/dbv:v<VERSION>
+  ghcr.io/<OWNER>/dbv:<VERSION>
+  ghcr.io/<OWNER>/dbv:<MAJOR>.<MINOR>
+  ghcr.io/<OWNER>/dbv:<MAJOR>
+  ghcr.io/<OWNER>/dbv:latest
 ```
