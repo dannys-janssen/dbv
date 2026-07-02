@@ -18,6 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import type { CollectionSchema } from "../api/mongo";
 
@@ -357,7 +358,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: 13,
   fontWeight: 600,
-  color: "#1e293b",
+  color: "var(--dbv-form-label)",
   marginBottom: 4,
   textAlign: "left",
 };
@@ -365,10 +366,10 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "9px 12px",
-  background: "#ffffff",
-  border: "1px solid #cbd5e1",
+  background: "var(--dbv-form-input-bg)",
+  border: "1px solid var(--dbv-form-input-border)",
   borderRadius: 8,
-  color: "#0f172a",
+  color: "var(--dbv-form-input-text)",
   fontSize: 14,
   boxSizing: "border-box",
   outline: "none",
@@ -383,24 +384,24 @@ const textareaStyle: React.CSSProperties = {
 
 const typeTagStyle = (type: string): React.CSSProperties => {
   const colors: Record<string, string> = {
-    date: "#0ea5e9",
-    objectId: "#a78bfa",
-    bool: "#f59e0b",
-    int: "#34d399",
-    long: "#34d399",
-    double: "#34d399",
-    decimal: "#34d399",
-    string: "#f1f5f9",
-    object: "#94a3b8",
-    array: "#94a3b8",
-    uuid: "#fb923c",
+    date: "var(--dbv-form-type-date)",
+    objectId: "var(--dbv-form-type-object-id)",
+    bool: "var(--dbv-form-type-bool)",
+    int: "var(--dbv-form-type-number)",
+    long: "var(--dbv-form-type-number)",
+    double: "var(--dbv-form-type-number)",
+    decimal: "var(--dbv-form-type-number)",
+    string: "var(--dbv-form-type-string)",
+    object: "var(--dbv-form-type-structure)",
+    array: "var(--dbv-form-type-structure)",
+    uuid: "var(--dbv-form-type-uuid)",
   };
   return {
     fontSize: 10,
     fontWeight: 700,
-    color: colors[type] ?? "#475569",
-    background: "#f8fafc",
-    border: `1px solid ${colors[type] ?? "#94a3b8"}`,
+    color: colors[type] ?? "var(--dbv-form-muted)",
+    background: "var(--dbv-form-chip-bg)",
+    border: `1px solid ${colors[type] ?? "var(--dbv-form-input-border)"}`,
     borderRadius: 999,
     padding: "2px 8px",
     marginLeft: 6,
@@ -503,7 +504,7 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
   };
 
   return (
-    <div style={{ marginBottom: 12, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 12px" }}>
+    <div style={{ marginBottom: 12, background: "var(--dbv-form-card-bg)", border: "1px solid var(--dbv-form-border)", borderRadius: 10, padding: "10px 12px" }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 10, gap: 8 }}>
         {/* Collapse/expand toggle for nested object and array fields */}
         {isNested && (
@@ -511,7 +512,7 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
             onClick={() => setCollapsed((c) => !c)}
             aria-label={collapsed ? t("form.button.expand") : t("form.button.collapse")}
             title={collapsed ? t("form.button.expand") : t("form.button.collapse")}
-            style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", color: "#64748b", cursor: "pointer", fontSize: 11, padding: "2px 5px", lineHeight: 1, flexShrink: 0, borderRadius: 6 }}
+            style={{ background: "var(--dbv-form-chip-bg)", border: "1px solid var(--dbv-form-border)", color: "var(--dbv-form-muted)", cursor: "pointer", fontSize: 11, padding: "2px 5px", lineHeight: 1, flexShrink: 0, borderRadius: 6 }}
           >
             {collapsed ? "▶" : "▼"}
           </button>
@@ -520,7 +521,7 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
           {displayKey}
           <span style={typeTagStyle(field.type)}>{field.type}</span>
           {isNested && collapsed && (
-            <span style={{ fontSize: 11, color: "#64748b", fontWeight: 500, marginLeft: 8 }}>
+            <span style={{ fontSize: 11, color: "var(--dbv-form-muted)", fontWeight: 500, marginLeft: 8 }}>
               {field.type === "array"
                 ? `[${field.arrayItems?.length ?? 0} ${t("form.label.items")}]`
                 : `{${field.children?.length ?? 0} ${t("form.label.fields")}}`}
@@ -551,8 +552,8 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
 
         {/* Null toggle */}
         {!readOnly && (
-          <label style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8, fontSize: 11, color: "#475569", cursor: "pointer", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 999, padding: "3px 8px" }}>
-            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "#475569" }} aria-label={`${t("form.button.setNull")} ${field.key}`} />
+          <label style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8, fontSize: 11, color: "var(--dbv-form-muted)", cursor: "pointer", background: "var(--dbv-form-input-bg)", border: "1px solid var(--dbv-form-border)", borderRadius: 999, padding: "3px 8px" }}>
+            <input type="checkbox" checked={field.isNull} onChange={handleNull} style={{ accentColor: "var(--dbv-form-muted)" }} aria-label={`${t("form.button.setNull")} ${field.key}`} />
             null
           </label>
         )}
@@ -565,10 +566,10 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
             aria-label={`${t("form.button.remove")} ${field.key}`}
             style={{
               marginLeft: 8,
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
+              background: "var(--dbv-form-remove-bg)",
+              border: "1px solid var(--dbv-form-remove-border)",
               borderRadius: 999,
-              color: "#dc2626",
+              color: "var(--dbv-form-remove-text)",
               cursor: "pointer",
               fontSize: 12,
               padding: "3px 8px",
@@ -583,19 +584,19 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
           type="text"
           readOnly
           value={readOnly ? (field.displayValue || field.key) : t("form.value.null")}
-          style={{ ...inputStyle, opacity: 0.7, cursor: "not-allowed", background: "#f8fafc" }}
+          style={{ ...inputStyle, opacity: 0.7, cursor: "not-allowed", background: "var(--dbv-form-card-bg)" }}
         />
       ) : field.type === "bool" ? (
-        <div style={{ display: "flex", gap: 16, padding: "8px 10px", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8 }}>
+        <div style={{ display: "flex", gap: 16, padding: "8px 10px", background: "var(--dbv-form-input-bg)", border: "1px solid var(--dbv-form-input-border)", borderRadius: 8 }}>
           {(["true", "false"] as const).map((opt) => (
-            <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "#334155", fontSize: 14, userSelect: "none" }}>
+           <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", color: "var(--dbv-form-input-text)", fontSize: 14, userSelect: "none" }}>
               <input
                 type="radio"
                 name={`bool-${pathPrefix ? `${pathPrefix}.${field.key}` : field.key}`}
                 value={opt}
                 checked={field.displayValue === opt}
                 onChange={() => handleValue(opt)}
-                style={{ accentColor: "#2563eb", cursor: "pointer" }}
+                style={{ accentColor: "var(--dbv-form-accent)", cursor: "pointer" }}
               />
               {opt === "true" ? t("form.option.true") : t("form.option.false")}
             </label>
@@ -610,7 +611,7 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
                 type="date"
                 value={datePart}
                 onChange={(e) => handleValue(`${e.target.value}|${timePart || "00:00:00"}`)}
-                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
+                style={{ ...inputStyle, flex: 1 }}
                 aria-label={`${t("form.label.date")} for ${field.key}`}
               />
               <input
@@ -618,10 +619,10 @@ function FieldRowImpl({ field, isId, isEditing, schema, pathPrefix = "", schemaP
                 value={timePart}
                 onChange={(e) => handleValue(`${datePart}|${e.target.value}`)}
                 step="1"
-                style={{ ...inputStyle, flex: 1, colorScheme: "light" }}
+                style={{ ...inputStyle, flex: 1 }}
                 aria-label={`${t("form.label.time")} for ${field.key}`}
               />
-              <span style={{ fontSize: 11, color: "#64748b", whiteSpace: "nowrap", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>{t("form.label.utc")}</span>
+              <span style={{ fontSize: 11, color: "var(--dbv-form-muted)", whiteSpace: "nowrap", background: "var(--dbv-form-chip-bg)", border: "1px solid var(--dbv-form-border)", borderRadius: 999, padding: "4px 8px" }}>{t("form.label.utc")}</span>
             </div>
           );
         })()
@@ -714,9 +715,9 @@ function NestedObjectEditorImpl({ parentKey, children, isEditing, schema, pathPr
   };
 
   return (
-    <div style={{ padding: "8px 10px", border: "1px dashed #bfdbfe", borderRadius: 8, background: "#eff6ff", marginTop: 6, marginBottom: 4 }}>
+    <div style={{ padding: "8px 10px", border: "1px dashed var(--dbv-form-nested-object-border)", borderRadius: 8, background: "var(--dbv-form-nested-object-bg)", marginTop: 6, marginBottom: 4 }}>
       {children.length === 0 && (
-        <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.nested.empty")}</div>
+        <div style={{ fontSize: 12, color: "var(--dbv-form-muted)", padding: "4px 0 8px" }}>{t("form.nested.empty")}</div>
       )}
       {children.map((child) => (
         <FieldRow
@@ -753,12 +754,12 @@ function NestedObjectEditorImpl({ parentKey, children, isEditing, schema, pathPr
         </select>
         <button
           onClick={handleAddChild}
-          style={{ padding: "6px 10px", background: "#ffffff", border: "1px solid #93c5fd", borderRadius: 8, color: "#1d4ed8", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+          style={{ padding: "6px 10px", background: "var(--dbv-form-input-bg)", border: "1px solid var(--dbv-form-nested-object-border)", borderRadius: 8, color: "var(--dbv-form-accent)", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
         >
           {t("buttons.add")}
         </button>
       </div>
-      {addError && <div style={{ color: "#ef4444", fontSize: 11, marginTop: 4 }}>{addError}</div>}
+      {addError && <div style={{ color: "var(--dbv-form-error)", fontSize: 11, marginTop: 4 }}>{addError}</div>}
     </div>
   );
 }
@@ -802,9 +803,9 @@ function NestedArrayEditorImpl({ parentKey, arrayItems, isEditing, schema, pathP
   };
 
   return (
-    <div style={{ padding: "8px 10px", border: "1px dashed #bbf7d0", borderRadius: 8, background: "#f0fdf4", marginTop: 6, marginBottom: 4 }}>
+    <div style={{ padding: "8px 10px", border: "1px dashed var(--dbv-form-nested-array-border)", borderRadius: 8, background: "var(--dbv-form-nested-array-bg)", marginTop: 6, marginBottom: 4 }}>
       {arrayItems.length === 0 && (
-        <div style={{ fontSize: 12, color: "#475569", padding: "4px 0 8px" }}>{t("form.array.empty")}</div>
+        <div style={{ fontSize: 12, color: "var(--dbv-form-muted)", padding: "4px 0 8px" }}>{t("form.array.empty")}</div>
       )}
       {arrayItems.map((item) => (
         <FieldRow
@@ -835,7 +836,7 @@ function NestedArrayEditorImpl({ parentKey, arrayItems, isEditing, schema, pathP
         </select>
         <button
           onClick={handleAddItem}
-          style={{ padding: "6px 10px", background: "#ffffff", border: "1px solid #86efac", borderRadius: 8, color: "#166534", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
+          style={{ padding: "6px 10px", background: "var(--dbv-form-input-bg)", border: "1px solid var(--dbv-form-nested-array-border)", borderRadius: 8, color: "var(--dbv-form-accent)", cursor: "pointer", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}
         >
           {t("form.button.addItem")}
         </button>
@@ -866,6 +867,7 @@ interface DocFormEditorProps {
 
 const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, isEditing }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [fields, setFields] = useState<FieldState[]>([]);
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState("string");
@@ -982,14 +984,41 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
 
   if (fieldCount === 0 && !schema) {
     return (
-      <div style={{ color: "#64748b", fontSize: 13, padding: "16px 0" }}>
+      <div style={{ color: theme.palette.text.secondary, fontSize: 13, padding: "16px 0" }}>
         {t("editor.form.noSchema")}
       </div>
     );
   }
 
+  const formThemeVars = {
+    "--dbv-form-label": theme.palette.text.primary,
+    "--dbv-form-input-bg": theme.palette.background.paper,
+    "--dbv-form-input-border": theme.palette.divider,
+    "--dbv-form-input-text": theme.palette.text.primary,
+    "--dbv-form-card-bg": theme.palette.action.hover,
+    "--dbv-form-border": theme.palette.divider,
+    "--dbv-form-muted": theme.palette.text.secondary,
+    "--dbv-form-chip-bg": theme.palette.action.selected,
+    "--dbv-form-accent": theme.palette.primary.main,
+    "--dbv-form-error": theme.palette.error.main,
+    "--dbv-form-remove-bg": alpha(theme.palette.error.main, theme.palette.mode === "dark" ? 0.2 : 0.08),
+    "--dbv-form-remove-border": alpha(theme.palette.error.main, theme.palette.mode === "dark" ? 0.5 : 0.35),
+    "--dbv-form-remove-text": theme.palette.error.main,
+    "--dbv-form-type-date": theme.palette.info.main,
+    "--dbv-form-type-object-id": theme.palette.secondary.main,
+    "--dbv-form-type-bool": theme.palette.warning.main,
+    "--dbv-form-type-number": theme.palette.success.main,
+    "--dbv-form-type-string": theme.palette.text.primary,
+    "--dbv-form-type-structure": theme.palette.text.secondary,
+    "--dbv-form-type-uuid": theme.palette.warning.light,
+    "--dbv-form-nested-object-bg": alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.14 : 0.08),
+    "--dbv-form-nested-object-border": alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.45 : 0.35),
+    "--dbv-form-nested-array-bg": alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.14 : 0.08),
+    "--dbv-form-nested-array-border": alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.45 : 0.35),
+  } as React.CSSProperties;
+
   return (
-    <div style={{ overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
+    <div style={{ ...formThemeVars, colorScheme: theme.palette.mode, overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
       {/* _id field at the top */}
       {idField && (
         <>
@@ -1003,7 +1032,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             onChange={handleChange}
             onRemove={handleRemove}
           />
-          <hr style={{ border: "none", borderTop: "1px solid #e2e8f0", margin: "8px 0 12px" }} />
+          <hr style={{ border: "none", borderTop: "1px solid var(--dbv-form-border)", margin: "8px 0 12px" }} />
         </>
       )}
 
@@ -1022,8 +1051,8 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
       ))}
 
       {/* Add new field */}
-      <div style={{ marginTop: 12, padding: "12px", background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      <div style={{ marginTop: 12, padding: "12px", background: "var(--dbv-form-card-bg)", borderRadius: 10, border: "1px dashed var(--dbv-form-input-border)" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--dbv-form-muted)", marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>
           {t("form.section.addField")}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1050,10 +1079,10 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             onClick={handleAddField}
             style={{
               padding: "6px 14px",
-              background: "#ffffff",
-              border: "1px solid #93c5fd",
+              background: "var(--dbv-form-input-bg)",
+              border: "1px solid var(--dbv-form-nested-object-border)",
               borderRadius: 8,
-              color: "#1d4ed8",
+              color: "var(--dbv-form-accent)",
               cursor: "pointer",
               fontSize: 13,
               fontWeight: 600,
@@ -1063,7 +1092,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
             {t("buttons.add")}
           </button>
         </div>
-        {addError && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>{addError}</div>}
+        {addError && <div style={{ color: "var(--dbv-form-error)", fontSize: 12, marginTop: 6 }}>{addError}</div>}
       </div>
     </div>
   );
