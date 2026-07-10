@@ -1018,7 +1018,7 @@ const DocFormEditor: React.FC<DocFormEditorProps> = ({ schema, value, onChange, 
   } as React.CSSProperties;
 
   return (
-    <div style={{ ...formThemeVars, colorScheme: theme.palette.mode, overflowY: "auto", maxHeight: "calc(90vh - 200px)", padding: "2px 4px 2px 2px" }}>
+    <div style={{ ...formThemeVars, colorScheme: theme.palette.mode, padding: "2px 4px 2px 2px" }}>
       {/* _id field at the top */}
       {idField && (
         <>

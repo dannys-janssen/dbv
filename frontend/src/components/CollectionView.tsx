@@ -2070,9 +2070,9 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
       {/* ── Editor modal ── */}
       {editorOpen && (
         <div style={overlayStyle}>
-          <div style={{ ...themedModalBaseStyle, width: "min(900px, 92vw)", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
+          <div style={{ ...themedModalBaseStyle, width: "min(900px, 92vw)", height: "min(80vh, 700px)", minWidth: "400px", minHeight: "300px", maxWidth: "95vw", maxHeight: "95vh", display: "flex", flexDirection: "column", resize: "both", overflow: "hidden" }}>
             {/* Header row: title + Form/JSON toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexShrink: 0 }}>
               <h3 style={{ ...themedModalTitleStyle, marginBottom: 0 }}>
                 {editingId ? t("modals.editDocument.title") : t("modals.newDocument.title")}
               </h3>
@@ -2097,23 +2097,25 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 ))}
               </div>
             </div>
-            <p style={themedModalSubtitleStyle}>
+            <p style={{ ...themedModalSubtitleStyle, flexShrink: 0 }}>
               {editorMode === "form"
                 ? t("editor.mode.form.subtitle")
                 : t("editor.mode.json.subtitle")}
             </p>
 
             {editorMode === "form" ? (
-              <DocFormEditor
-                schema={schema}
-                value={editorValue}
-                onChange={setEditorValue}
-                isEditing={editingId !== null}
-              />
+              <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+                <DocFormEditor
+                  schema={schema}
+                  value={editorValue}
+                  onChange={setEditorValue}
+                  isEditing={editingId !== null}
+                />
+              </div>
             ) : (
-              <div style={{ border: `1px solid ${muiTheme.palette.divider}`, borderRadius: 8, overflow: "hidden" }}>
+              <div style={{ flex: 1, minHeight: 0, border: `1px solid ${muiTheme.palette.divider}`, borderRadius: 8, overflow: "hidden" }}>
                 <Editor theme={editorTheme}
-                  height="500px"
+                  height="100%"
                   defaultLanguage="json"
                   path={`dbv://document/${tabId}`}
                   value={editorValue}
@@ -2122,7 +2124,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
               </div>
             )}
 
-            <div style={modalFooterStyle}>
+            <div style={{ ...modalFooterStyle, flexShrink: 0 }}>
               <button
                 onClick={() => setEditorOpen(false)}
                 style={themedCancelBtnStyle}
