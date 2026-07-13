@@ -93,9 +93,10 @@ interface Props {
   db: string;
   collection: string; // used to pre-fill collection name in templates
   tabId: string;
+  active: boolean;
 }
 
-export default function CommandsView({ db, collection, tabId }: Props) {
+export default function CommandsView({ db, collection, tabId, active }: Props) {
   const muiTheme = useTheme();
   const [monacoReady, setMonacoReady] = useState(false);
   const editorTheme = monacoReady
@@ -182,6 +183,18 @@ export default function CommandsView({ db, collection, tabId }: Props) {
       setMonacoReady(true);
     }).catch(() => setMonacoReady(false));
   }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        void executeCommand();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [active, executeCommand]);
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",
