@@ -185,8 +185,8 @@ export default function CommandsView({ db, collection, tabId, active }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!active) return;
     const handler = (e: KeyboardEvent) => {
+      if (!active) return;
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         void executeCommand();
