@@ -151,6 +151,11 @@ export default function CommandsView({ db, collection, tabId, active }: Props) {
     }
   }, [commandText, db, adminFlag]);
 
+  // Keep a stable ref to executeCommand so the keydown handler doesn't need
+  // to re-register whenever the command text, db, or admin flag changes.
+  const executeCommandRef = useRef(executeCommand);
+  useEffect(() => { executeCommandRef.current = executeCommand; }, [executeCommand]);
+
   const filteredPalette = PALETTE.map((cat) => ({
     ...cat,
     commands: search
@@ -189,12 +194,13 @@ export default function CommandsView({ db, collection, tabId, active }: Props) {
       if (!active) return;
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        void executeCommand();
+        void executeCommandRef.current();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [active, executeCommand]);
+    // executeCommandRef is a stable ref; its .current is kept up-to-date above.
+  }, [active]);
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",
