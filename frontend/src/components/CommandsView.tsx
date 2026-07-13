@@ -199,7 +199,8 @@ export default function CommandsView({ db, collection, tabId, active }: Props) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-    // executeCommandRef is a stable ref; its .current is kept up-to-date above.
+    // executeCommandRef is a ref (stable object) — its .current is kept up-to-date
+    // by the useEffect above, so it intentionally does not appear in this dependency array.
   }, [active]);
 
   const resizeHandleStyle: React.CSSProperties = {

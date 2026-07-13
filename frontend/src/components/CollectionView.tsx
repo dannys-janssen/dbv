@@ -613,7 +613,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
     // applySqlRef and loadDocumentsRef are refs (stable objects); their .current
-    // is kept up-to-date by dedicated useEffects, so they don't need to be listed here.
+    // is kept up-to-date by dedicated useEffects, so they intentionally do not
+    // appear here. queryMode IS listed because the handler branches on its value.
   }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, runDeleteMany, canWrite, visible, queryMode]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
