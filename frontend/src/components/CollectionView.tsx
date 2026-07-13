@@ -250,6 +250,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [docLayout, setDocLayout] = useState<"table" | "tree" | "json">("table");
   const loadDocumentsRef = useRef<() => void>(() => {});
+  const applySqlRef = useRef<() => void>(() => {});
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorValue, setEditorValue] = useState("{}");
@@ -398,6 +399,22 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   }, [db, col, page, limitVal, filterText, sortText, projectionText]);
 
   useEffect(() => { loadDocumentsRef.current = loadDocuments; }, [loadDocuments]);
+
+  const applySql = useCallback(() => {
+    const result = parseSqlToMql(sqlText);
+    if (!result || result.error !== null || !result.mql) return;
+    const { filter, sort, projection, limit } = result.mql;
+    setFilterText(Object.keys(filter).length ? JSON.stringify(filter) : "");
+    setSortText(Object.keys(sort).length ? JSON.stringify(sort) : "");
+    setProjectionText(Object.keys(projection).length ? JSON.stringify(projection) : "");
+    if (limit !== null) setLimitVal(Math.min(100, Math.max(1, limit)));
+    setPage(1);
+    loadDocumentsRef.current();
+  }, [sqlText]);
+
+  // Keep the ref in sync so Monaco's onMount callback (registered once) always
+  // calls the latest applySql without a stale closure.
+  useEffect(() => { applySqlRef.current = applySql; }, [applySql]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
@@ -572,22 +589,33 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
         e.preventDefault();
         void handleSave();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && view === "aggregate") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && visible && view === "documents") {
+        e.preventDefault();
+        if (queryMode === "sql") {
+          applySqlRef.current();
+        } else {
+          loadDocumentsRef.current();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && visible && view === "aggregate") {
         e.preventDefault();
         void runAggregate();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canWrite && view === "update") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && visible && canWrite && view === "update") {
         e.preventDefault();
         void runUpdateMany();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canWrite && view === "delete") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && visible && canWrite && view === "delete") {
         e.preventDefault();
         void runDeleteMany();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, runDeleteMany, canWrite]);
+    // applySqlRef and loadDocumentsRef are refs (stable objects); their .current
+    // is kept up-to-date by dedicated useEffects, so they intentionally do not
+    // appear here. queryMode IS listed because the handler branches on its value.
+  }, [importModalOpen, editorOpen, newIndexOpen, view, handleSave, runAggregate, runUpdateMany, runDeleteMany, canWrite, visible, queryMode]);
 
   const startDoc = total > 0 ? (page - 1) * limitVal + 1 : 0;
   const endDoc = Math.min(page * limitVal, total);
@@ -836,17 +864,6 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   quickSuggestions: { other: true, comments: false, strings: true },
                 };
 
-                const applySql = () => {
-                  if (!sqlResult || sqlResult.error !== null || !sqlResult.mql) return;
-                  const { filter, sort, projection, limit } = sqlResult.mql;
-                  setFilterText(Object.keys(filter).length ? JSON.stringify(filter) : "");
-                  setSortText(Object.keys(sort).length ? JSON.stringify(sort) : "");
-                  setProjectionText(Object.keys(projection).length ? JSON.stringify(projection) : "");
-                  if (limit !== null) setLimitVal(Math.min(100, Math.max(1, limit)));
-                  setPage(1);
-                  loadDocumentsRef.current();
-                };
-
                 return (
                   <div style={{ padding: "10px 20px", background: muiTheme.palette.background.paper, borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
                     {/* Mode toggle row */}
@@ -1019,7 +1036,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                                 const keyMod = monaco?.KeyMod?.CtrlCmd;
                                 const keyCode = monaco?.KeyCode?.Enter;
                                 if (typeof keyMod === "number" && typeof keyCode === "number") {
-                                  editor.addCommand(keyMod | keyCode, applySql);
+                                  editor.addCommand(keyMod | keyCode, () => applySqlRef.current());
                                 }
                               }}
                             />
@@ -2062,7 +2079,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
               flexDirection: "column",
             }}
           >
-            <CommandsView db={db} collection={col} tabId={tabId} />
+            <CommandsView db={db} collection={col} tabId={tabId} active={view === "commands" && visible} />
           </div>
         </div>
       )}

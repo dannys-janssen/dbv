@@ -93,9 +93,10 @@ interface Props {
   db: string;
   collection: string; // used to pre-fill collection name in templates
   tabId: string;
+  active: boolean;
 }
 
-export default function CommandsView({ db, collection, tabId }: Props) {
+export default function CommandsView({ db, collection, tabId, active }: Props) {
   const muiTheme = useTheme();
   const [monacoReady, setMonacoReady] = useState(false);
   const editorTheme = monacoReady
@@ -150,6 +151,11 @@ export default function CommandsView({ db, collection, tabId }: Props) {
     }
   }, [commandText, db, adminFlag]);
 
+  // Keep a stable ref to executeCommand so the keydown handler doesn't need
+  // to re-register whenever the command text, db, or admin flag changes.
+  const executeCommandRef = useRef(executeCommand);
+  useEffect(() => { executeCommandRef.current = executeCommand; }, [executeCommand]);
+
   const filteredPalette = PALETTE.map((cat) => ({
     ...cat,
     commands: search
@@ -182,6 +188,20 @@ export default function CommandsView({ db, collection, tabId }: Props) {
       setMonacoReady(true);
     }).catch(() => setMonacoReady(false));
   }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!active) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        void executeCommandRef.current();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+    // executeCommandRef is a ref (stable object) — its .current is kept up-to-date
+    // by the useEffect above, so it intentionally does not appear in this dependency array.
+  }, [active]);
 
   const resizeHandleStyle: React.CSSProperties = {
     height: "6px",
