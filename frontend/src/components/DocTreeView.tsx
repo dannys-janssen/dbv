@@ -65,10 +65,14 @@ function TreeNode({ nodeKey, value, depth, defaultExpanded }: TreeNodeProps) {
           cursor: "pointer",
           userSelect: "none",
         }}
-        onClick={() => setIsExpanded((e) => !e)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsExpanded((ex) => !ex);
+        }}
         onKeyDown={(e) => {
           if (e.key === " " || e.key === "Enter") {
             e.preventDefault();
+            e.stopPropagation();
             setIsExpanded((ex) => !ex);
           }
         }}

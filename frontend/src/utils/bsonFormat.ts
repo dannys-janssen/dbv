@@ -127,7 +127,7 @@ export function normalizeBsonForReadonlyJson(value: unknown): unknown {
 
 /** Returns true if a value should be rendered inline (no expand toggle needed). */
 export function isBsonPrimitive(v: unknown): boolean {
-  if (v === null || typeof v !== "object" || Array.isArray(v)) return true;
+  if (v === null || typeof v !== "object") return true;
   const obj = v as Record<string, unknown>;
   return (
     "$oid" in obj ||
