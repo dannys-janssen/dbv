@@ -141,8 +141,8 @@ describe("isBsonPrimitive", () => {
     expect(isBsonPrimitive(true)).toBe(true);
   });
 
-  it("returns true for arrays", () => {
-    expect(isBsonPrimitive([1, 2, 3])).toBe(true);
+  it("returns false for arrays", () => {
+    expect(isBsonPrimitive([1, 2, 3])).toBe(false);
   });
 
   it("returns true for BSON Extended JSON special types", () => {
