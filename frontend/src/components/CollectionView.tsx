@@ -833,7 +833,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
 
           {/* ── Documents tab ── */}
           {view === "documents" && (
-            <>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minHeight: 0 }}>
               {/* Query bar */}
               {(() => {
                 const filterValid = !filterText.trim() || (() => { try { JSON.parse(filterText); return true; } catch { return false; } })();
@@ -1209,6 +1209,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                 </div>
               )}
 
+              {/* Document list (scrollable) */}
+              <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
               {/* Document table */}
               <div style={{ padding: "0 20px 20px" }}>
                 {error && (
@@ -1570,6 +1572,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   </table>
                 )}
               </div>
+              </div>
 
               {/* Pagination bar */}
               {!loading && (
@@ -1644,7 +1647,7 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* ── Aggregate tab ── */}
