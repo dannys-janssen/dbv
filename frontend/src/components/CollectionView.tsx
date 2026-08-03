@@ -859,7 +859,6 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                   wordWrap: "on" as const,
                   padding: { top: 6, bottom: 6 },
                   fontSize: 13,
-                  contextmenu: false,
                   suggest: { showSnippets: true, showWords: false },
                   quickSuggestions: { other: true, comments: false, strings: true },
                 };
