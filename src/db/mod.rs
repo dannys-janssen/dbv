@@ -90,7 +90,7 @@ impl DbClient {
             .database("admin")
             .run_command(bson::doc! { "ping": 1 })
             .await?;
-        tracing::info!("Connected to MongoDB at {}", uri);
+        tracing::info!("Connected to MongoDB at {}", mask_uri_password(uri));
         Ok(Self {
             client,
             default_db: default_db.to_string(),
