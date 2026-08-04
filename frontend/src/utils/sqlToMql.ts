@@ -31,6 +31,30 @@ export interface SqlParseError {
 
 const parser = new Parser();
 
+
+function toExtendedJsonDate(value: unknown): { $date: string } | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const ms = Math.abs(value) < 1e12 ? value * 1000 : value;
+    const d = new Date(ms);
+    if (!Number.isNaN(d.getTime())) return { $date: d.toISOString() };
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const d = new Date(trimmed);
+    if (!Number.isNaN(d.getTime())) return { $date: d.toISOString() };
+  }
+
+  return null;
+}
+
+function coerceDateValueForField(field: string, value: unknown): unknown {
+  if (!/date|time|created|updated|timestamp/i.test(field)) return value;
+  return toExtendedJsonDate(value) ?? value;
+}
+
 export function parseSqlToMql(sql: string): SqlParseResult | SqlParseError {
   const trimmed = sql.trim();
   if (!trimmed) return { mql: null, preview: null, error: "" };
@@ -90,7 +114,7 @@ function convertWhere(node: any): Record<string, unknown> {
 
     // Comparison operators
     const field = extractField(node.left);
-    const value = extractValue(node.right);
+    const value = coerceDateValueForField(field, extractValue(node.right));
 
     if (op === "=" || op === "IS") return { [field]: { $eq: value } };
     if (op === "!=" || op === "<>" || op === "IS NOT") return { [field]: { $ne: value } };
@@ -127,13 +151,13 @@ function convertWhere(node: any): Record<string, unknown> {
 
     // BETWEEN
     if (op === "BETWEEN") {
-      const from = extractValue(node.right.left ?? node.right.value?.[0]);
-      const to = extractValue(node.right.right ?? node.right.value?.[1]);
+      const from = coerceDateValueForField(field, extractValue(node.right.left ?? node.right.value?.[0]));
+      const to = coerceDateValueForField(field, extractValue(node.right.right ?? node.right.value?.[1]));
       return { [field]: { $gte: from, $lte: to } };
     }
     if (op === "NOT BETWEEN") {
-      const from = extractValue(node.right.left ?? node.right.value?.[0]);
-      const to = extractValue(node.right.right ?? node.right.value?.[1]);
+      const from = coerceDateValueForField(field, extractValue(node.right.left ?? node.right.value?.[0]));
+      const to = coerceDateValueForField(field, extractValue(node.right.right ?? node.right.value?.[1]));
       return { $or: [{ [field]: { $lt: from } }, { [field]: { $gt: to } }] };
     }
 

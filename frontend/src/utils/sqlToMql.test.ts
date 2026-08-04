@@ -286,3 +286,41 @@ describe("parseSqlToMql – preview", () => {
     expect(r.preview!.limit).toBe("");
   });
 });
+
+
+describe("parseSqlToMql – date predicates", () => {
+  it("coerces ISO datetime string comparisons to Extended JSON $date for date-like fields", () => {
+    const r = parseSqlToMql('SELECT * FROM cst_ZD WHERE Created > "2026-07-29T00:00:00Z"');
+    expect(r.error).toBeNull();
+    if (r.mql) {
+      expect(r.mql.filter).toEqual({
+        Created: { $gt: { $date: "2026-07-29T00:00:00.000Z" } },
+      });
+    }
+  });
+
+  it("coerces numeric epoch comparisons to Extended JSON $date for date-like fields", () => {
+    const r = parseSqlToMql("SELECT * FROM cst_ZD WHERE Created > 1785283200");
+    expect(r.error).toBeNull();
+    if (r.mql) {
+      expect(r.mql.filter).toEqual({
+        Created: { $gt: { $date: "2026-07-29T00:00:00.000Z" } },
+      });
+    }
+  });
+
+  it("coerces BETWEEN bounds to Extended JSON $date for date-like fields", () => {
+    const r = parseSqlToMql(
+      'SELECT * FROM cst_test WHERE Created BETWEEN "2026-05-23T21:47:53.000Z" AND "2026-05-24T21:47:53.000Z"'
+    );
+    expect(r.error).toBeNull();
+    if (r.mql) {
+      expect(r.mql.filter).toEqual({
+        Created: {
+          $gte: { $date: "2026-05-23T21:47:53.000Z" },
+          $lte: { $date: "2026-05-24T21:47:53.000Z" },
+        },
+      });
+    }
+  });
+});
