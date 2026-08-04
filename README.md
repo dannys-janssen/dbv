@@ -834,7 +834,7 @@ dbv:
 The project ships a Copilot CLI skill at `.github/skills/release/` that automates the full release workflow. To use it, start a Copilot CLI session in the repo root and run:
 
 ```
-Use the /release skill to release v0.3.0
+Use the /release skill to release v0.3.1
 ```
 
 The skill will:
@@ -849,17 +849,17 @@ The skill will:
 After the PR is merged, tell Copilot CLI to tag the release:
 
 ```
-Use the /release skill to tag v0.3.0
+Use the /release skill to tag v0.3.1
 ```
 
 The skill verifies the PR is merged and the version on `main` matches, then creates an annotated tag and pushes it:
 
 ```bash
-git tag -a v0.3.0 -m "Release v0.3.0"
-git push origin v0.3.0
+git tag -a v0.3.1 -m "Release v0.3.1"
+git push origin v0.3.1
 ```
 
-This triggers the Docker workflow which publishes `ghcr.io/dannys-janssen/dbv:v0.3.0`, `:0.3.0`, `:0.3`, `:0`, and `:latest`.
+This triggers the Docker workflow which publishes `ghcr.io/dannys-janssen/dbv:v0.3.1`, `:0.3.1`, `:0.3`, `:0`, and `:latest`.
 
 The published image includes standard OCI metadata labels for authors, vendor, title, documentation, source, description, and license information so registries can classify it correctly.
 
