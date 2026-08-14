@@ -90,11 +90,18 @@ describe("formatBsonValue", () => {
     expect(formatBsonValue({ $numberDecimal: "12345.6789" })).toBe("12345.6789");
   });
 
-  it("formats $binary UUID subType 04 as [UUID]", () => {
+  it("formats $binary UUID subType 04 with valid 16-byte base64 as UUID string", () => {
+    // base64 of 16 bytes: 7b 77 a4 07 63 78 4a 04 9b dc e0 ae dc 8e 90 f9
+    expect(formatBsonValue({ $binary: { base64: "e3ekB2N4SgSb3OCu3I6Q+Q==", subType: "04" } })).toBe(
+      "7b77a407-6378-4a04-9bdc-e0aedc8e90f9"
+    );
+  });
+
+  it("formats $binary UUID subType 04 with invalid base64 as [UUID] fallback", () => {
     expect(formatBsonValue({ $binary: { base64: "abc", subType: "04" } })).toBe("[UUID]");
   });
 
-  it("formats $binary UUID subType 03 as [UUID]", () => {
+  it("formats $binary UUID subType 03 as [UUID] fallback for invalid base64", () => {
     expect(formatBsonValue({ $binary: { base64: "abc", subType: "03" } })).toBe("[UUID]");
   });
 

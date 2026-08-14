@@ -46,7 +46,11 @@ export function formatBsonValue(v: unknown): string {
     if ("$binary" in obj) {
       const bin = obj["$binary"] as Record<string, unknown> | undefined;
       const subType = bin?.["subType"];
-      return subType === "04" || subType === "03" ? "[UUID]" : "[Binary]";
+      if (subType === "04" || subType === "03") {
+        const uuid = tryDecodeUuidFromBinary(bin?.["base64"], subType);
+        return uuid ?? "[UUID]";
+      }
+      return "[Binary]";
     }
 
     if ("$timestamp" in obj) return "[Timestamp]";
