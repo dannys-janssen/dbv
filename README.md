@@ -401,7 +401,7 @@ dbv container
   │     ├── auth/        JWT RS256 validation via Keycloak JWKS
   │     ├── rbac/        ReadAccess / WriteAccess Axum extractors
   │     ├── routes/      auth proxy, CRUD, aggregate, schema, export/import
-  │     └── db/          MongoDB 2.8 async client
+  │     └── db/          MongoDB 3.7 async client
   └── React SPA    served from frontend/dist/
 ```
 

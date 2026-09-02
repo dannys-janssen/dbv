@@ -12,11 +12,11 @@ browser (HTTPS)
         └── dbv container :8080
               ├── React SPA (static assets via tower-http ServeDir)
               └── /api/* (Axum REST handlers)
-                    ├── MongoDB (mongodb 2.8, separate container)
+                    ├── MongoDB (mongo:7 database container)
                     └── Keycloak (JWKS JWT validation, separate container)
 ```
 
-- **Backend**: Rust, Axum 0.7, Tokio async runtime, mongodb 2.8
+- **Backend**: Rust, Axum 0.8, Tokio async runtime, mongodb driver 3.7
 - **Frontend**: React + TypeScript, Vite, served as static files by Axum; proxied to `localhost:8080` during dev via Vite proxy
 - **Auth**: Keycloak OIDC; backend validates RS256 JWT bearer tokens; JWKS fetched and cached from Keycloak
 - **RBAC**: Two roles — `dbv-admin` (read + write) and `dbv-viewer` (read-only); enforced via `ReadAccess`/`WriteAccess` Axum extractors in `src/auth/rbac.rs`
