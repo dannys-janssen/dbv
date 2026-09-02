@@ -392,7 +392,15 @@
     "label_page": "ページ {{page}}",
     "button": {
       "prev": "← 前へ",
-      "next": "次へ →"
+      "next": "次へ →",
+      "first": "最初のページ",
+      "last": "最後のページ"
+    },
+    "input": {
+      "label": "現在のページ（1〜{{totalPages}}）"
+    },
+    "validation": {
+      "range": "1 から {{totalPages}} までのページ番号を入力してください。"
     }
   },
   "aggregate": {

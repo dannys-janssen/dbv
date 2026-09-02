@@ -161,6 +161,7 @@ Each collection opens in its own **tab** so you can work with multiple collectio
 **Document view**
 
 - Browse documents with configurable **pagination** (10 / 20 / 50 / 100 per page)
+- Jump directly to a page by entering its number, or use the **first** / **last** page controls for large collections
 The query bar supports two modes, toggled with the **MQL / SQL** button group:
 
 **MQL mode** (default) — write MongoDB Query Language directly:

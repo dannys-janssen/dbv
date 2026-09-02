@@ -398,7 +398,15 @@
     "label_page": "صفحہ {{page}}",
     "button": {
       "prev": "← پچھلا",
-      "next": "اگلا →"
+      "next": "اگلا →",
+      "first": "پہلا صفحہ",
+      "last": "آخری صفحہ"
+    },
+    "input": {
+      "label": "موجودہ صفحہ، 1 سے {{totalPages}} تک"
+    },
+    "validation": {
+      "range": "1 سے {{totalPages}} تک کوئی صفحہ درج کریں۔"
     }
   },
   "aggregate": {

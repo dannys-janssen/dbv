@@ -398,7 +398,15 @@
     "label_page": "{{page}}페이지",
     "button": {
       "prev": "← 이전",
-      "next": "다음 →"
+      "next": "다음 →",
+      "first": "첫 페이지",
+      "last": "마지막 페이지"
+    },
+    "input": {
+      "label": "현재 페이지, 1부터 {{totalPages}}까지"
+    },
+    "validation": {
+      "range": "1에서 {{totalPages}} 사이의 페이지를 입력하세요."
     }
   },
   "aggregate": {

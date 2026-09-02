@@ -398,7 +398,15 @@
     "label_page": "Strona {{page}}",
     "button": {
       "prev": "← Poprz.",
-      "next": "Nast. →"
+      "next": "Nast. →",
+      "first": "Pierwsza strona",
+      "last": "Ostatnia strona"
+    },
+    "input": {
+      "label": "Bieżąca strona, od 1 do {{totalPages}}"
+    },
+    "validation": {
+      "range": "Wpisz stronę od 1 do {{totalPages}}."
     }
   },
   "aggregate": {

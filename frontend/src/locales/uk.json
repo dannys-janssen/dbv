@@ -398,7 +398,15 @@
     "label_page": "Сторінка {{page}}",
     "button": {
       "prev": "← Назад",
-      "next": "Вперед →"
+      "next": "Вперед →",
+      "first": "Перша сторінка",
+      "last": "Остання сторінка"
+    },
+    "input": {
+      "label": "Поточна сторінка, від 1 до {{totalPages}}"
+    },
+    "validation": {
+      "range": "Введіть сторінку від 1 до {{totalPages}}."
     }
   },
   "aggregate": {
