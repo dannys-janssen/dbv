@@ -392,7 +392,15 @@
     "label_page": "पृष्ठ {{page}}",
     "button": {
       "prev": "← पिछला",
-      "next": "अगला →"
+      "next": "अगला →",
+      "first": "पहला पृष्ठ",
+      "last": "अंतिम पृष्ठ"
+    },
+    "input": {
+      "label": "वर्तमान पृष्ठ, 1 से {{totalPages}} तक"
+    },
+    "validation": {
+      "range": "1 से {{totalPages}} तक का पृष्ठ दर्ज करें।"
     }
   },
   "aggregate": {

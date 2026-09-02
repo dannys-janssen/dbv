@@ -392,7 +392,15 @@
     "label_page": "صفحة {{page}}",
     "button": {
       "prev": "→ السابق",
-      "next": "التالي ←"
+      "next": "التالي ←",
+      "first": "الصفحة الأولى",
+      "last": "الصفحة الأخيرة"
+    },
+    "input": {
+      "label": "الصفحة الحالية، من 1 إلى {{totalPages}}"
+    },
+    "validation": {
+      "range": "أدخل رقم صفحة من 1 إلى {{totalPages}}."
     }
   },
   "aggregate": {

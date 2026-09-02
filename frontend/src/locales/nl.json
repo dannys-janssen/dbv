@@ -392,7 +392,15 @@
     "label_page": "Pagina {{page}}",
     "button": {
       "prev": "← Vorige",
-      "next": "Volgende →"
+      "next": "Volgende →",
+      "first": "Eerste pagina",
+      "last": "Laatste pagina"
+    },
+    "input": {
+      "label": "Huidige pagina, van 1 tot {{totalPages}}"
+    },
+    "validation": {
+      "range": "Voer een pagina van 1 tot {{totalPages}} in."
     }
   },
   "aggregate": {

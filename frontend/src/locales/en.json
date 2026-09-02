@@ -396,9 +396,17 @@
   "pagination": {
     "label": "Showing {{start}}–{{end}} of {{total}} documents",
     "label_page": "Page {{page}}",
+    "input": {
+      "label": "Current page, from 1 to {{totalPages}}"
+    },
+    "validation": {
+      "range": "Enter a page from 1 to {{totalPages}}."
+    },
     "button": {
+      "first": "First page",
       "prev": "← Prev",
-      "next": "Next →"
+      "next": "Next →",
+      "last": "Last page"
     }
   },
   "aggregate": {

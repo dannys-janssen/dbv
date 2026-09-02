@@ -392,7 +392,15 @@
     "label_page": "Side {{page}}",
     "button": {
       "prev": "← Forrige",
-      "next": "Næste →"
+      "next": "Næste →",
+      "first": "Første side",
+      "last": "Sidste side"
+    },
+    "input": {
+      "label": "Aktuel side, fra 1 til {{totalPages}}"
+    },
+    "validation": {
+      "range": "Indtast en side fra 1 til {{totalPages}}."
     }
   },
   "aggregate": {

@@ -398,7 +398,15 @@
     "label_page": "Страница {{page}}",
     "button": {
       "prev": "← Назад",
-      "next": "Вперёд →"
+      "next": "Вперёд →",
+      "first": "Первая страница",
+      "last": "Последняя страница"
+    },
+    "input": {
+      "label": "Текущая страница, от 1 до {{totalPages}}"
+    },
+    "validation": {
+      "range": "Введите номер страницы от 1 до {{totalPages}}."
     }
   },
   "aggregate": {

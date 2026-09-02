@@ -398,7 +398,15 @@
     "label_page": "Σελίδα {{page}}",
     "button": {
       "prev": "← Προηγ.",
-      "next": "Επόμ. →"
+      "next": "Επόμ. →",
+      "first": "Πρώτη σελίδα",
+      "last": "Τελευταία σελίδα"
+    },
+    "input": {
+      "label": "Τρέχουσα σελίδα, από 1 έως {{totalPages}}"
+    },
+    "validation": {
+      "range": "Εισαγάγετε σελίδα από 1 έως {{totalPages}}."
     }
   },
   "aggregate": {
