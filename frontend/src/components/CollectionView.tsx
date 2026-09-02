@@ -41,6 +41,7 @@ import { parseSqlToMql } from "../utils/sqlToMql";
 import { buildUpdateManyCommand, parseUpdateManyInput } from "../utils/updateMany";
 import { buildDeleteManyRequest, parseDeleteManyInput } from "../utils/deleteMany";
 import { registerDbvMonacoThemes, type MonacoWithDefineTheme } from "../utils/monacoTheme";
+import { getTotalPages, hasNextPage, parsePageInput } from "../utils/pagination";
 
 type View = "documents" | "aggregate" | "update" | "delete" | "schema" | "indexes" | "stats" | "commands";
 
@@ -238,6 +239,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
   const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageInputError, setPageInputError] = useState("");
+  const pageInputRef = useRef<HTMLInputElement | null>(null);
   const [filterText, setFilterText] = useState("");
   const [sortText, setSortText] = useState("");
   const [projectionText, setProjectionText] = useState("");
@@ -392,6 +395,8 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
       .then((r) => {
         setDocuments(r.documents);
         setTotal(r.total);
+        const nextTotalPages = getTotalPages(r.total, limitVal);
+        if (page > nextTotalPages) setPage(nextTotalPages);
         setQueryDuration(Date.now() - t0);
       })
       .catch((e) => { setError((e as Error).message); setQueryDuration(null); })
@@ -420,6 +425,26 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sets loading before async fetch
     loadDocuments();
   }, [loadDocuments]);
+
+  const totalPages = getTotalPages(total, limitVal);
+  const canGoToNextPage = hasNextPage(page, total, limitVal);
+  const goToPage = useCallback((nextPage: number) => {
+    setPageInputError("");
+    setPage(nextPage);
+  }, []);
+
+  const submitPageInput = useCallback((value?: string) => {
+    const nextPage = parsePageInput(value ?? pageInputRef.current?.value ?? "", totalPages);
+    if (nextPage === null) {
+      setPageInputError(t("pagination.validation.range", { totalPages }));
+      return;
+    }
+    if (nextPage !== page) {
+      goToPage(nextPage);
+      return;
+    }
+    setPageInputError("");
+  }, [goToPage, page, t, totalPages]);
 
   const handleDelete = async (id: string) => {
     if (!confirm(t("modals.confirmDelete.document"))) return;
@@ -1600,10 +1625,30 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                       display: "flex",
                       gap: "8px",
                       alignItems: "center",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
                     }}
                   >
                     <button
-                      onClick={() => setPage((p) => p - 1)}
+                      onClick={() => goToPage(1)}
+                      disabled={page === 1}
+                      title={t("pagination.button.first")}
+                      aria-label={t("pagination.button.first")}
+                      style={{
+                        background: "transparent",
+                        color: page === 1 ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
+                        border: `1px solid ${muiTheme.palette.divider}`,
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        cursor: page === 1 ? "not-allowed" : "pointer",
+                        fontFamily: FONT,
+                      }}
+                    >
+                      {"≪"}
+                    </button>
+                    <button
+                      onClick={() => goToPage(page - 1)}
                       disabled={page === 1}
                       style={{
                         background: "transparent",
@@ -1618,30 +1663,95 @@ export default function CollectionView({ db, col, visible, tabId }: CollectionVi
                     >
                       {t("pagination.button.prev")}
                     </button>
-                    <span
+                    <label
                       style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                         fontSize: "13px",
                         color: muiTheme.palette.text.secondary,
                         fontFamily: FONT,
                       }}
                     >
-                      {t("pagination.label_page", { page })}
-                    </span>
+                      <span>{t("pagination.label_page", { page })}</span>
+                      <input
+                        key={page}
+                        ref={pageInputRef}
+                        type="number"
+                        min={1}
+                        max={totalPages}
+                        defaultValue={page}
+                        onChange={() => {
+                          if (pageInputError) setPageInputError("");
+                        }}
+                        onBlur={(e) => submitPageInput(e.currentTarget.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            submitPageInput(e.currentTarget.value);
+                          }
+                        }}
+                        aria-label={t("pagination.input.label", { totalPages })}
+                        aria-invalid={pageInputError ? "true" : "false"}
+                        title={pageInputError || undefined}
+                        style={{
+                          width: "64px",
+                          background: muiTheme.palette.background.default,
+                          color: muiTheme.palette.text.primary,
+                          border: `1px solid ${pageInputError ? muiTheme.palette.error.main : muiTheme.palette.divider}`,
+                          borderRadius: "6px",
+                          padding: "6px 8px",
+                          fontSize: "13px",
+                          fontFamily: FONT,
+                        }}
+                      />
+                      <span>/{totalPages}</span>
+                    </label>
+                    {pageInputError && (
+                      <span
+                        role="alert"
+                        style={{
+                          fontSize: "12px",
+                          color: muiTheme.palette.error.main,
+                          fontFamily: FONT,
+                        }}
+                      >
+                        {pageInputError}
+                      </span>
+                    )}
                     <button
-                      onClick={() => setPage((p) => p + 1)}
-                      disabled={documents.length < limitVal}
+                      onClick={() => goToPage(page + 1)}
+                      disabled={!canGoToNextPage}
                       style={{
                         background: "transparent",
-                        color: documents.length < limitVal ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
+                        color: !canGoToNextPage ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
                         border: `1px solid ${muiTheme.palette.divider}`,
                         padding: "6px 12px",
                         borderRadius: "6px",
                         fontSize: "13px",
-                        cursor: documents.length < limitVal ? "not-allowed" : "pointer",
+                        cursor: !canGoToNextPage ? "not-allowed" : "pointer",
                         fontFamily: FONT,
                       }}
                     >
                       {t("pagination.button.next")}
+                    </button>
+                    <button
+                      onClick={() => goToPage(totalPages)}
+                      disabled={page >= totalPages}
+                      title={t("pagination.button.last")}
+                      aria-label={t("pagination.button.last")}
+                      style={{
+                        background: "transparent",
+                        color: page >= totalPages ? muiTheme.palette.text.disabled : muiTheme.palette.text.primary,
+                        border: `1px solid ${muiTheme.palette.divider}`,
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        cursor: page >= totalPages ? "not-allowed" : "pointer",
+                        fontFamily: FONT,
+                      }}
+                    >
+                      {"≫"}
                     </button>
                   </div>
                 </div>
