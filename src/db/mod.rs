@@ -50,6 +50,11 @@ pub struct CreateIndexParams {
     pub unique: Option<bool>,
     pub sparse: Option<bool>,
     pub ttl: Option<u64>,
+    /// Deprecated: MongoDB has ignored foreground/background index build hints since
+    /// server 4.2 (all builds use the async index build protocol), and the driver no
+    /// longer forwards this field. Retained only for API/request-body compatibility;
+    /// intentionally not read by `create_index`.
+    #[allow(dead_code)]
     pub background: Option<bool>,
     pub partial_filter_expression: Option<bson::Document>,
 }
@@ -218,7 +223,8 @@ impl DbClient {
         opts.unique = params.unique;
         opts.sparse = params.sparse;
         opts.expire_after = params.ttl.map(std::time::Duration::from_secs);
-        opts.background = params.background;
+        // params.background is intentionally not forwarded: MongoDB has ignored this
+        // hint since server 4.2, and mongodb-driver 3.9 deprecated the field as a no-op.
         opts.partial_filter_expression = params.partial_filter_expression;
         let model = IndexModel::builder()
             .keys(params.keys)
