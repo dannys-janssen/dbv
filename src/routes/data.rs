@@ -11,7 +11,7 @@ use serde_json::{Value, json};
 
 use crate::{
     auth::rbac::{ReadAccess, WriteAccess},
-    db::CreateIndexParams,
+    db::{CreateIndexParams, DataSource, ListRowsParams},
     errors::AppError,
     state::AppState,
 };
@@ -76,6 +76,7 @@ pub async fn create_database(
         .db
         .read()
         .await
+        .as_mongo()?
         .create_collection(&db, &body.collection)
         .await?;
     Ok((
@@ -94,7 +95,7 @@ pub async fn drop_database(
             "Cannot drop system database '{db}'"
         )));
     }
-    state.db.read().await.drop_database(&db).await?;
+    state.db.read().await.as_mongo()?.drop_database(&db).await?;
     Ok(Json(json!({ "dropped": db })))
 }
 
@@ -122,6 +123,7 @@ pub async fn create_collection(
         .db
         .read()
         .await
+        .as_mongo()?
         .create_collection(&db, &body.name)
         .await?;
     Ok((
@@ -139,9 +141,52 @@ pub async fn drop_collection(
         .db
         .read()
         .await
+        .as_mongo()?
         .drop_collection(&db, &collection)
         .await?;
     Ok(Json(json!({ "dropped": collection })))
+}
+
+/// Parse an optional JSON query-string parameter, ignoring malformed input.
+fn parse_json_param(raw: Option<&str>) -> Option<Value> {
+    raw.and_then(|s| serde_json::from_str(s).ok())
+}
+
+/// MySQL variant of [`list_documents`] — returns table rows in the same envelope.
+async fn list_rows_mysql(
+    state: &AppState,
+    db: &str,
+    table: &str,
+    params: &PaginationParams,
+) -> Result<Json<Value>, AppError> {
+    let filter = parse_json_param(params.filter.as_deref());
+    let sort = parse_json_param(params.sort.as_deref());
+    let projection = parse_json_param(params.projection.as_deref());
+    let offset = (params.page.saturating_sub(1) as i64) * params.limit.max(0);
+
+    let src = state.db.read().await;
+    let page = src
+        .as_mysql()?
+        .list_rows(
+            db,
+            table,
+            &ListRowsParams {
+                filter: filter.as_ref(),
+                sort: sort.as_ref(),
+                projection: projection.as_ref(),
+                limit: params.limit,
+                offset,
+            },
+        )
+        .await?;
+
+    Ok(Json(json!({
+        "total": page.total,
+        "page": params.page,
+        "limit": params.limit,
+        "columns": page.columns,
+        "documents": page.rows,
+    })))
 }
 
 pub async fn list_documents(
@@ -150,6 +195,10 @@ pub async fn list_documents(
     Path((db, collection)): Path<(String, String)>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<Value>, AppError> {
+    if matches!(&*state.db.read().await, DataSource::MySql(_)) {
+        return list_rows_mysql(&state, &db, &collection, &params).await;
+    }
+
     let filter: Document = match &params.filter {
         Some(f) => serde_json::from_str(f)
             .ok()
@@ -179,7 +228,12 @@ pub async fn list_documents(
         .projection(projection)
         .build();
 
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let total = coll.count_documents(filter.clone()).await?;
     let mut cursor = coll.find(filter).with_options(options).await?;
     let mut docs = Vec::new();
@@ -206,7 +260,17 @@ pub async fn get_document(
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    if matches!(&*state.db.read().await, DataSource::MySql(_)) {
+        let src = state.db.read().await;
+        return Ok(Json(src.as_mysql()?.get_row(&db, &collection, &id).await?));
+    }
+
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let doc = coll
@@ -223,7 +287,12 @@ pub async fn create_document(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let document = json_to_doc(body)?;
     let result = coll.insert_one(document).await?;
     let inserted_id = serde_json::to_value(result.inserted_id)?;
@@ -236,7 +305,12 @@ pub async fn update_document(
     Path((db, collection, id)): Path<(String, String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let replacement = json_to_doc(body)?;
@@ -255,7 +329,12 @@ pub async fn delete_document(
     State(state): State<AppState>,
     Path((db, collection, id)): Path<(String, String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let doc_id = parse_id_bson(&id);
 
     let result = coll.delete_one(doc! { "_id": doc_id }).await?;
@@ -285,7 +364,12 @@ pub async fn bulk_delete_documents(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<BulkDeleteBody>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
 
     match body {
         BulkDeleteBody::Ids { ids } => {
@@ -327,7 +411,12 @@ pub async fn aggregate(
     Path((db, collection)): Path<(String, String)>,
     Json(body): Json<AggregateBody>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let pipeline: Vec<Document> = body
         .pipeline
         .iter()
@@ -387,6 +476,7 @@ pub async fn create_index(
         .db
         .read()
         .await
+        .as_mongo()?
         .create_index(
             &db,
             &collection,
@@ -416,6 +506,7 @@ pub async fn drop_index(
         .db
         .read()
         .await
+        .as_mongo()?
         .drop_index(&db, &collection, &name)
         .await?;
     Ok(Json(json!({ "dropped": name })))
@@ -426,11 +517,17 @@ pub async fn database_stats(
     State(state): State<AppState>,
     Path(db): Path<String>,
 ) -> Result<Json<Value>, AppError> {
-    let database = state.db.read().await.database(&db);
-    let doc = database
-        .run_command(bson::doc! { "dbStats": 1, "scale": 1 })
-        .await?;
-    Ok(Json(serde_json::to_value(doc)?))
+    let src = state.db.read().await;
+    match &*src {
+        DataSource::MySql(my) => Ok(Json(my.database_stats(&db).await?)),
+        DataSource::Mongo(mongo) => {
+            let doc = mongo
+                .database(&db)
+                .run_command(bson::doc! { "dbStats": 1, "scale": 1 })
+                .await?;
+            Ok(Json(serde_json::to_value(doc)?))
+        }
+    }
 }
 
 pub async fn collection_stats(
@@ -438,11 +535,17 @@ pub async fn collection_stats(
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let database = state.db.read().await.database(&db);
-    let doc = database
-        .run_command(bson::doc! { "collStats": &collection, "scale": 1 })
-        .await?;
-    Ok(Json(serde_json::to_value(doc)?))
+    let src = state.db.read().await;
+    match &*src {
+        DataSource::MySql(my) => Ok(Json(my.table_stats(&db, &collection).await?)),
+        DataSource::Mongo(mongo) => {
+            let doc = mongo
+                .database(&db)
+                .run_command(bson::doc! { "collStats": &collection, "scale": 1 })
+                .await?;
+            Ok(Json(serde_json::to_value(doc)?))
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -464,9 +567,31 @@ pub async fn run_command(
         .db
         .read()
         .await
+        .as_mongo()?
         .run_command(&db, cmd_doc, body.admin)
         .await?;
     Ok(Json(json!({ "result": result })))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct QueryBody {
+    pub sql: String,
+}
+
+/// Run an ad-hoc read-only SQL statement (MySQL only).
+pub async fn query(
+    _claims: ReadAccess,
+    State(state): State<AppState>,
+    Path(db): Path<String>,
+    Json(body): Json<QueryBody>,
+) -> Result<Json<Value>, AppError> {
+    let src = state.db.read().await;
+    let result = src.as_mysql()?.execute_select(&db, &body.sql).await?;
+    Ok(Json(json!({
+        "columns": result.columns,
+        "rows": result.rows,
+        "truncated": result.truncated,
+    })))
 }
 
 #[cfg(test)]

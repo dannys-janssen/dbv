@@ -43,11 +43,12 @@ spec:
             - configMapRef:
                 name: {{ include "dbv.fullname" . }}
           env:
-            - name: MONGODB_URI
+            {{- $uriKey := ternary "MYSQL_URI" "MONGODB_URI" (eq (.Values.config.dbEngine | default "mongodb") "mysql") }}
+            - name: {{ $uriKey }}
               valueFrom:
                 secretKeyRef:
                   name: {{ include "dbv.secretName" . }}
-                  key: MONGODB_URI
+                  key: {{ $uriKey }}
           livenessProbe:
             httpGet:
               path: /api/health

@@ -13,9 +13,11 @@ import {
   setConnection,
   reconnectMongo,
   type ConnectionInfo,
+  type Engine,
 } from "../api/mongo";
 import { useAuth } from "../context/useAuth";
 import CollectionView from "../components/CollectionView";
+import TableView from "../components/TableView";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { ThemeSelector } from "../components/ThemeSelector";
 import { useThemeMode } from "../context/useThemeMode";
@@ -95,6 +97,7 @@ interface Tab {
 
 export default function BrowserPage() {
   const { logout, canWrite } = useAuth();
+
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { mode } = useThemeMode();
@@ -289,7 +292,13 @@ export default function BrowserPage() {
   const [newTlsCaFile, setNewTlsCaFile] = useState("");
   const [newTlsCertKeyFile, setNewTlsCertKeyFile] = useState("");
   const [newTlsAllowInvalid, setNewTlsAllowInvalid] = useState(false);
+  const [newEngine, setNewEngine] = useState<Engine>("mongodb");
   const [connError, setConnError] = useState("");
+
+  // SQL engines are read-only in dbv, so every mutating affordance is hidden.
+  const engine: Engine = connInfo?.engine ?? "mongodb";
+  const isSql = engine === "mysql";
+  const canMutate = canWrite && !isSql;
 
   // ── Tab management ──
   const openCollection = useCallback((db: string, col: string) => {
@@ -502,9 +511,10 @@ export default function BrowserPage() {
     try {
       const info = await setConnection({
         uri: newUri,
+        engine: newEngine,
         default_db: newDefaultDb || undefined,
         tls_ca_file: newTlsCaFile || undefined,
-        tls_cert_key_file: newTlsCertKeyFile || undefined,
+        tls_cert_key_file: newEngine === "mongodb" ? newTlsCertKeyFile || undefined : undefined,
         tls_allow_invalid_certs: newTlsAllowInvalid || undefined,
       });
       setConnInfo(info);
@@ -679,6 +689,7 @@ export default function BrowserPage() {
                 setNewTlsCaFile(connInfo?.tls_ca_file ?? "");
                 setNewTlsCertKeyFile(connInfo?.tls_cert_key_file ?? "");
                 setNewTlsAllowInvalid(connInfo?.tls_allow_invalid_certs ?? false);
+                setNewEngine(connInfo?.engine ?? "mongodb");
                 setConnError("");
                 setChangeConnOpen(true);
               }}
@@ -713,8 +724,8 @@ export default function BrowserPage() {
                 flexShrink: 0,
               }}
             >
-              <span style={sectionLabelStyle}>{t("nav.section.databases")}</span>
-              {canWrite && (
+              <span style={sectionLabelStyle}>{isSql ? t("nav.section.schemas") : t("nav.section.databases")}</span>
+              {canMutate && (
                 <button
                   onClick={(e) => { newDbOpenerRef.current = e.currentTarget as HTMLElement; setNewDbOpen(true); }}
                   style={{
@@ -828,7 +839,7 @@ export default function BrowserPage() {
                           ℹ
                         </button>
                       )}
-                      {canWrite && isSelected && (
+                      {canMutate && isSelected && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -869,8 +880,8 @@ export default function BrowserPage() {
                 flexShrink: 0,
               }}
             >
-              <span style={sectionLabelStyle}>{t("nav.section.collections")}</span>
-              {canWrite && selectedDb && (
+              <span style={sectionLabelStyle}>{isSql ? t("nav.section.tables") : t("nav.section.collections")}</span>
+              {canMutate && selectedDb && (
                 <button
                   onClick={(e) => { newColOpenerRef.current = e.currentTarget as HTMLElement; setNewColOpen(true); }}
                   style={{
@@ -923,7 +934,7 @@ export default function BrowserPage() {
                     fontFamily: FONT,
                   }}
                 >
-                  {t("collection.list.empty.noCollections")}{canWrite ? ` ${t("collection.list.empty.canCreate")}` : ""}
+                  {isSql ? t("table.list.empty.noTables") : t("collection.list.empty.noCollections")}{canMutate ? ` ${t("collection.list.empty.canCreate")}` : ""}
                 </p>
               ) : (
                 filteredCollections.map((col) => {
@@ -968,7 +979,7 @@ export default function BrowserPage() {
                       >
                         {col}
                       </span>
-                      {canWrite && (
+                      {canMutate && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1224,12 +1235,21 @@ export default function BrowserPage() {
               tabIndex={0}
               style={{ flex: 1, display: tab.id === activeTabId ? "flex" : "none", flexDirection: "column", overflow: "hidden" }}
             >
-              <CollectionView
-                db={tab.db}
-                col={tab.col}
-                visible={tab.id === activeTabId}
-                tabId={tab.id}
-              />
+              {isSql ? (
+                <TableView
+                  db={tab.db}
+                  table={tab.col}
+                  visible={tab.id === activeTabId}
+                  tabId={tab.id}
+                />
+              ) : (
+                <CollectionView
+                  db={tab.db}
+                  col={tab.col}
+                  visible={tab.id === activeTabId}
+                  tabId={tab.id}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -1391,6 +1411,21 @@ export default function BrowserPage() {
             <p style={modalSubtitleStyle}>
               {t("modals.changeConnection.subtitle")}
             </p>
+            <label style={modalLabelStyle} htmlFor="conn-engine">{t("modals.changeConnection.label.engine")}</label>
+            <select
+              id="conn-engine"
+              style={modalInputStyle}
+              value={newEngine}
+              onChange={(e) => setNewEngine(e.target.value as Engine)}
+            >
+              <option value="mongodb">{t("engine.mongodb")}</option>
+              <option value="mysql">{t("engine.mysql")}</option>
+            </select>
+            {newEngine === "mysql" && (
+              <p role="status" style={{ ...modalSubtitleStyle, marginTop: -4 }}>
+                {t("modals.changeConnection.sqlReadOnly")}
+              </p>
+            )}
             <label style={modalLabelStyle}>{t("modals.changeConnection.label.uri")}</label>
             <input
               style={modalInputStyle}
@@ -1413,13 +1448,17 @@ export default function BrowserPage() {
               value={newTlsCaFile}
               onChange={(e) => setNewTlsCaFile(e.target.value)}
             />
-            <label style={modalLabelStyle}>{t("modals.changeConnection.label.tlsCertKeyFile")} <span style={{ fontWeight: 400, color: mainMutedText }}>{t("modals.changeConnection.optional")}</span></label>
-            <input
-              style={modalInputStyle}
-              placeholder={t("modals.changeConnection.placeholder.tlsCertKeyFile")}
-              value={newTlsCertKeyFile}
-              onChange={(e) => setNewTlsCertKeyFile(e.target.value)}
-            />
+            {newEngine === "mongodb" && (
+              <>
+                <label style={modalLabelStyle}>{t("modals.changeConnection.label.tlsCertKeyFile")} <span style={{ fontWeight: 400, color: mainMutedText }}>{t("modals.changeConnection.optional")}</span></label>
+                <input
+                  style={modalInputStyle}
+                  placeholder={t("modals.changeConnection.placeholder.tlsCertKeyFile")}
+                  value={newTlsCertKeyFile}
+                  onChange={(e) => setNewTlsCertKeyFile(e.target.value)}
+                />
+              </>
+            )}
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: "13px", color: mainText, margin: "8px 0 12px", fontFamily: FONT }}>
               <input
                 type="checkbox"

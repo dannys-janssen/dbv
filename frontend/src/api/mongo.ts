@@ -13,6 +13,8 @@ export interface DocumentPage {
   page: number;
   limit: number;
   documents: Record<string, unknown>[];
+  /** Column order, present for SQL engines only. */
+  columns?: string[];
 }
 
 export interface AggregateResult {
@@ -260,7 +262,10 @@ export const getCollectionStats = (db: string, collection: string) =>
 
 // ── Connection management ─────────────────────────────────────────────────────
 
+export type Engine = "mongodb" | "mysql";
+
 export interface ConnectionInfo {
+  engine: Engine;
   uri: string;
   default_db: string;
   status: "ok" | "error";
@@ -276,6 +281,7 @@ export const getConnection = (): Promise<ConnectionInfo> =>
 export interface SetConnectionParams {
   uri: string;
   default_db?: string;
+  engine?: Engine;
   tls_ca_file?: string;
   tls_cert_key_file?: string;
   tls_allow_invalid_certs?: boolean;
@@ -286,6 +292,17 @@ export const setConnection = (params: SetConnectionParams): Promise<ConnectionIn
 
 export const reconnectMongo = (): Promise<ConnectionInfo> =>
   api.post<ConnectionInfo>("/connection/reconnect").then((r) => r.data);
+
+// ── SQL query (MySQL only) ────────────────────────────────────────────────────
+
+export interface QueryResult {
+  columns: string[];
+  rows: Record<string, unknown>[];
+  truncated: boolean;
+}
+
+export const runSqlQuery = (db: string, sql: string): Promise<QueryResult> =>
+  api.post<QueryResult>(`/databases/${db}/query`, { sql }).then((r) => r.data);
 
 // ── Run command ────────────────────────────────────────────────────────────────
 
