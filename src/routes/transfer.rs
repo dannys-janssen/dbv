@@ -44,7 +44,12 @@ pub async fn export_collection(
     Query(params): Query<ExportParams>,
 ) -> Result<Response, AppError> {
     let filter = parse_export_filter(params.filter.as_deref());
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let mut cursor = coll.find(filter).await?;
     let mut docs: Vec<Value> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
@@ -74,7 +79,12 @@ pub async fn export_collection_bson(
     Query(params): Query<ExportParams>,
 ) -> Result<Response, AppError> {
     let filter = parse_export_filter(params.filter.as_deref());
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
     let mut cursor = coll.find(filter).await?;
     let mut buf: Vec<u8> = Vec::new();
     while let Some(doc) = cursor.try_next().await? {
@@ -112,6 +122,7 @@ pub async fn import_collection(
         .db
         .read()
         .await
+        .as_mongo()?
         .collection::<Document>(&db, &collection);
 
     if body.replace {
@@ -156,6 +167,7 @@ pub async fn import_collection_bson(
         .db
         .read()
         .await
+        .as_mongo()?
         .collection::<Document>(&db, &collection);
 
     let documents = parse_bson_bytes(&body)?;

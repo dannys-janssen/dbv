@@ -126,6 +126,10 @@ components:
     ConnectionInfo:
       type: object
       properties:
+        engine:
+          type: string
+          enum: [mongodb, mysql]
+          description: Database engine of the active connection
         uri:
           type: string
           description: Masked URI — password replaced with ***
@@ -264,7 +268,8 @@ paths:
     post:
       summary: Change connection
       description: |
-        Switches to a new MongoDB URI. Pings the new server before replacing the live client; returns 400 if the ping fails.
+        Switches to a new MongoDB or MySQL URI. Connects to the new server before replacing the live client; returns 400 if the connection fails.
+        `tls_cert_key_file` applies to MongoDB only.
         Requires `dbv-viewer` or `dbv-admin` role.
       operationId: setConnection
       tags: [Connection]
@@ -281,6 +286,10 @@ paths:
                   example: "mongodb://user:pass@host:27017"
                 default_db:
                   type: string
+                engine:
+                  type: string
+                  enum: [mongodb, mysql]
+                  description: Target engine; defaults to the currently active one
                 tls_ca_file:
                   type: string
                   description: Path to PEM CA certificate
@@ -303,7 +312,7 @@ paths:
   /connection/reconnect:
     post:
       summary: Reconnect
-      description: Re-creates the MongoDB client from the currently stored URI and TLS settings. Requires viewer role.
+      description: Re-creates the client from the currently stored engine, URI and TLS settings. Requires viewer role.
       operationId: reconnect
       tags: [Connection]
       responses:
@@ -881,6 +890,65 @@ paths:
                 properties:
                   inserted:
                     type: integer
+
+  /databases/{db}/query:
+    post:
+      summary: Run a read-only SQL query (MySQL only)
+      description: |
+        Executes a single read-only statement against `{db}`. Only
+        `SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC` and `EXPLAIN` are
+        accepted; multiple statements and `INTO OUTFILE`/`DUMPFILE` are
+        rejected. Results are capped at 1000 rows.
+
+        Requires `dbv-viewer` or `dbv-admin` role. Returns 501 when the active
+        connection is MongoDB.
+      operationId: query
+      tags: [Query]
+      parameters:
+        - $ref: "#/components/parameters/db"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sql]
+              properties:
+                sql:
+                  type: string
+                  example: "SELECT id, name FROM users ORDER BY id LIMIT 10"
+      responses:
+        "200":
+          description: Query result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  truncated:
+                    type: boolean
+                    description: True when the result was clipped at 1000 rows
+        "400":
+          description: Statement rejected or invalid SQL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "501":
+          description: Active connection is not MySQL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /databases/{db}/run_command:
     post:

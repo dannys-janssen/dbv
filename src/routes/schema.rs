@@ -8,7 +8,7 @@ use mongodb::options::FindOptions;
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
-use crate::{auth::rbac::ReadAccess, errors::AppError, state::AppState};
+use crate::{auth::rbac::ReadAccess, db::DataSource, errors::AppError, state::AppState};
 
 #[derive(Default)]
 struct FieldInfo {
@@ -17,13 +17,29 @@ struct FieldInfo {
     count: usize,
 }
 
-/// Sample up to 100 documents and infer field names and BSON types.
+/// Infer the shape of a collection or table.
+///
+/// MongoDB has no declared schema, so up to 100 documents are sampled and
+/// their field names and BSON types are merged. MySQL reports its columns
+/// exactly, via `information_schema`.
 pub async fn collection_schema(
     ReadAccess(_claims): ReadAccess,
     State(state): State<AppState>,
     Path((db, collection)): Path<(String, String)>,
 ) -> Result<Json<Value>, AppError> {
-    let coll: mongodb::Collection<Document> = state.db.read().await.collection(&db, &collection);
+    {
+        let src = state.db.read().await;
+        if let DataSource::MySql(my) = &*src {
+            return Ok(Json(my.table_schema(&db, &collection).await?));
+        }
+    }
+
+    let coll: mongodb::Collection<Document> = state
+        .db
+        .read()
+        .await
+        .as_mongo()?
+        .collection(&db, &collection);
 
     let options = FindOptions::builder().limit(100).build();
     let mut cursor = coll.find(bson::doc! {}).with_options(options).await?;

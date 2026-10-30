@@ -5,6 +5,8 @@
 
 A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authentication. Runs entirely in Docker.
 
+MySQL / MariaDB databases can also be browsed in **read-only** mode — see [MySQL Support](#mysql-support).
+
 ## Table of Contents
 
 - [User Guide](#user-guide)
@@ -12,6 +14,7 @@ A browser-based MongoDB viewer and editor secured with Keycloak OAuth2/JWT authe
   - [First-Time Keycloak Setup](#first-time-keycloak-setup)
   - [Using the App](#using-the-app)
   - [Roles and Permissions](#roles-and-permissions)
+  - [MySQL Support](#mysql-support)
 - [Developer Guide](#developer-guide)
   - [Code of Conduct](#code-of-conduct)
   - [Contributing](#contributing)
@@ -377,6 +380,62 @@ The **Commands** tab provides a split-panel MongoDB command runner:
 | Run deleteMany (Delete tab) | ❌ | ✅ |
 | Run MongoDB commands | ❌ | ✅ |
 
+> When dbv is connected to MySQL, **all write actions are unavailable to every role** — see [MySQL Support](#mysql-support).
+
+---
+
+### MySQL Support
+
+dbv can browse MySQL and MariaDB databases in **read-only** mode. Nothing in the
+application issues `INSERT`, `UPDATE`, `DELETE` or DDL against a SQL server.
+
+**Connecting**
+
+Either start dbv with `DB_ENGINE=mysql` and `MYSQL_URI=mysql://user:pass@host:3306/db`,
+or switch at runtime from the sidebar's **⚙ Change** dialog by picking *MySQL / MariaDB*
+as the engine. Only one connection is active at a time, so switching engines replaces
+the current connection.
+
+> **Recommended:** connect with a database user that only holds `SELECT` (and
+> `SHOW VIEW`) grants. dbv enforces read-only access itself, but a restricted user
+> is the strongest guarantee.
+
+**What you can do**
+
+| Feature | MySQL |
+|---|:---:|
+| Browse schemas and tables | ✅ |
+| Page through rows | ✅ |
+| Simple equality filter, sort and column selection | ✅ |
+| Inspect column types, nullability, keys and defaults (*Schema* tab) | ✅ |
+| List indexes (*Indexes* tab) | ✅ |
+| Table and schema size statistics (*Stats* tab) | ✅ |
+| Run ad-hoc read-only queries (*SQL* tab) | ✅ |
+| Create / edit / delete rows | ❌ |
+| Create / drop schemas, tables and indexes | ❌ |
+| Import / export | ❌ |
+| Aggregation pipelines, MongoDB commands | ❌ |
+
+**The query bar**
+
+The *Rows* tab reuses the MongoDB-style JSON inputs:
+
+| Input | Example | Translates to |
+|---|---|---|
+| Filter | `{"status": "active", "deleted_at": null}` | `WHERE status = ? AND deleted_at IS NULL` (parameterised) |
+| Sort | `{"created_at": -1}` | `ORDER BY created_at DESC` |
+| Columns | `{"id": 1, "email": 1}` | `SELECT id, email` |
+
+Only flat equality filters are supported. MongoDB operators such as `$gt` or `$or`
+are rejected with a message pointing at the *SQL* tab.
+
+**The SQL tab**
+
+Accepts a single statement beginning with `SELECT`, `WITH`, `SHOW`, `DESCRIBE`,
+`DESC` or `EXPLAIN`. Multiple statements, `INTO OUTFILE` / `DUMPFILE`, and anything
+that could write are rejected before the query reaches the server. Results are
+capped at 1000 rows; the UI shows a warning when a result set is truncated.
+
 ---
 
 ## Developer Guide
@@ -463,11 +522,14 @@ src/
 │   ├── mod.rs        # JwksCache, Claims extractor, RS256 JWT validation
 │   └── rbac.rs       # ReadAccess / WriteAccess extractors
 ├── db/
-│   └── mod.rs        # DbClient — wraps mongodb::Client, pings on startup, run_command helper
+│   ├── mod.rs        # Engine + DataSource dispatch enum (mongodb / mysql)
+│   ├── mongo.rs      # DbClient — wraps mongodb::Client, pings on startup, run_command helper
+│   ├── mysql.rs      # MySqlClient — read-only MySQL/MariaDB source (sqlx), SQL guard
+│   └── util.rs       # Shared helpers (URI password masking, name sorting)
 └── routes/
     ├── auth_proxy.rs # POST /api/auth/login and /api/auth/refresh (Keycloak proxy)
     ├── health.rs     # GET /api/health  (no auth, pings MongoDB)
-    ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection, run_command
+    ├── data.rs       # CRUD, aggregate, pagination, create/drop DB & collection, run_command, SQL query
     ├── schema.rs     # Schema inference (samples 100 docs, infers BSON types)
     ├── transfer.rs   # JSON Export/Import (GET/POST) and BSON Export/Import (GET/POST)
     └── connection.rs # GET/POST /api/connection and POST /api/connection/reconnect
@@ -482,7 +544,7 @@ frontend/src/
 │   ├── mongoSchema.ts   # JSON Schema builders for Monaco autocomplete
 │   │                    # (buildDocumentSchema, buildFilterSchema, buildSortSchema,
 │   │                    #  buildProjectionSchema, PIPELINE_SCHEMA)
-│   └── bsonFormat.ts    # Shared BSON Extended JSON display utilities
+│   ├── bsonFormat.ts    # Shared BSON Extended JSON display utilities
 │                        # (formatBsonValue, isBsonPrimitive, bsonTypeColor, bsonTypeLabel)
 ├── components/
 │   ├── ProtectedRoute.tsx
@@ -490,6 +552,7 @@ frontend/src/
 │   ├── DocTreeView.tsx      # Recursive tree view for documents
 │   ├── DocFormEditor.tsx    # Schema-driven form editor (date-picker, bool, number, etc.)
 │   ├── CollectionView.tsx   # Full per-collection UI (all tabs, query bar, editors)
+│   ├── TableView.tsx        # Read-only per-table UI for MySQL (rows, schema, indexes, stats, SQL)
 │   └── CommandsView.tsx     # Command palette + Monaco editor + results panel
 └── pages/
     ├── LoginPage.tsx        # Username/password login form
@@ -503,7 +566,7 @@ kubernetes/
         ├── deployment.yaml
         ├── service.yaml
         ├── ingress.yaml
-        ├── secret.yaml      # MONGODB_URI (or point to existingSecret)
+        ├── secret.yaml      # MONGODB_URI / MYSQL_URI (or point to existingSecret)
         ├── configmap.yaml   # Keycloak + other env vars
         ├── serviceaccount.yaml
         └── hpa.yaml         # HorizontalPodAutoscaler (disabled by default)
@@ -517,8 +580,11 @@ All backend configuration is read from environment variables at startup. Missing
 
 | Variable | Required | Default | Description |
 |---|:---:|---|---|
-| `MONGODB_URI` | ✅ | — | MongoDB connection string (see examples below) |
-| `MONGODB_DB` | ✅ | — | Default database shown on startup |
+| `DB_ENGINE` | | `mongodb` | Engine to connect to on startup: `mongodb` or `mysql` |
+| `MONGODB_URI` | ✅¹ | — | MongoDB connection string (see examples below) |
+| `MONGODB_DB` | ✅¹ | — | Default database shown on startup |
+| `MYSQL_URI` | ✅² | — | MySQL/MariaDB connection string, e.g. `mysql://user:pass@host:3306/db` |
+| `MYSQL_DB` | | *(from URI)* | Default MySQL schema shown on startup |
 | `KEYCLOAK_URL` | ✅ | — | Keycloak base URL (internal, e.g. `http://keycloak:8080`) |
 | `KEYCLOAK_REALM` | ✅ | — | Keycloak realm |
 | `KEYCLOAK_CLIENT_ID` | ✅ | — | OAuth2 client ID |
@@ -529,6 +595,9 @@ All backend configuration is read from environment variables at startup. Missing
 | `KEYCLOAK_PUBLIC_HOST` | | `keycloak.localhost` | Keycloak public hostname (Traefik routing) |
 | `TLS_RESOLVER` | | *(blank)* | Traefik cert resolver. Leave blank for self-signed; set `letsencrypt` for production |
 | `ACME_EMAIL` | | `admin@example.com` | Email for Let's Encrypt (production only) |
+
+¹ Required when `DB_ENGINE=mongodb` (the default).
+² Required when `DB_ENGINE=mysql`.
 
 #### `MONGODB_URI` connection string examples
 
@@ -552,6 +621,8 @@ These variables are needed only when the TLS certificate files cannot be express
 | `MONGODB_TLS_CA_FILE` | Path to a PEM-encoded CA certificate file. Required when MongoDB uses a private or self-signed CA. Not needed for Atlas. |
 | `MONGODB_TLS_CERT_KEY_FILE` | Path to a PEM file containing the client certificate **and** private key. Required only for x.509 mutual-TLS client authentication. |
 | `MONGODB_TLS_ALLOW_INVALID_CERTS` | Set to `true` to skip server certificate validation. **Dev only — never use in production.** |
+| `MYSQL_TLS_CA_FILE` | Path to a PEM-encoded CA certificate file for MySQL servers using a private or self-signed CA. |
+| `MYSQL_TLS_ALLOW_INVALID_CERTS` | Set to `true` to skip MySQL server certificate validation. **Dev only — never use in production.** |
 
 ### API Reference
 
@@ -622,13 +693,39 @@ All endpoints are under `/api`.
 |---|---|---|---|---|
 | POST | `/api/databases/:db/run_command` | admin | `{ "command": {...}, "admin": false }` | Run any MongoDB command on `:db` (or the `admin` database when `admin: true`) |
 
+#### SQL Queries *(MySQL only)*
+
+| Method | Path | Role | Body | Description |
+|---|---|---|---|---|
+| POST | `/api/databases/:db/query` | viewer+ | `{ "sql": "SELECT ..." }` | Run a single read-only statement (`SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`) against `:db`. Returns `{ columns, rows, truncated }`, capped at 1000 rows. Returns 501 when the active connection is MongoDB. |
+
 #### Connection Management
 
 | Method | Path | Role | Description |
 |---|---|---|---|
-| GET | `/api/connection` | *(none)* | Returns current connection info: `{ uri, default_db, status, error?, tls_ca_file?, tls_cert_key_file?, tls_allow_invalid_certs }`. Password in `uri` is masked as `***`. `status` is `"ok"` or `"error"`. |
-| POST | `/api/connection` | viewer+ | Switch to a new MongoDB connection. Body: `{ "uri": "...", "default_db": "...", "tls_ca_file": "...", "tls_cert_key_file": "...", "tls_allow_invalid_certs": false }`. All fields except `uri` are optional. Pings before replacing the live client; returns 400 on failure. |
-| POST | `/api/connection/reconnect` | viewer+ | Reconnects using the current URI and TLS settings (creates a fresh `mongodb::Client`). |
+| GET | `/api/connection` | *(none)* | Returns current connection info: `{ uri, engine, default_db, status, error?, tls_ca_file?, tls_cert_key_file?, tls_allow_invalid_certs }`. Password in `uri` is masked as `***`. `status` is `"ok"` or `"error"`. |
+| POST | `/api/connection` | viewer+ | Switch to a new connection. Body: `{ "uri": "...", "engine": "mongodb" \| "mysql", "default_db": "...", "tls_ca_file": "...", "tls_cert_key_file": "...", "tls_allow_invalid_certs": false }`. All fields except `uri` are optional; `engine` defaults to the currently active engine. `tls_cert_key_file` is MongoDB-only. Pings before replacing the live client; returns 400 on failure. |
+| POST | `/api/connection/reconnect` | viewer+ | Reconnects using the current engine, URI and TLS settings (creates a fresh client). |
+
+### Running the MySQL Integration Tests
+
+`cargo test` runs only pure unit tests and needs no servers. The MySQL data source
+also has end-to-end tests that talk to a real MySQL/MariaDB instance. They are marked
+`#[ignore]` so CI skips them.
+
+```bash
+# 1. Seed a throwaway server (creates the dbvtest schema and a SELECT-only user)
+mysql -h 127.0.0.1 -u root < tests/fixtures/mysql_seed.sql
+
+# 2. Run them
+DBV_TEST_MYSQL_URI='mysql://dbvro:ropass@127.0.0.1:3306/dbvtest' \
+  cargo test --all-features mysql::live -- --ignored
+```
+
+They cover connecting, listing schemas/tables/columns/primary keys, row decoding for
+every column type (including `DECIMAL`, `JSON`, `BLOB` and `NULL`), filter/sort/column
+selection, offset paging, schema and index introspection, statistics, the SELECT
+console, and that write statements are rejected before reaching the server.
 
 ### Adding a New Route
 
@@ -786,10 +883,13 @@ Key values — see `kubernetes/helm/dbv/values.yaml` for the full reference:
 | `image.tag` | chart `appVersion` | Image tag |
 | `config.mongodbUri` | *(required)* | MongoDB connection string |
 | `config.mongodbDb` | `test` | Default database |
+| `config.dbEngine` | `mongodb` | Engine to connect to: `mongodb` or `mysql` |
+| `config.mysqlUri` | *(required when `dbEngine=mysql`)* | MySQL connection string |
+| `config.mysqlDb` | `""` | Default MySQL schema |
 | `config.keycloakUrl` | *(required)* | Keycloak URL reachable from the pod |
 | `config.keycloakRealm` | *(required)* | Keycloak realm |
 | `config.keycloakClientId` | *(required)* | OAuth2 client ID |
-| `existingSecret` | `""` | Name of existing Secret containing `MONGODB_URI` |
+| `existingSecret` | `""` | Name of existing Secret containing `MONGODB_URI` (or `MYSQL_URI` when `dbEngine=mysql`) |
 | `ingress.enabled` | `true` | Create an Ingress resource |
 | `autoscaling.enabled` | `false` | Enable HPA |
 
