@@ -20,7 +20,7 @@ mod routes;
 mod state;
 
 use config::Config;
-use db::DbClient;
+use db::{DataSource, DbClient, Engine, MySqlClient};
 use state::AppState;
 
 #[tokio::main]
@@ -38,10 +38,16 @@ async fn main() -> anyhow::Result<()> {
         std::process::exit(1);
     });
 
-    let db = DbClient::new(&config).await.unwrap_or_else(|e| {
-        eprintln!("Failed to connect to MongoDB: {e}");
-        std::process::exit(1);
-    });
+    let db = match config.db_engine {
+        Engine::Mongo => DataSource::Mongo(DbClient::new(&config).await.unwrap_or_else(|e| {
+            eprintln!("Failed to connect to MongoDB: {e}");
+            std::process::exit(1);
+        })),
+        Engine::MySql => DataSource::MySql(MySqlClient::new(&config).await.unwrap_or_else(|e| {
+            eprintln!("Failed to connect to MySQL: {e}");
+            std::process::exit(1);
+        })),
+    };
 
     let jwks = auth::JwksCache::new(&config);
     if let Err(e) = jwks.get_keys().await {
@@ -129,6 +135,7 @@ async fn main() -> anyhow::Result<()> {
             "/databases/{db}/run_command",
             post(routes::data::run_command),
         )
+        .route("/databases/{db}/query", post(routes::data::query))
         .route(
             "/connection",
             get(routes::connection::get_connection).post(routes::connection::set_connection),

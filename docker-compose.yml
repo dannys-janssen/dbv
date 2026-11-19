@@ -27,8 +27,13 @@ services:
     expose:
       - "8080"
     environment:
+      DB_ENGINE: ${DB_ENGINE:-mongodb}
       MONGODB_URI: mongodb://mongo:27017
       MONGODB_DB: ${MONGODB_DB:-dbv}
+      MYSQL_URI: ${MYSQL_URI:-}
+      MYSQL_DB: ${MYSQL_DB:-}
+      MYSQL_TLS_CA_FILE: ${MYSQL_TLS_CA_FILE:-}
+      MYSQL_TLS_ALLOW_INVALID_CERTS: ${MYSQL_TLS_ALLOW_INVALID_CERTS:-false}
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-master}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-dbv}

@@ -11,6 +11,9 @@ pub enum AppError {
     #[error("MongoDB error: {0}")]
     Mongo(#[from] mongodb::error::Error),
 
+    #[error("SQL error: {0}")]
+    Sql(#[from] sqlx::Error),
+
     #[error("BSON serialization error: {0}")]
     BsonSer(#[from] bson::ser::Error),
 
@@ -34,12 +37,16 @@ pub enum AppError {
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error("Not supported: {0}")]
+    Unsupported(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match &self {
             AppError::Mongo(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+            AppError::Sql(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
             AppError::BsonSer(_) | AppError::BsonDe(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
@@ -49,6 +56,7 @@ impl IntoResponse for AppError {
             AppError::NotFound(_) => (StatusCode::NOT_FOUND, self.to_string()),
             AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             AppError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+            AppError::Unsupported(_) => (StatusCode::NOT_IMPLEMENTED, self.to_string()),
         };
 
         let body = Json(json!({ "error": message }));
@@ -120,6 +128,20 @@ mod tests {
         // A plain string cannot be serialised as a BSON document.
         let bson_err = bson::to_document(&"just a string").unwrap_err();
         let (status, _body) = response_parts(AppError::BsonSer(bson_err)).await;
+        assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    #[tokio::test]
+    async fn unsupported_returns_501() {
+        let (status, body) =
+            response_parts(AppError::Unsupported("aggregation on MySQL".into())).await;
+        assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+        assert!(body["error"].as_str().unwrap().contains("aggregation"));
+    }
+
+    #[tokio::test]
+    async fn sql_error_returns_500() {
+        let (status, _body) = response_parts(AppError::Sql(sqlx::Error::RowNotFound)).await;
         assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
     }
 

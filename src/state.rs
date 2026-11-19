@@ -2,12 +2,13 @@ use axum::extract::FromRef;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::{auth::JwksCache, config::Config, db::DbClient};
+use crate::{auth::JwksCache, config::Config, db::DataSource};
 
 #[derive(Clone)]
 pub struct AppState {
     pub config: Config,
-    pub db: Arc<RwLock<DbClient>>,
+    /// The single active connection, whichever engine it targets.
+    pub db: Arc<RwLock<DataSource>>,
     pub jwks: JwksCache,
 }
 

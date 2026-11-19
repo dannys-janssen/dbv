@@ -70,6 +70,10 @@ affinity: {}
 
 # ── dbv application configuration ───────────────────────────────────────────
 config:
+  # Which engine dbv connects to on startup: "mongodb" (read/write) or
+  # "mysql" (read-only MySQL / MariaDB browser).
+  dbEngine: "mongodb"
+
   # MongoDB connection string — stored in a Secret
   # Example: mongodb://user:password@mongo-host:27017/mydb
   mongodbUri: ""
@@ -92,6 +96,19 @@ config:
   mongodbTlsCertKeyFile: ""
   mongodbTlsAllowInvalidCerts: "false"
 
-# Use an existing Secret instead of creating one from config.mongodbUri.
-# The secret must contain a key named MONGODB_URI.
+  # MySQL connection string — stored in a Secret, required when dbEngine=mysql
+  # Example: mysql://dbv_ro:secret@mysql-host:3306/mydb
+  # dbv never writes to MySQL; grant the user SELECT only.
+  mysqlUri: ""
+
+  # Default MySQL schema to show on startup (optional)
+  mysqlDb: ""
+
+  # Optional: MySQL TLS settings
+  mysqlTlsCaFile: ""
+  mysqlTlsAllowInvalidCerts: "false"
+
+# Use an existing Secret instead of creating one from config.mongodbUri /
+# config.mysqlUri. The secret must contain a key named MONGODB_URI when
+# dbEngine=mongodb, or MYSQL_URI when dbEngine=mysql.
 existingSecret: ""

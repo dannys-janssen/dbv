@@ -1,6 +1,6 @@
 [package]
 name = "dbv"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2024"
 license = "MIT"
 
@@ -16,6 +16,14 @@ serde_json = "1"
 mongodb = { version = "3.9.0" }
 bson = { version = "2", features = ["chrono-0_4"] }
 
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",
+    "tls-rustls-aws-lc-rs",
+    "mysql",
+    "chrono",
+    "json",
+] }
+
 jsonwebtoken = { version = "11", features = ["rust_crypto"] }
 reqwest = { version = "0.13", features = ["json", "rustls", "form"], default-features = false }
 
@@ -27,5 +35,4 @@ envy = "0.4"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4"] }
 futures = "0.3"
-async-trait = "0.1"
 anyhow = "1"

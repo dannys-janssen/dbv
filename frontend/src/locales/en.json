@@ -23,7 +23,9 @@
     "signOut": "Sign out",
     "section": {
       "databases": "DATABASES",
-      "collections": "COLLECTIONS"
+      "collections": "COLLECTIONS",
+      "schemas": "SCHEMAS",
+      "tables": "TABLES"
     }
   },
   "connection": {
@@ -140,7 +142,8 @@
         "defaultDb": "Default Database",
         "tlsCaFile": "TLS CA Certificate File",
         "tlsCertKeyFile": "TLS Client Certificate + Key File",
-        "allowInvalidTls": "Allow invalid / self-signed TLS certificates"
+        "allowInvalidTls": "Allow invalid / self-signed TLS certificates",
+        "engine": "Engine"
       },
       "placeholder": {
         "uri": "e.g. mongodb://user:pass@host:27017 or mongodb+srv://cluster.mongodb.net/",
@@ -151,7 +154,8 @@
       "optional": "(optional, path on server)",
       "warning": {
         "insecure": "⚠ insecure"
-      }
+      },
+      "sqlReadOnly": "SQL engines are read-only in dbv: browsing, schema inspection and SELECT queries only."
     },
     "confirmDrop": {
       "database": "Drop entire database \"{{db}}\"? This cannot be undone.",
@@ -391,6 +395,52 @@
       "types": "Types",
       "coverage": "Coverage",
       "nullable": "Nullable"
+    },
+    "list": {
+      "empty": {
+        "noTables": "No tables"
+      }
+    },
+    "empty": {
+      "selectTable": "Select a table to browse its rows."
+    },
+    "readOnlyBadge": "Read-only",
+    "tabs": {
+      "label": "Table views",
+      "rows": "Rows",
+      "schema": "Schema",
+      "indexes": "Indexes",
+      "stats": "Stats",
+      "sql": "SQL"
+    },
+    "query": {
+      "filter": "Filter (JSON)",
+      "sort": "Sort (JSON)",
+      "projection": "Columns (JSON)",
+      "limit": "Limit",
+      "apply": "Apply",
+      "reset": "Reset",
+      "invalidJson": "Filter, sort and columns must each be a JSON object, e.g. {\"id\": 1}."
+    },
+    "rows": {
+      "empty": "No rows match this query.",
+      "total": "{{count}} rows",
+      "pageLabel": "Page number",
+      "prevPage": "Previous page",
+      "nextPage": "Next page"
+    },
+    "indexes": {
+      "name": "Name",
+      "columns": "Columns",
+      "unique": "Unique"
+    },
+    "sql": {
+      "hint": "Read-only SELECT / WITH / SHOW / DESCRIBE / EXPLAIN statements only. Press Ctrl+Enter to run.",
+      "run": "Run query",
+      "truncated": "Results truncated to the first 1000 rows."
+    },
+    "rowDetail": {
+      "title": "Row detail"
     }
   },
   "pagination": {
@@ -617,5 +667,9 @@
     "dropCollection": "Drop collection {{name}}",
     "dropDatabase": "Drop database {{name}}",
     "openCollection": "Open collection {{name}}"
+  },
+  "engine": {
+    "mongodb": "MongoDB",
+    "mysql": "MySQL / MariaDB"
   }
 }
